@@ -1,28 +1,42 @@
 #!/usr/bin/env bash
-# bbu = agent-browser + 本机登录态。默认 Chrome for Testing + 按仓库隔离的 session；
-# --login 切到 CloakBrowser（反检测）+ 从 Helium 同步的 profile，一个 profile 只能被
-# 一个 Chrome 打开，所以 session 固定。启动、复用、回收全由 agent-browser daemon 负责。
+# bbu = agent-browser + 本机登录态。bbu 独占 session 命名，启动、复用、回收全由 agent-browser daemon 负责。
+# 默认车道：Chrome for Testing，session 按工作树隔离，登录态按仓库自动存取（worktree 共享 localhost 登录）。
+# --login：CloakBrowser + 从 Helium 同步的 profile；一个 profile 只能被一个 Chrome 打开，所以 session 固定。
+# --as <身份>：默认车道内的另一个独立浏览器（多账号流程），session 与登录态都按身份分开。
 set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BBU_HOME="${BBU_HOME:-$HOME/.bbu}"
+# agent-browser 的默认闲置回收豁免有窗口的浏览器；显式设置后同样回收它们。
+export AGENT_BROWSER_IDLE_TIMEOUT_MS="${AGENT_BROWSER_IDLE_TIMEOUT_MS:-3600000}"
 
-case "${1:-}" in
-  sync-profile)
-    shift
-    exec node "$DIR/sync-profile.js" "$BBU_HOME/profile" "$@"
-    ;;
-  --login)
-    shift
-    BIN="${BBU_BIN:-$(ls -d "$HOME"/.cloakbrowser/chromium-*/Chromium.app/Contents/MacOS/Chromium 2>/dev/null | sort -V | tail -n 1)}"
-    [ -x "$BIN" ] || { echo "bbu: CloakBrowser not found; run: cloakbrowser install (or set BBU_BIN)" >&2; exit 1; }
-    export AGENT_BROWSER_EXECUTABLE_PATH="$BIN"
-    export AGENT_BROWSER_PROFILE="$BBU_HOME/profile"
-    export AGENT_BROWSER_SESSION=bbu-login
-    ;;
-  *)
-    export AGENT_BROWSER_SESSION="${AGENT_BROWSER_SESSION:-bbu-$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")}"
-    ;;
-esac
+[ "${1:-}" = sync-profile ] && { shift; exec node "$DIR/sync-profile.js" "$BBU_HOME/profile" "$@"; }
+
+login=0 as=""
+while :; do
+  case "${1:-}" in
+    --login) login=1; shift ;;
+    --as) as="-${2:?bbu: --as needs a name}"; shift 2 ;;
+    *) break ;;
+  esac
+done
+for arg in "$@"; do
+  case "$arg" in --session|--session=*) echo "bbu: session is named by bbu; use --as <name> for another browser" >&2; exit 2 ;; esac
+done
+
+if [ "$login" = 1 ]; then
+  [ -z "$as" ] || { echo "bbu: --as applies to the default lane only" >&2; exit 2; }
+  BIN="${BBU_BIN:-$(ls -d "$HOME"/.cloakbrowser/chromium-*/Chromium.app/Contents/MacOS/Chromium 2>/dev/null | sort -V | tail -n 1)}"
+  [ -x "$BIN" ] || { echo "bbu: CloakBrowser not found; run: cloakbrowser install (or set BBU_BIN)" >&2; exit 1; }
+  export AGENT_BROWSER_EXECUTABLE_PATH="$BIN"
+  export AGENT_BROWSER_PROFILE="$BBU_HOME/profile"
+  export AGENT_BROWSER_SESSION=bbu-login
+else
+  worktree="$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")"
+  common="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
+  repo="$( [ -n "$common" ] && basename "$(dirname "$common")" || echo "$worktree")"
+  export AGENT_BROWSER_SESSION="bbu-$worktree$as"
+  export AGENT_BROWSER_RESTORE="bbu-$repo$as"
+fi
 
 exec agent-browser "$@"
