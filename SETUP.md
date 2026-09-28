@@ -114,10 +114,9 @@ ln -s ~/Project/better-computer-use/skills/better-computer-use ~/.agents/skills/
 ```bash
 brew install agent-browser
 npm install --global cloakbrowser && cloakbrowser install
-brew install --cask helium-browser
 ```
 
-自动化只走隔离浏览器：默认 Chrome for Testing，需要登录态时用 cloakbrowser 加从 Helium 同步的 profile；从不动读者的日常浏览器。需要登录态的站点由读者在 Helium 里登录一次。路径由 skill 自己查找，不需要环境变量。
+自动化只走隔离浏览器：默认 Chrome for Testing，需要登录态时用 cloakbrowser 加 agent 专用的持久 profile；从不动读者的日常浏览器。需要登录态的站点由读者在 agent 弹出的窗口里登录一次。路径由 skill 自己查找，不需要环境变量。
 
 **完成标准**：`agent-browser --version` 与 `cloakbrowser info --quick` 均正常输出。
 
@@ -151,6 +150,6 @@ Bark 推送地址写入 `~/.pi/agent/bark-key` 并 `chmod 600`，格式 `https:/
 | 终端 | `~/.config/` 下 `ghostty/config`、`ghostty/shaders/cursor.frag`、`starship.toml`、`fastfetch/` | 整体写入 |
 | zsh | `~/.config/my-agent-workstation/workstation.zsh`、`env.zsh` | 新增 |
 | zsh 入口 | `~/.zshrc` | 末尾追加一行 source，原件留底 |
-| Homebrew | ghostty、font-maple-mono-nf-cn、helium-browser；starship、fastfetch、zsh-autosuggestions、zsh-syntax-highlighting、agent-browser | 新增 |
+| Homebrew | ghostty、font-maple-mono-nf-cn；starship、fastfetch、zsh-autosuggestions、zsh-syntax-highlighting、agent-browser | 新增 |
 | BCU helper | `/Applications/bcu.app`（或 `~/Applications/bcu.app`）及两项授权 | 新增 |
-| 隔离浏览器 | cloakbrowser 自管目录、`/Applications/Helium.app` | 新增 |
+| 隔离浏览器 | cloakbrowser 自管目录、agent 专用 profile `~/.bbu/` | 新增 |
