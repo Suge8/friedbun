@@ -27,8 +27,15 @@ if [ "$login" = 1 ]; then
   [ -z "$as" ] || { echo "bbu: --as applies to the default lane only" >&2; exit 2; }
   BIN="${BBU_BIN:-$(ls -d "$HOME"/.cloakbrowser/chromium-*/Chromium.app/Contents/MacOS/Chromium 2>/dev/null | sort -V | tail -n 1)}"
   [ -x "$BIN" ] || { echo "bbu: CloakBrowser not found; run: cloakbrowser install (or set BBU_BIN)" >&2; exit 1; }
+  profile="$BBU_HOME/profile"
+  # 不给种子时 CloakBrowser 每次启动随机换一台设备；同一份 cookie 配不同设备是反爬信号。
+  # 种子存在 profile 里，与它同生同删。
+  seed="$profile/bbu-fingerprint-seed"
+  [ -s "$seed" ] || { (umask 077; mkdir -p "$profile"); echo $(( (RANDOM << 15 | RANDOM) % 90000 + 10000 )) > "$seed"; }
+  read -r fingerprint < "$seed"
   export AGENT_BROWSER_EXECUTABLE_PATH="$BIN"
-  export AGENT_BROWSER_PROFILE="$BBU_HOME/profile"
+  export AGENT_BROWSER_PROFILE="$profile"
+  export AGENT_BROWSER_ARGS="--fingerprint=$fingerprint"
   export AGENT_BROWSER_SESSION=bbu-login
 else
   worktree="$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")"
