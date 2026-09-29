@@ -113,12 +113,14 @@ ln -s ~/Project/better-computer-use/skills/better-computer-use ~/.agents/skills/
 
 ```bash
 brew install agent-browser
-npm install --global cloakbrowser && cloakbrowser install
+npm install --global cloakbrowser
 ```
+
+然后转达读者：终端运行 `cloakbrowser login`，按回车用 GitHub 领免费许可证（最新版浏览器，同一时间一个会话；不领只能装落后的旧版），完成后运行 `cloakbrowser install`。
 
 自动化只走隔离浏览器：默认 Chrome for Testing，需要登录态时用 cloakbrowser 加 agent 专用的持久 profile；从不动读者的日常浏览器。需要登录态的站点由读者在 agent 弹出的窗口里登录一次。路径由 skill 自己查找，不需要环境变量。
 
-**完成标准**：`agent-browser --version` 与 `cloakbrowser info --quick` 均正常输出。
+**完成标准**：`agent-browser --version` 正常输出；`cloakbrowser info --quick` 的版本带 `(pro)` 且 `Installed: true`。
 
 ## 步骤 8：凭据（人工关口）
 
