@@ -45,7 +45,7 @@ docs(changelog): note session persistence
 发布顺序是硬边界：先完成 Step 2 的全部用户改动提交，再修改版本与 CHANGELOG 并创建 release commit；tag 必须指向这个最终 release commit。禁止先提交 release 元数据、再把业务改动补在 tag 前后。
 
 1. 按 semver 判定新版号（用户没指定时自己判定，执行前一句话告知，不阻塞）
-2. 更新版本文件 + CHANGELOG：新条目从本次 commits 生成，用户向语言，不写实现细节；双语仓库两种语言都写；文风走 stop-slop
+2. 更新版本文件 + CHANGELOG：新条目从本次 commits 生成，用户向语言，不写实现细节；双语仓库两种语言都写
 3. `chore(release): prepare vX.Y.Z` 提交（匹配仓库风格）→ 打 tag → push tag
 4. **盯 CI 到绿**：`gh run watch`（外部系统无事件接口，等待即业务语义）。红了：分析日志，属本次发布的问题就修并重走流程；历史遗留问题报告用户
 5. 确认 release 产物生成，报告最终链接

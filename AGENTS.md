@@ -19,7 +19,6 @@
 | 建立并维护仓库架构 wiki 与过期检查 | `architecture-wiki` |
 | 项目宣传物料与演示图 | `promo` |
 | 转化文案：标题、Hero、CTA、落地页 | `copywriting` |
-| 去除文稿 AI 味 | `stop-slop` |
 | 实测数据写成社媒帖：核数、文案、数据图、发布 | `post` |
 | 生成图片、海报、插图与 Logo | `gpt-image` |
 | 视频策划、Remotion 实现与生成 | `video` |

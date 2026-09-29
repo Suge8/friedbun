@@ -45,8 +45,8 @@ description: 项目骨架与文档一致性体检：初始化、半途补缺、�
 | ----------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
 | CONTEXT.md              | Matt `domain-modeling`                                            | 从代码提取候选术语，确认后按其格式写入；在 AGENTS.md 中标注为活文档 |
 | AGENTS.md               | 本 skill 直接写                                                   | 内容全部来自 Step 1 的探索事实，不编造                              |
-| README                  | 本 skill 按项目事实起草；营销文案用 copywriting，成稿用 stop-slop | 语言规则见下                                                        |
-| CONTRIBUTING / SECURITY | 本 skill 起草，文案走 stop-slop                                   | 语言规则见下                                                        |
+| README                  | 本 skill 按项目事实起草；营销文案用 copywriting                   | 语言规则见下                                                        |
+| CONTRIBUTING / SECURITY | 本 skill 起草                                                     | 语言规则见下                                                        |
 
 ## 语言规则
 

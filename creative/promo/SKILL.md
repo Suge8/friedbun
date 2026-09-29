@@ -6,7 +6,7 @@ description: 制作项目宣传物料：Hero/OG/社媒图、商店截图、READM
 
 # Promo（物料工坊）
 
-编排者，自己不生成任何东西：Logo 和 AI 图归 gpt-image、文案归 copywriting + stop-slop、截图归 better-browser-use/系统工具。本 skill 管的是：搞清项目是什么 → 缺什么物料 → 按正确的工具链生产 → 落盘成套。
+编排者，自己不生成任何东西：Logo 和 AI 图归 gpt-image、文案归 copywriting、截图归 better-browser-use/系统工具。本 skill 管的是：搞清项目是什么 → 缺什么物料 → 按正确的工具链生产 → 落盘成套。
 
 ## Step 0 — 建立语境（物料质量的上游）
 
@@ -24,7 +24,7 @@ description: 制作项目宣传物料：Hero/OG/社媒图、商店截图、READM
 | AI 宣传底图（hero/OG/社媒） | 官网首屏、GitHub social、推文卡片   | [VISUAL.md](./VISUAL.md) 链 B |
 | 产品截图（美化合成）        | README hero、商店图库、Product Hunt | [SHOTS.md](./SHOTS.md)        |
 | 演示 GIF / 视频             | README、社媒、商店                  | [MOTION.md](./MOTION.md)      |
-| 配套文案（标题/口号）       | 叠加在图上、社媒帖                  | copywriting → stop-slop       |
+| 配套文案（标题/口号）       | 叠加在图上、社媒帖                  | copywriting                   |
 
 ## Step 2 — 生产纪律
 
