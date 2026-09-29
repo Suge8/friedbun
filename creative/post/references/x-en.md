@@ -1,4 +1,4 @@
-# X · English
+# X · English · short posts and replies
 
 Voice distilled from verbatim posts by @thsottiaux, @theo, @Da7_Tech, @0xSero and @shadcn (2026, ~140 posts).
 
