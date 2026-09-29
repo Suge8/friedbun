@@ -46,30 +46,24 @@
 	"master": {
 		"roles": {
 			"调研员": {
-				"model": "anthropic/claude-sonnet-5/medium",
+				"model": "anthropic/claude-sonnet-5-5/medium",
 				"use": "大量搜索、读日志、找线索；不实现",
 				"fallback": ["openai-codex/gpt-6-luna/medium"]
 			},
 			"工程师": {
-				"model": "anthropic/claude-opus-5-5/medium",
+				"model": "anthropic/claude-sonnet-5-5/high",
 				"use": "实现、调试",
-				"fallback": [
-					"openai-codex/gpt-6-astra/low",
-					"anthropic/claude-fable-5-1/low"
-				]
+				"fallback": ["openai-codex/gpt-6-sol/high"]
 			},
 			"设计师": {
 				"model": "anthropic/claude-opus-5-5/medium",
 				"use": "视觉、前端",
-				"fallback": [
-					"anthropic/claude-fable-5-1/low",
-					"openai-codex/gpt-6-astra/low"
-				]
+				"fallback": ["openai-codex/gpt-6-sol/high"]
 			},
 			"哨兵": {
 				"model": "openai-codex/gpt-6-luna/low",
 				"use": "CI、部署、长测试等待",
-				"fallback": ["anthropic/claude-sonnet-5/low"]
+				"fallback": ["anthropic/claude-sonnet-5-5/low"]
 			}
 		}
 	},
@@ -77,12 +71,12 @@
 	// 预设：一键切换模型原子+工具+附加指令的组合，按 key 或 /preset 名字切。
 	// 字段都可选：model（原子）/ tools / instructions / key；没写 key 只能 /preset。
 	"presets": {
-		"opus": { "model": "anthropic/claude-opus-5-5/medium", "key": "alt+1" },
-		"fable": { "model": "anthropic/claude-fable-5-1/medium", "key": "alt+2" },
-		"astra": { "model": "openai-codex/gpt-6-astra/medium", "key": "alt+3" },
-		"sol": { "model": "openai-codex/gpt-6-sol/medium", "key": "alt+4" },
-		"ds": { "model": "deepseek/deepseek-flash/high", "key": "alt+5" },
-		"xai": { "model": "xai/grok-4.7/high", "key": "alt+6" }
+		"sonnet": { "model": "anthropic/claude-sonnet-5-5/high", "key": "alt+1" },
+		"opus": { "model": "anthropic/claude-opus-5-5/high", "key": "alt+2" },
+		"fable": { "model": "anthropic/claude-fable-5-1/medium", "key": "alt+3" },
+		"astra": { "model": "openai-codex/gpt-6-astra/medium", "key": "alt+4" },
+		"sol": { "model": "openai-codex/gpt-6-sol/medium", "key": "alt+5" },
+		"ds": { "model": "deepseek/deepseek-flash/high", "key": "alt+6" }
 	},
 
 	// /fire-review 对抗性审查：几个审查模型并行挑毛病，全部说过才算过；
@@ -94,7 +88,7 @@
 	// language：审查报告语言 zh/en。
 	// 本节字段必须齐全；拼错字段名会直接报配置错误而不是静默忽略。
 	"review": {
-		"advisor": "anthropic/claude-fable-5-1/medium",
+		"advisor": "anthropic/claude-fable-5-1/high",
 		"reviewers": [
 			"anthropic/claude-opus-5-5/low",
 			"openai-codex/gpt-6-sol/low"
