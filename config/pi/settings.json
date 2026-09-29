@@ -23,6 +23,7 @@
   ],
   "hideThinkingBlock": true,
   "showCacheMissNotices": true,
+  "httpIdleTimeoutMs": 900000,
   "warnings": {
     "anthropicExtraUsage": false
   },
