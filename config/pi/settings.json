@@ -3,11 +3,6 @@
   "defaultProvider": "anthropic",
   "defaultModel": "claude-opus-5-5",
   "defaultThinkingLevel": "medium",
-  "theme": "catppuccin-latte/catppuccin-mocha",
-  "extensions": [
-    "!extensions/*.test.ts",
-    "!tps.ts"
-  ],
   "quietStartup": true,
   "defaultProjectTrust": "always",
   "enabledModels": [
@@ -21,7 +16,7 @@
     "xai/grok-4.7",
     "deepseek/deepseek-flash"
   ],
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "showCacheMissNotices": true,
   "httpIdleTimeoutMs": 900000,
   "warnings": {
