@@ -41,4 +41,4 @@ open → snapshot -i → errors --json / network requests --status 400-599 → �
 
 - 任务结束对用过的每个浏览器 `close`（带上同样的 `--login`/`--as`）；漏关的闲置 1h 后自动回收，有窗口的也一样。
 - 桌面应用归 better-computer-use。
-- `eval` 只读；不打印 cookie/token，不 dump 整个 DOM/storage；不执行付款、删除、发消息、改密码、提交生产数据。
+- `eval` 只读；不打印 cookie/token，不 dump 整个 DOM/storage；不执行付款、删除、改密码、提交生产数据。
