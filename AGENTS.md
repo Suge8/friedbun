@@ -1,7 +1,7 @@
 # Active Skills
 
 - `creative/`：图像与视频生产、宣传物料、文案。
-- `workflow/`：从对齐到交付按顺序使用的命令：调研、追问、规格与工单、实现、寻路、工单库配置、复盘。起源 mattpocock/skills（MIT），已分叉。
+- `workflow/`：从对齐到交付按顺序使用的命令：调研、追问、规格与工单、实现、工单库配置、复盘。起源 mattpocock/skills（MIT），已分叉。
 - `development/`：被流程调用的能力与参考：测试、原型、深模块与领域词汇、面向 agent 的写作、发布、体检、架构 wiki。
 - `frontend/`：前端设计与 UI polish。
 - `operations/`：运维连接、远程操作、Herdr 终端、网页与桌面自动化；多 Agent 编排由 FireCode `/master` 负责。
@@ -24,7 +24,6 @@
 | 视频策划、Remotion 实现与生成 | `video` |
 | 提交、版本、Tag 与发布 | `ship` |
 | 想法或计划压力测试，并同步 ADR 与术语表 | `grill-with-docs` |
-| 超过一个会话的大型决策工作 | `wayfinder` |
 | 把已对齐的讨论变成规格头与工单，一次发布 | `to-tickets` |
 | 深模块与架构加深审计 | `improve-codebase-architecture` |
 | 为仓库配置 tracker、标签与领域文档 | `setup-tracker` |
