@@ -89,7 +89,7 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 
 ### Arc — 复杂交互控件（React / shadcn registry / Motion）
 
-- 只用免费项（MIT）；机读 <https://uiarc.dev/llms.txt>，组件页加 `/markdown` 取何时用、props、键盘与无障碍说明。
+- 只用免费项（MIT，源码 [kuratlielia/arc-library](https://github.com/kuratlielia/arc-library)）；机读 <https://uiarc.dev/llms.txt>，组件页加 `/markdown` 取何时用、props、键盘与无障碍说明。
 - 获取：`npx shadcn@latest add https://uiarc.dev/r/<组件>.json`。
 - 红线：样式是 CSS modules + CSS 变量而非 Tailwind，变量映射到项目 token，不引入它的 `arc-foundation`，文件落进项目既有组件目录；它的规则去掉了 focus ring，按 ui-craft 补回 `:focus-visible`；不装它的 skill 与规则文件；Pro 项不照着重建。
 
