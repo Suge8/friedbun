@@ -36,6 +36,7 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 | 扁平无动效的实用小件（表单、日历、票据/名片 mockup、社交卡、Dock） | Opensource UI |
 | 产品控件，shadcn / 复制源码风格 | Fluid Functionalism |
 | 产品控件整包，React 19 + Tailwind v4 | Appica UI |
+| 复杂交互控件（签名、快捷键录制、@提及、滑动操作、长按确认、主题切换转场） | Arc |
 | 营销页与仪表盘的动效块（hero、卡片块、定价块、图表） | Spectrum UI |
 | AI 界面视觉件（思考态、流式、审批、工具调用） | Beautiful UI / Fluid Functionalism |
 | AI 聊天 runtime（线程、流式、工具调用） | assistant-ui |
@@ -85,6 +86,12 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 - 表单校验、日期/时间/颜色/组合框、Data Table、Toast、Drawer 等 70+ 控件，主题、暗色、RTL、reduced-motion 内建，附约 5000 图标。机读 <https://appica.dev/llms.txt>，文档页加 `.md` 取纯文本，MIT。
 - 安装：`pnpm add @appica/ui-react`，全局样式里 `@import '@appica/ui-react/styles.css'` 并加 `@source '../node_modules/@appica/ui-react/dist'`（相对该 CSS 文件的真实路径，写裸包名会静默失效、整体无样式）；按子路径逐个导入 `@appica/ui-react/button`。
 - 红线：React 19 与 Tailwind v4 是硬门槛，不降级适配；它按角色命名的 token（`bg-background-muted`）和项目已有 shadcn token 二选一。
+
+### Arc — 复杂交互控件（React / shadcn registry / Motion）
+
+- 只用免费项（MIT）；机读 <https://uiarc.dev/llms.txt>，组件页加 `/markdown` 取何时用、props、键盘与无障碍说明。
+- 获取：`npx shadcn@latest add https://uiarc.dev/r/<组件>.json`。
+- 红线：样式是 CSS modules + CSS 变量而非 Tailwind，变量映射到项目 token，不引入它的 `arc-foundation`，文件落进项目既有组件目录；它的规则去掉了 focus ring，按 ui-craft 补回 `:focus-visible`；不装它的 skill 与规则文件；Pro 项不照着重建。
 
 ### Spectrum UI — 营销页 / 仪表盘动效块（React / shadcn registry / Motion）
 
