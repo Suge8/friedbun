@@ -34,7 +34,7 @@
         "gpt-6-luna": {
           "contextWindow": 1050000
         },
-        "gpt-6-sol": {
+        "gpt-6.1-sol": {
           "contextWindow": 1050000
         }
       }

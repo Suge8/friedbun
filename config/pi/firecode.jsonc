@@ -39,7 +39,7 @@
 	// 模型必须是内置 provider（扩展注册的如 antigravity 在观察子会话里解析不到）。
 	"watcher": {
 		"enabled": false,
-		"model": "openai-codex/gpt-6-sol/medium",
+		"model": "openai-codex/gpt-6.1-sol/medium",
 		"context": "minimal"
 	},
 
@@ -53,12 +53,12 @@
 			"工程师": {
 				"model": "anthropic/claude-sonnet-5-5/high",
 				"use": "实现、调试",
-				"fallback": ["openai-codex/gpt-6-sol/high"]
+				"fallback": ["openai-codex/gpt-6.1-sol/high"]
 			},
 			"设计师": {
 				"model": "anthropic/claude-opus-5-5/medium",
 				"use": "视觉、前端",
-				"fallback": ["openai-codex/gpt-6-sol/high"]
+				"fallback": ["openai-codex/gpt-6.1-sol/high"]
 			},
 			"哨兵": {
 				"model": "openai-codex/gpt-6-luna/low",
@@ -75,7 +75,7 @@
 		"opus": { "model": "anthropic/claude-opus-5-5/high", "key": "alt+2" },
 		"fable": { "model": "anthropic/claude-fable-5-1/medium", "key": "alt+3" },
 		"astra": { "model": "openai-codex/gpt-6-astra/medium", "key": "alt+4" },
-		"sol": { "model": "openai-codex/gpt-6-sol/medium", "key": "alt+5" },
+		"sol": { "model": "openai-codex/gpt-6.1-sol/medium", "key": "alt+5" },
 		"ds": { "model": "deepseek/deepseek-flash/high", "key": "alt+6" }
 	},
 
@@ -91,7 +91,7 @@
 		"advisor": "anthropic/claude-fable-5-1/high",
 		"reviewers": [
 			"anthropic/claude-opus-5-5/low",
-			"openai-codex/gpt-6-sol/low"
+			"openai-codex/gpt-6.1-sol/low"
 		],
 		"maxRounds": 5,
 		"advisorAfterFailures": 2,
