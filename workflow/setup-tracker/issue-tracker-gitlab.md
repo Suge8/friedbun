@@ -28,7 +28,7 @@
 
 ## 当技能说“发布到 issue tracker”时
 
-创建 GitLab issue。
+创建 GitLab issue。阻塞边用原生 blocking link：`glab issue note <child> --message "/blocked_by #<blocker>"`；它是 Premium/Ultimate 功能，免费层在描述顶部写 `Blocked by: #<n>, #<n>`。
 
 ## 当技能说“获取相关 ticket”时
 

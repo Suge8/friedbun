@@ -27,7 +27,7 @@ GitHub 的 issue 和 PR 共享同一个编号空间，因此单独的 `#42` 可�
 
 ## 当技能说“发布到 issue tracker”时
 
-创建 GitHub issue。
+创建 GitHub issue。子工单与阻塞边用原生关系：`gh issue create --parent <spec> --blocked-by <n>,<n>`；补挂用 `gh issue edit <n> --parent <spec> --add-blocked-by <n>`。
 
 ## 当技能说“获取相关 ticket”时
 
