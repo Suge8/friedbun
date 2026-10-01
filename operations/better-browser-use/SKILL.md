@@ -10,9 +10,9 @@ allowed-tools: Bash(./bin/bbu:*), Bash(agent-browser:*)
 
 ## 车道
 
-- `bbu <cmd>`（默认）：Chrome for Testing，每个工作树一个浏览器；cookie 与 storage 按仓库自动存取，dev server 登录一次，重启和其他 worktree 都沿用。console、errors、network 完整。开发调试走这里。
+- `bbu <cmd>`（默认）：Chrome for Testing，每个工作树一个浏览器；cookie 与 storage 按工作树自动存取，重启后沿用；新工作树需自己登录一次（多个浏览器共用一份快照会让轮换制 refresh token 互相作废）。console、errors、network 完整。开发调试走这里。
 - `bbu --login <cmd>`：CloakBrowser（反检测）+ agent 专用的持久 profile，全局单实例。用户第三方账号和有反爬的站点走这里；引擎屏蔽 console/异常事件，此车道 `console`/`errors` 恒空。
-- `bbu --as <身份> <cmd>`：默认车道里再开一个独立浏览器，给多账号流程（如 owner 与 guest 对测），登录态按身份分开存。session 名由 bbu 生成，传 `--session` 会被拒绝。
+- `bbu --as <身份> <cmd>`：默认车道里再开一个独立浏览器，给多账号流程（如 owner 与 guest 对测），登录态按工作树和身份分开存。session 名由 bbu 生成，传 `--session` 会被拒绝。
 
 ## 窗口
 
