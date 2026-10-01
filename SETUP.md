@@ -40,6 +40,7 @@ herdr plugin install -y smarzban/herdr-file-viewer
 | `models.json` | `~/.pi/agent/models.json` | 合并 |
 | `SYSTEM.md` | `~/.pi/agent/SYSTEM.md` | 整体替换 |
 | `firecode.jsonc` | `~/.pi/agent/extensions/firecode/config.jsonc` | 整体写入 |
+| `prompts/` | `~/.pi/agent/prompts/`（`/do <任务>` 附上工程原则） | 整体写入 |
 
 转达读者：SYSTEM.md 会把 agent 的语气、验证纪律、改动前对齐习惯换成作者那套，想保留自己的风格就跳过。
 
@@ -146,7 +147,7 @@ Bark 推送地址写入 `~/.pi/agent/bark-key` 并 `chmod 600`，格式 `https:/
 | Skills 与 BCU | `~/.agents/skills`、`~/Project/architecture-wiki`、`~/Project/better-computer-use`（均为 clone）、两个 skill symlink | 新增 |
 | Pi package | `settings.json` 的 `packages`：firecode | 新增 |
 | Pi 配置 | `~/.pi/agent/` 下 `settings.json`、`keybindings.json`、`models.json` | 合并 |
-| Pi 配置 | `~/.pi/agent/SYSTEM.md`、`extensions/firecode/config.jsonc` | 整体写入，原件留底 |
+| Pi 配置 | `~/.pi/agent/SYSTEM.md`、`prompts/`、`extensions/firecode/config.jsonc` | 整体写入，原件留底 |
 | Bark | `~/.pi/agent/bark-key` | 新增 |
 | 终端 | `~/.config/` 下 `ghostty/config`、`ghostty/shaders/cursor.frag`、`starship.toml`、`fastfetch/` | 整体写入 |
 | zsh | `~/.config/my-agent-workstation/workstation.zsh`、`env.zsh` | 新增 |

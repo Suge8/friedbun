@@ -52,13 +52,11 @@
 			},
 			"工程师": {
 				"model": "anthropic/claude-sonnet-5-5/high",
-				"use": "实现、调试",
-				"fallback": ["openai-codex/gpt-6.1-sol/high"]
+				"use": "实现、调试"
 			},
 			"设计师": {
 				"model": "anthropic/claude-opus-5-5/medium",
-				"use": "视觉、前端",
-				"fallback": ["openai-codex/gpt-6.1-sol/high"]
+				"use": "视觉、前端"
 			},
 			"哨兵": {
 				"model": "openai-codex/gpt-6-luna/low",
