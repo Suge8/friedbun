@@ -1,12 +1,12 @@
 ---
 name: better-browser-use
 description: 操作和调试网页：导航、点击、填写、snapshot、截图、console、network；需要用户登录态或反检测的站点、用户要预览 dev server 时同样用它。
-allowed-tools: Bash(./bin/bbu:*), Bash(agent-browser:*)
+allowed-tools: Bash(bbu:*), Bash(agent-browser:*)
 ---
 
 # Better Browser Use
 
-`./bin/bbu` 就是 agent-browser 加持久登录态：命令、参数、输出全是 agent-browser 的，细节读 `agent-browser skills get core`（含完整参考），系统性 QA 读 `skills get dogfood`。所有浏览器操作经 `bbu`，用户的日常浏览器从不被接管。
+`bbu`（在 PATH 上，`~/.local/bin/bbu` 链到本技能的 `bin/bbu`）就是 agent-browser 加持久登录态：命令、参数、输出全是 agent-browser 的，细节读 `agent-browser skills get core`（含完整参考），系统性 QA 读 `skills get dogfood`。所有浏览器操作经 `bbu`，用户的日常浏览器从不被接管。
 
 ## 车道
 
