@@ -39,7 +39,7 @@
 
 ## 候选卡片
 
-图表承担主要信息。正文要稀少、直白，并使用 `/codebase-design` skill 中的术语表术语，不要刻意解释。
+图表承担主要信息。正文稀少、直白。
 
 每个候选项都是一个 `<article>`：
 
@@ -50,7 +50,6 @@
 - **问题**——一句话。哪里造成了痛点。
 - **解决方案**——一句话。发生什么变化。
 - **收益**——项目符号，每项不超过 6 个词。例如：“测试命中一个 interface”“Pricing 逻辑不再泄漏”“删除 4 个浅层 wrapper”。
-- **ADR 提示**（如适用）——琥珀色背景框中的一行文字。
 
 不要写解释段落。如果图表需要段落才能看懂，就重画图表。
 
@@ -105,19 +104,4 @@ Before：以嵌套框渲染的函数调用树。After：将同一棵树合并成
 
 ## 语气
 
-简洁直白的中文，但架构名词和动词直接来自 `/codebase-design` skill。简洁不能成为偏离术语的借口。
-
-**只使用：** module、interface、implementation、depth、deep、shallow、seam、adapter、leverage、locality。
-
-**绝不替换为：** component、service、unit（当指 module 时）· API、signature（当指 interface 时）· boundary（当指 seam 时）· layer、wrapper（当你实际指 module 时）。
-
-**符合此风格的表述：**
-
-- “Order intake module 很 shallow——interface 几乎等同于 implementation。”
-- “Pricing 跨 seam 泄漏。”
-- “Deepen：一个 interface，一个测试位置。”
-- “两个 adapter 足以证明 seam 存在：生产环境用 HTTP，测试用内存实现。”
-
-**Wins 项目符号**要用术语表中的术语命名收益：*“locality：bug 集中在一个 module 中”*、*“leverage：一个 interface，N 个调用点”*、*“interface 收缩；implementation 吸收 wrappers”*。不要写 *“更易维护”* 或 *“代码更干净”*——这些术语不在术语表中，不值得占据位置。
-
-不要模棱两可，不要铺垫，不要写“值得注意的是……”。如果一句话可以成为项目符号，就把它写成项目符号。如果一个项目符号可以删掉，就删掉。如果某个术语不在 `/codebase-design` 术语表中，优先使用其中的术语，而不是创造新术语。
+简洁直白的中文，用行为说收益：「改价格规则只动一个文件」「测试只需打一个入口」「删掉 4 个只转发的包装」。不写「更易维护」「代码更干净」这类说不出具体变化的话，也不堆 deep、seam、leverage 这类术语；用到时第一次配一句人话。一句话能变成项目符号就写成项目符号，能删的项目符号就删。

@@ -1,6 +1,7 @@
 ---
 name: grilling
 description: 以毫不留情的方式就计划、决策或想法不断追问用户。当用户想对自己的思路进行压力测试
+disable-model-invocation: true
 ---
 
 不断追问用户，直到你们达成共同理解。将其映射为一棵**设计树**：每个决策都分支出依附于它的决策。

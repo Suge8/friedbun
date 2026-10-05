@@ -1,6 +1,7 @@
 ---
 name: eli5
 description: 把话题讲到没读过代码的技术读者也能准确理解，默认 HTML 图解
+disable-model-invocation: true
 ---
 
 # ELI5
