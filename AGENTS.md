@@ -15,11 +15,10 @@
 
 | 需求 | Skill |
 |---|---|
-| 项目骨架、文档、工单库约定与验证链体检 | `project-setup` |
+| 项目体检：文档骨架、工单约定与验证链 | `project-setup` |
 | 项目宣传物料与演示图 | `promo` |
 | 转化文案：标题、Hero、CTA、落地页 | `copywriting` |
 | 实测数据写成社媒帖：核数、文案、数据图、发布 | `post` |
-| 生成图片、海报、插图与 Logo | `gpt-image` |
 | 视频策划、Remotion 实现与生成 | `video` |
 | 提交、版本、Tag 与发布 | `ship` |
 | 架构体检：找该加深的浅模块并设计接口 | `architecture-audit` |
