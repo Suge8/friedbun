@@ -5,15 +5,14 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 
 # UI Picks
 
-个人品味的 UI 库选型表。命中场景就用表里的库；组件清单和 API 以各库的 llms.txt / registry / 文档为准，构建时现取。
+个人品味的 UI 库选型表。组件清单和 API 以各库的 llms.txt / registry / 文档为准，构建时现取；下文只记查不到的获取方式、坑和红线。
 
 ## 使用规则
 
-1. 按任务识别场景，不按用户提到的库名。"要个粒子背景"是特效场景，即使用户没提任何库。
-2. 先查 `package.json`。项目已用表内库直接用；已用竞品时提示本表推荐，保留现有依赖。
-3. 每个场景按路由表取一个库，说明用途一句话，属于请求范围就直接移植接线。
-4. 装饰性动效不限场景，webapp、产品 UI 也可按需用。内容层独立于特效层：文字可选中、链接可点击、核心信息不依赖特效。
-5. WebGL / shader 特效（Canvas UI、Paper Shaders）只在用户明确要求时启用，读 [references/shaders.md](references/shaders.md)。
+1. 按任务场景选库，不按用户提到的库名："要个粒子背景"即特效场景。
+2. 先查 `package.json`：项目已用表内库直接用；已用竞品时提示本表推荐，保留现有依赖。
+3. 装饰性动效不限场景，产品 UI 也可按需用。内容层独立于特效层：文字可选中、链接可点击、核心信息不依赖特效。
+4. WebGL / shader 特效（Canvas UI、Paper Shaders）只在用户明确要求时启用，读 [references/shaders.md](references/shaders.md)。
 
 ## 移植流程
 
@@ -22,7 +21,7 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 1. 取源码进项目，剥掉示例里的 mock 数据、定时状态流、站点专属 CSS 变量和共享 atoms。
 2. 依赖对账：逐个看组件带来的依赖（motion、Radix、vaul、three 等），项目已有的复用，没有的先评估 CSS 或原生替代，确实需要再引入并说明。
 3. 颜色、圆角、字体、间距映射到项目设计系统；库自带的 token 体系和项目 token 二选一，不并存。
-4. 按 ui-craft 检查 AI 模板痕迹、性能和 reduced-motion。
+4. 按 ui-craft 核对「标签与页眉」「其他模板痕迹」、性能和 reduced-motion。
 
 ## 路由表
 
@@ -57,11 +56,11 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 ### transitions.dev — CSS 状态转场片段（框架无关）
 
 - 站点 [transitions.dev](https://transitions.dev)。获取：`npx transitions-pro add <name>`（免费款无需账号，`list` 看全量；Pro 需浏览器登录）或站点卡片复制。片段自含 `:root` 语义变量、`t-*` 命名空间类和 reduced-motion guard。
-- 红线：多款默认带 blur，与 ui-craft「blur 非默认入场属性」冲突，实测流畅且视觉语言支持才保留。
+- 红线：多款默认带 blur，与 ui-craft 动效参考「blur 只在视觉语言需要且实测流畅时加入」冲突，实测流畅且视觉语言支持才保留。
 
 ### morphicons — SVG 图标 morph（React / Vue / Svelte / RN / vanilla）
 
-- 可中断弹簧物理，零依赖 ~6-8KB；机读 <https://www.morphicons.com/llms.txt>（完整 API 在 llms-full.txt）。SSR 干净、默认 `aria-hidden`、自动尊重 reduced-motion。
+- 零依赖 ~6-8KB；机读 <https://www.morphicons.com/llms.txt>（完整 API 在 llms-full.txt）。SSR 干净、默认 `aria-hidden`、自动尊重 reduced-motion。
 - 安装：`npm i morphicons`，按框架取 `morphicons/react|vue|svelte|react-native|dom` 入口；图标以数据形式导入（装 `lucide` 包，不是 `lucide-react` 组件）。
 - 红线：只支持 stroke 图标（Lucide/Tabler/Heroicons outline/Iconoir）；非 24×24 网格的包先用 `fitIcon` 重排。
 
@@ -72,18 +71,18 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 
 ### Opensource UI — 自包含扁平小件（React / Next.js / Tailwind v4）
 
-- 170 个单文件组件，只靠 Tailwind + clsx/tailwind-merge，图标是仓库内 SVG；机读 <https://opensourceui.in/llms.txt>，组件页 `/components/<slug>` 带源码，仓库 `skills/opensource-ui/references/catalog.md` 是全量目录，MIT。
+- 单文件组件，只靠 Tailwind + clsx/tailwind-merge，图标是仓库内 SVG；机读 <https://opensourceui.in/llms.txt>，组件页 `/components/<slug>` 带源码，仓库 `skills/opensource-ui/references/catalog.md` 是全量目录，MIT。
 - 获取：组件页复制；`cn()` 用项目已有的，图标从仓库 `icons/` 取或换项目图标库。
-- 红线：它的视觉语言（Instrument Serif + Geist、纯扁平、无渐变发光）很强势，移植时必须按项目 token 重映射，不把它的设计体系带进项目。
+- 红线：它的视觉语言（Instrument Serif + Geist、纯扁平、无渐变发光）很强势，移植时按项目 token 重映射，不把它的设计体系带进项目。
 
 ### Fluid Functionalism — 成品感产品控件（React / shadcn registry）
 
-- Button、Dialog、Select、Tabs、Table 等，含 AI 聊天视觉件（ChatMessage、ThinkingIndicator）；动效传达语义、hover 即预览。文档 [fluidfunctionalism.com/docs](https://www.fluidfunctionalism.com/docs)，机读 <https://www.fluidfunctionalism.com/r/registry.json>。
+- 文档 [fluidfunctionalism.com/docs](https://www.fluidfunctionalism.com/docs)，机读 <https://www.fluidfunctionalism.com/r/registry.json>。
 - 获取：`npx shadcn@latest add https://www.fluidfunctionalism.com/r/<组件>.json`；`/r/base/` 路径只有部分组件，用 `/r/`。
 
 ### Appica UI — 产品控件整包（React 19 / Tailwind v4 / Base UI）
 
-- 表单校验、日期/时间/颜色/组合框、Data Table、Toast、Drawer 等 70+ 控件，主题、暗色、RTL、reduced-motion 内建，附约 5000 图标。机读 <https://appica.dev/llms.txt>，文档页加 `.md` 取纯文本，MIT。
+- 机读 <https://appica.dev/llms.txt>，文档页加 `.md` 取纯文本，MIT。
 - 安装：`pnpm add @appica/ui-react`，全局样式里 `@import '@appica/ui-react/styles.css'` 并加 `@source '../node_modules/@appica/ui-react/dist'`（相对该 CSS 文件的真实路径，写裸包名会静默失效、整体无样式）；按子路径逐个导入 `@appica/ui-react/button`。
 - 红线：React 19 与 Tailwind v4 是硬门槛，不降级适配；它按角色命名的 token（`bg-background-muted`）和项目已有 shadcn token 二选一。
 
@@ -95,7 +94,7 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 
 ### Spectrum UI — 营销页 / 仪表盘动效块（React / shadcn registry / Motion）
 
-- 250+ 组件与块：hero、50 种卡片块、定价块、AI 助手块、20 个图表（10 个无图表依赖）；建立在 shadcn + Radix + Motion 上，机读 <https://ui.spectrumhq.in/llms.txt>，Apache-2.0。
+- 建立在 shadcn + Radix + Motion 上，机读 <https://ui.spectrumhq.in/llms.txt>，Apache-2.0。
 - 获取：`npx shadcn@latest add @spectrumui/<组件>`，或 `claude mcp add spectrum-ui -- npx -y @spectrumui/mcp` 后直接让 MCP 装；每个组件页有已验证命令。
 - 红线：每个组件按 registry 拉自己的依赖（motion、vaul、react-use-measure 等），移植流程第 2 步逐个对账。
 
@@ -106,7 +105,7 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 
 ### assistant-ui — AI 聊天 runtime（React / TS）
 
-- 线程、流式输出、Markdown、工具调用 UI；机读 <https://www.assistant-ui.com/llms.txt>。
+- 机读 <https://www.assistant-ui.com/llms.txt>。
 - 安装：已有项目 `npx assistant-ui@latest init`，新项目 `npx assistant-ui@latest create`；或 `@assistant-ui/react` + 对应 runtime 包（如 `@assistant-ui/react-ai-sdk`）。样式与密度对齐项目设计系统。
 
 ### UI SFX — 语义化界面音效（Web Audio / 跨端音频文件）
