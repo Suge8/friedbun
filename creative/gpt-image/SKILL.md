@@ -1,6 +1,5 @@
 ---
 name: gpt-image
-disable-model-invocation: true
 description: 通过 gptimage 模型生成优美 AI 图片、海报、插图或 Logo
 ---
 
@@ -17,13 +16,13 @@ python3 scripts/gpt_image.py \
 脚本读取 `~/.codex/auth.json`，调用带以下内容的 Codex `/responses`：
 
 ```json
-{"tools":[{"type":"image_generation","output_format":"png"}]}
+{ "tools": [{ "type": "image_generation", "output_format": "png" }] }
 ```
 
 它打印一个 JSON object：
 
 ```json
-{"ok":true,"path":"/absolute/path/output.png","size":"1254x1254"}
+{ "ok": true, "path": "/absolute/path/output.png", "size": "1254x1254" }
 ```
 
 如果 prompt 很长，pipe stdin：
