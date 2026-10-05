@@ -63,9 +63,7 @@ disable-model-invocation: true
 
 用户选择候选项后，使用 `grilling` skill，与用户一起沿决策树推进——约束、依赖、deepened module 的形态、seam 后方的内容，以及哪些测试保留。
 
-随着决策逐渐明确，副作用要内联发生——使用 `domain-modeling` skill，持续更新领域模型：
+随着决策逐渐明确，副作用要内联发生：
 
-- **是否用 `CONTEXT.md` 中没有的概念为 deepened module 命名？** 将该术语加入 `CONTEXT.md`。如果文件不存在，按需创建。
-- **是否在对话中明确了某个模糊术语？** 当场更新 `CONTEXT.md`。
-- **用户是否因一个具有决定性作用的理由拒绝候选项？** 提供 ADR，但措辞应为：“要我把它记录为 ADR，避免未来的架构评审再次建议同一方案吗？”只有当该理由确实能帮助未来的探索者避免重复建议时才提供；短暂理由（“现在不值得”）和不言自明的理由则跳过。
+- **是否用 `CONTEXT.md` 中没有的概念为 deepened module 命名，或在对话中明确了某个模糊术语？** 项目已有 `CONTEXT.md` 时当场更新。
 - **是否想探索 deepened module 的替代 interface？** 使用 `codebase-design` skill，并使用其 design-it-twice 并行子代理模式。
