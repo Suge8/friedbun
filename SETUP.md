@@ -49,12 +49,10 @@ herdr plugin install -y smarzban/herdr-file-viewer
 
 ## 步骤 3：Skills、Pi 扩展与登录（人工关口）
 
-Skills 落在所有 agent 共用的 `~/.agents/skills`，Pi 自动从这里读；architecture-wiki 的 skill 随它自己的仓库发布，clone 后 symlink 进来：
+Skills 落在所有 agent 共用的 `~/.agents/skills`，Pi 自动从这里读：
 
 ```bash
 git clone https://github.com/Suge8/skills ~/.agents/skills
-git clone https://github.com/Suge8/architecture-wiki ~/Project/architecture-wiki
-ln -s ~/Project/architecture-wiki/skills/architecture-wiki ~/.agents/skills/development/architecture-wiki
 ```
 
 Pi 扩展：
@@ -65,7 +63,7 @@ pi install git:github.com/Suge8/firecode
 
 然后让读者启动 `pi` 执行 `/login`，至少完成一个供应商；作者用到 `openai-codex`、`anthropic`、`xai`、`deepseek`、`kimi-coding`。web-search 的默认搜索用 `anthropic` 与 `openai-codex` 的登录，登了哪家就只搜哪家。
 
-**完成标准**：`pi list` 列出 firecode；`pi --list-models` 至少一个模型；`ls ~/.agents/skills/development/architecture-wiki/SKILL.md` 存在。
+**完成标准**：`pi list` 列出 firecode；`pi --list-models` 至少一个模型；`ls ~/.agents/skills/workflow/research/SKILL.md` 存在。
 
 ## 步骤 4：校正模型
 
@@ -143,7 +141,7 @@ Bark 推送地址写入 `~/.pi/agent/bark-key` 并 `chmod 600`，格式 `https:/
 | --- | --- | --- |
 | 全局 npm | `pi`、`cloakbrowser`；`bcu`（`npm link` 指向克隆） | 新增 |
 | Herdr | `command -v herdr`、`~/.config/herdr/`（配置、插件、会话状态）；`herdr integration install pi` 写入 Pi 配置目录 | 新增 |
-| Skills 与 BCU | `~/.agents/skills`、`~/Project/architecture-wiki`、`~/Project/better-computer-use`（均为 clone）、两个 skill symlink | 新增 |
+| Skills 与 BCU | `~/.agents/skills`、`~/Project/better-computer-use`（均为 clone）、一个 skill symlink | 新增 |
 | Pi package | `settings.json` 的 `packages`：firecode | 新增 |
 | Pi 配置 | `~/.pi/agent/` 下 `settings.json`、`keybindings.json`、`models.json` | 合并 |
 | Pi 配置 | `~/.pi/agent/SYSTEM.md`、`extensions/firecode/config.jsonc` | 整体写入，原件留底 |
