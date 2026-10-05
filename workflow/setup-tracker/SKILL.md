@@ -36,7 +36,7 @@ disable-model-invocation: true
 
 **A 部分——Issue tracker。**
 
-> 解释：“issue tracker”是本仓库 issue 所在的位置。`to-tickets` 和 `implement` 等技能会从中读取并写入——它们需要知道应该调用 `gh issue create`、在 `.scratch/` 下写入 markdown 文件，还是遵循你描述的其他工作流。选择本仓库实际跟踪工作的地方。
+> 解释：“issue tracker”是本仓库 issue 所在的位置。指挥官和 `implement` 等技能会从中读取并写入——它们需要知道应该调用 `gh issue create`、在 `.scratch/` 下写入 markdown 文件，还是遵循你描述的其他工作流。选择本仓库实际跟踪工作的地方。
 
 默认倾向：这些技能是为 GitHub 设计的。如果 `git remote` 指向 GitHub，就提议 GitHub；如果指向 GitLab（`gitlab.com` 或自托管主机），就提议 GitLab。否则（或用户偏好其他选项），提供：
 

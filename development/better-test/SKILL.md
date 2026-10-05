@@ -25,7 +25,7 @@ description: 写、改、审查或清理测试时使用：价值门、反模式�
 5. **抗重构**：行为不变的内部重构、无关文案或布局调整后仍然通过。
 6. **唯一 owner**：该合同只在最低的可靠边界证明一次，且没有被现有测试、类型系统、编译器或 lint 等价保证。
 
-**接缝**是不深入内部就能观察行为的公共边界，沿用规格测试决策已定的接缝；接缝形态有疑问时用 `codebase-design` 的词汇。纯规则放领域测试，编排与授权结果放应用层，交互合同放组件测试，端到端只留关键用户流程。示例见 [references/tests.md](./references/tests.md)，mock 边界见 [references/mocking.md](./references/mocking.md)。
+**接缝**是不深入内部就能观察行为的公共边界；接缝形态有疑问时用 `codebase-design` 的词汇。纯规则放领域测试，编排与授权结果放应用层，交互合同放组件测试，端到端只留关键用户流程。示例见 [references/tests.md](./references/tests.md)，mock 边界见 [references/mocking.md](./references/mocking.md)。
 
 ## 反模式
 
