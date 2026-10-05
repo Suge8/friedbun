@@ -17,7 +17,7 @@ description: 项目体检：新项目开工、半途补缺、开源前检查或�
 | 项 | 何时需要 | 内容与位置 |
 |---|---|---|
 | AGENTS.md | 所有项目 | 根目录；地图：命令入口、代码看不出的约束、条件指针 |
-| WORDS.md | 出现界面用词与代码命名不一致、易混近义词时 | 根目录；格式见 writing-for-agents「术语表 WORDS.md」 |
+| WORDS.md | 出现要禁用的近义词或易混概念时 | 根目录；格式见 writing-for-agents「术语表 WORDS.md」 |
 | 工单约定 | 团队或多个 agent 用 GitHub issue 分工时 | 写进根 AGENTS.md，见下 |
 | 验证链 | 所有项目 | 达到 [references/toolchains.md](references/toolchains.md) 的「合格验证链」；不达标时推荐动作按该文件「建链的最小形状」写到能直接交给 agent |
 | LICENSE、用户向 README | 要开源时 | 根目录 |
