@@ -88,7 +88,7 @@ brew install --cask ghostty font-maple-mono-nf-cn
 | `config/fastfetch/config.jsonc`、`logo.txt` | `~/.config/fastfetch/` |
 | `config/zsh/workstation.zsh` | `~/.config/my-agent-workstation/workstation.zsh` |
 
-Ghostty 的 `macos-option-as-alt = true` 是步骤 4 alt 预设键的前提。Ghostty、Herdr、Pi 统一用 Catppuccin，随系统明暗在 Mocha 与 Latte 间切换；Starship 提示符只用标准字符和终端色名，远程终端缺 Nerd Font 也能正常显示。
+Ghostty 的 `macos-option-as-alt = true` 是步骤 4 alt 预设键的前提。Ghostty 与 Herdr 统一用 Catppuccin，随系统明暗在 Mocha 与 Latte 间切换，Pi 的 system 主题从终端取色；窗格里的 Pi 若明暗不对，先看 `herdr status` 的服务端版本是否落后于客户端，落后就 `herdr server stop` 后重开 `herdr`（会结束窗格进程）；Starship 提示符只用标准字符和终端色名，远程终端缺 Nerd Font 也能正常显示。
 
 向 `~/.zshrc` **末尾追加一行** `source ~/.config/my-agent-workstation/workstation.zsh`，必须在 `compinit` 之后。读者 `.zshrc` 里已有的 autosuggestions / starship / syntax-highlighting / fastfetch 加载语句删掉，避免重复加载。
 

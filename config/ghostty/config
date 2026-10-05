@@ -9,7 +9,7 @@ adjust-cell-height = -10%
 font-feature = dlig
 
 # ---- Theme --------------------------------------------------------------------
-# Herdr and Pi use the same Catppuccin pair and follow the same light/dark switch.
+# Herdr switches its built-in Catppuccin pair with the same light/dark report; Pi's "system" theme derives its colors from this palette.
 theme = dark:Catppuccin Mocha,light:Catppuccin Latte
 alpha-blending = linear-corrected
 custom-shader = ~/.config/ghostty/shaders/cursor.frag

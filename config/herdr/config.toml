@@ -17,7 +17,8 @@ delivery = "system"
 pi = [["state_icon", "workspace", { token = "$session", bold = true, dim = false }], ["agent"]]
 
 [theme]
-# auto_switch 按内置配对在 catppuccin（Mocha）与 catppuccin-latte 间切换，与 Ghostty、Pi 同一套
+# auto_switch 按 Ghostty 报告的明暗在 catppuccin（Mocha）与 catppuccin-latte 间切换，与 Ghostty 同一套。
+# 不用 terminal 主题：它的激活行用 ANSI 黑作底，浅色下侧边栏文字看不清。
 name = "catppuccin"
 auto_switch = true
 
