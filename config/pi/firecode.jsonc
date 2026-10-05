@@ -1,8 +1,8 @@
 {
 	// 功能开关，默认全开；要关哪个就写 false，比如 "features": { "header": false }。
-	// 可选：header（启动横幅）/ statusbar（底部状态栏）/ tools（工具行渲染）/ presets（预设切换）
+	// 可选：header（启动横幅）/ statusbar（输入框边框状态）/ tools（工具行渲染）/ presets（预设切换）
 	// / rename（改会话名）/ stats（/tokens 统计）/ claudeSub（Claude 订阅适配：归因与令牌换发 401 自愈）
-	// / openaiNative（下方 openai 请求层）/ workingFlame（工作回合火焰）/ review（/fire-review）/ master（/fire-master）
+	// / openaiNative（下方 openai 请求层）/ review（/fire-review）/ master（/fire-master）
 	// / bark（任务落定时推送 iPhone Bark；地址写在 ~/.pi/agent/bark-key，整行即 https://api.day.app/<key>/，
 	//   缺失即停用；可选 ~/.pi/agent/bark-crypto.json 存 {"key","iv"} 启用端到端加密，两文件都在仓库外；
 	//   有工人待拍板时升 timeSensitive 穿透专注模式，Worker 会话静默）
@@ -24,7 +24,7 @@
 		"providers": {
 			"openai-codex": {
 				"textVerbosity": "low",
-				"priority": false
+				"priority": true
 			}
 		}
 	},
@@ -51,7 +51,7 @@
 				"fallback": ["openai-codex/gpt-6-luna/medium"]
 			},
 			"工程师": {
-				"model": "anthropic/claude-sonnet-5-5/high",
+				"model": "anthropic/claude-opus-5-5/medium",
 				"use": "实现、调试"
 			},
 			"设计师": {

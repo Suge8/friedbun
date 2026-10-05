@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.99.1",
+  "lastChangelogVersion": "1.0.3",
   "defaultProvider": "anthropic",
   "defaultModel": "claude-opus-5-5",
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "high",
   "quietStartup": true,
   "defaultProjectTrust": "always",
   "enabledModels": [
@@ -16,7 +16,7 @@
     "xai/grok-4.7",
     "deepseek/deepseek-flash"
   ],
-  "hideThinkingBlock": false,
+  "hideThinkingBlock": true,
   "showCacheMissNotices": true,
   "httpIdleTimeoutMs": 900000,
   "warnings": {
@@ -30,6 +30,6 @@
     "showTerminalProgress": true
   },
   "treeFilterMode": "no-tools",
-  "tuiMode": "regular",
+  "tuiMode": "fullscreen",
   "fullscreenExitOutput": "transcript"
 }
