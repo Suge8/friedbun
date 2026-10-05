@@ -9,28 +9,25 @@ metadata:
 
 # Copywriting
 
-写清楚、可信且促进行动的营销文案。
-
 ## 开始前
 
-先读取已有产品与营销事实源：`.agents/product-marketing.md`、`.claude/product-marketing.md`、旧版 `product-marketing-context.md`，以及项目的 PRODUCT、README 和当前页面。只补问会改变成稿的缺口：
+先读已有产品与营销事实源：`.agents/product-marketing.md`、`.claude/product-marketing.md`、旧版 `product-marketing-context.md`，以及项目的 PRODUCT、README 和当前页面。只补问会改变成稿的缺口：
 
 - 页面类型与唯一主行动；
 - 目标用户、痛点、异议和用户自己的说法；
 - 产品、差异、结果与可核实证据；
 - 流量来源和访客已知信息。
 
-信息足够就直接写，不要求完整 brief。不得编造统计、客户评价或能力。
+信息够就直接写。统计、客户评价和能力只写有来源的；没有事实支持时降低主张强度。
 
-## 写作原则
+## 写法
 
-- 清晰优先于机巧，具体优先于抽象。
-- 把功能连接到用户获得的结果，使用客户语言而不是公司术语。
-- 每个区段只推进一个论点，顺序形成完整说服链。
-- CTA 写“动作 + 获得物”，避免 Submit、Learn More 等空泛标签。
-- 保持项目既有语气；没有事实支持时降低主张强度，不用夸张补洞。
+- 功能连到用户得到的结果，用客户的说法，不用公司术语。
+- 每个区段只推进一个论点，区段顺序构成说服链；Hero 后逐个功能平铺的页面是清单，不是论证。
+- CTA 写「动作 + 获得物」。
+- 保持项目既有语气。
 
-完整页面或需要结构模板时读取 [文案框架](references/copy-frameworks.md)；长页面转场生硬时才读取 [自然转场](references/natural-transitions.md)。
+逐项避开这些失败模式：Submit、Learn More 式空 CTA；「Great product!」「Love it!」式无具体结果的评价；"That being said" "It's worth noting that" "At its core" "In today's digital landscape" "When it comes to the realm of" "This begs the question" "Let's delve into"、段首 "In conclusion"、成串的 moreover/furthermore；每句都加过渡词。
 
 ## 页面重点
 
@@ -42,4 +39,4 @@ metadata:
 
 ## 输出
 
-先给可直接使用的成稿，按页面区段组织。只有标题和 CTA 值得比较时给 2–3 个候选；用户未要求时不附逐段写作课或大段理由。
+先给可直接使用的成稿，按页面区段组织。标题和 CTA 值得比较时给 2–3 个候选；用户没要求就不附写作讲解或大段理由。

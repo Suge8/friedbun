@@ -7,19 +7,9 @@ metadata:
 
 # 将 AI 配音添加到 Remotion 作品中
 
-使用 ElevenLabs TTS 生成每个场景的语音音频，然后使用 [`calculateMetadata`](./calculate-metadata.md) 动态调整合成大小以匹配音频。
+逐场景生成语音音频，再用 [`calculateMetadata`](./calculate-metadata.md) 让合成时长匹配音频。
 
-## 先决条件
-
-默认情况下，本指南使用 **ElevenLabs** 作为 TTS 提供程序（`ELEVENLABS_API_KEY` 环境变量）。用户可以替换任何可以生成音频文件的TTS服务。
-
-如果用户未指定 TTS 提供商，则推荐 ElevenLabs 并询问其 API 密钥。
-
-确保运行生成脚本时环境变量可用：
-
-```bash
-node --strip-types generate-voiceover.ts
-```
+TTS 默认用本 Skill 的 Fish Audio 脚本 `scripts/fish_tts.py`（用法见 `references/director.md` 旁白一节），音频写进 `public/`。用户点名 ElevenLabs 时用下面的调用（`ELEVENLABS_API_KEY` 环境变量，`node --strip-types generate-voiceover.ts` 运行）。
 
 ## 使用 ElevenLabs 生成音频
 

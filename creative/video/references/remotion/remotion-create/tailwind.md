@@ -4,8 +4,6 @@ description: 在Remotion中使用TailwindCSS。
 metadata:
 ---
 
-如果项目中安装了TailwindCSS，您可以而且应该在Remotion中使用TailwindCSS。
+项目已安装并启用 TailwindCSS 时（见 https://www.remotion.dev/docs/tailwind），在 Remotion 中照常使用。
 
-不要使用 `transition-*` 或 `animate-*` 类 - 始终使用 `useCurrentFrame()` 挂钩进行动画处理。
-
-必须首先在 Remotion 项目中安装并启用Tailwind - 请参阅https://www.remotion.dev/docs/tailwind.
+`transition-*`、`animate-*` 类渲染不正确；动画只用 `useCurrentFrame()` 驱动。

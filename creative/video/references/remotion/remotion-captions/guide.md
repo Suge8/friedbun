@@ -1,8 +1,6 @@
 # Remotion 字幕
 
-处理 Remotion 中的字幕
-
-所有字幕必须在 JSON 中处理。字幕必须使用 [`Caption`](https://www.remotion.dev/docs/captions/caption.md) 类型，如下所示：
+字幕一律以 JSON 处理，使用 [`Caption`](https://www.remotion.dev/docs/captions/caption.md) 类型，如下所示：
 
 ```ts
 import type { Caption } from "@remotion/captions";

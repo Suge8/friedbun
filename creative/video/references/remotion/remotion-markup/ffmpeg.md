@@ -26,7 +26,7 @@ import {Video} from '@remotion/media';
 <Video src={staticFile('video.mp4')} trimBefore={5 * fps} trimAfter={10 * fps} />;
 ```
 
-2. 使用 FFmpeg 命令行。您MUST重新编码视频以避免视频开始时出现冻结帧。仅当您需要独立的修剪文件（例如用于上传或外部使用）时才使用此选项。
+2. 使用 FFmpeg 命令行。要重新编码，否则视频开头会出现冻结帧。仅当您需要独立的修剪文件（例如用于上传或外部使用）时才使用此选项。
 
 ```bash
 # Re-encodes from the exact frame

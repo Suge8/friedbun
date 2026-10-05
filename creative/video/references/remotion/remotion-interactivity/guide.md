@@ -1,10 +1,6 @@
-# Remotion 互动性
+# Remotion 交互
 
-编写 Remotion 动画的最佳实践，使代理保持直观并可在 Remotion Studio 视觉模式下进行编辑。
-
-# Remotion 互动性
-
-请改用规范的交互最佳实践页面：
+让动画可在 Remotion Studio 视觉模式下编辑，按官方页面：
 [交互最佳实践](https://www.remotion.dev/docs/studio/interactivity-best-practices.md)
 
 要使元素或自定义组件具有交互性，请使用：

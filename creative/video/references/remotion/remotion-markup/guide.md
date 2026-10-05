@@ -1,10 +1,5 @@
 # Remotion 标记
 
-编写 Remotion React 标记的最佳实践
-
-这是编写 Remotion React 标记的指南。
-如果这不相关，请改为加载 [Remotion 最佳实践](../../../SKILL.md)。
-
 ## 一般规则
 
 使用 `useCurrentFrame()` 和 `interpolate()` 对属性进行动画处理。
@@ -59,8 +54,7 @@ style={{
 }}
 ```
 
-CSS 过渡或动画为 FORBIDDEN - 它们将无法正确渲染。
-Tailwind 动画类名称为 FORBIDDEN - 它们将无法正确渲染。
+CSS transition/animation 和 Tailwind 动画类渲染不正确，不用；动画只由 `useCurrentFrame()` 驱动。
 
 将资源放置在项目根目录的 `public/` 文件夹中。
 
@@ -255,24 +249,7 @@ npx remotion add @remotion/media
 
 这适用于 `@remotion/*` 软件包、`mediabunny`、`@mediabunny/*` 和 `zod`。
 
-## 预览标记
+## 预览
 
-仅当您认为用户想要查看预览时才执行此操作。
-
-```bash
-npx remotion studio --no-open
-```
-
-这将启动一个长时间运行的进程并打印服务器URL以进行预览。
-如果已经启动，将打印URL。
-
-## 可选：一帧渲染检查
-
-您可以使用 CLI 渲染单个帧，以检查布局、颜色或时间。
-对于琐碎的编辑、纯粹的重构，或者当您已经对 Studio 或之前的渲染有足够的信心时，请跳过它。
-
-```bash
-npx remotion still [composition-id] --scale=0.25 --frame=30
-```
-
-在 30 fps 时，`--frame=30` 是一秒标记（`--frame` 从零开始）。
+- Studio：`npx remotion studio --no-open`（长驻进程，打印预览 URL；已启动时直接打印 URL）。
+- 单帧：`npx remotion still [composition-id] --scale=0.25 --frame=30`；`--frame` 从 0 起，30 fps 下 30 即第 1 秒。

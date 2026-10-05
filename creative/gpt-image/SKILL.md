@@ -5,28 +5,15 @@ description: 通过 gptimage 模型生成优美 AI 图片、海报、插图或 L
 
 # GPT Image
 
-生成普通图片时使用 bundled script。用户要设计 Logo 或系列 Logo 提案板时，先读取 [Logo 指南](reference/logo.md)。不要读取或打印 tokens。
+用户要设计 Logo 或系列 Logo 提案板时，先读 [Logo 指南](reference/logo.md)。脚本读 `~/.codex/auth.json`；不读取、不打印 token。
 
 ```bash
-python3 scripts/gpt_image.py \
-  "IMAGE_PROMPT" \
-  --out "/absolute/path/output.png"
+python3 scripts/gpt_image.py "IMAGE_PROMPT" --out "/absolute/path/output.png"
+printf '%s' "$PROMPT" | python3 scripts/gpt_image.py --out "/absolute/path/output.png"  # 长 prompt 走 stdin
 ```
 
-脚本读取 `~/.codex/auth.json`，调用带以下内容的 Codex `/responses`：
-
-```json
-{ "tools": [{ "type": "image_generation", "output_format": "png" }] }
-```
-
-它打印一个 JSON object：
+尺寸（`--size 1024x1536` 竖版 2:3 等）、参考图 `--ref`、质量 `--quality` 见 `--help`。成功打印：
 
 ```json
 { "ok": true, "path": "/absolute/path/output.png", "size": "1254x1254" }
-```
-
-如果 prompt 很长，pipe stdin：
-
-```bash
-printf '%s' "$PROMPT" | python3 scripts/gpt_image.py --out "/absolute/path/output.png"
 ```
