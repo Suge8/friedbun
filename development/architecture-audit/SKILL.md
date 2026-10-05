@@ -1,6 +1,6 @@
 ---
 name: architecture-audit
-description: 架构体检：找出该合并加深的浅模块，出 HTML 报告，再为选中的一项并行设计几种接口。
+description: 架构体检：找出该合并加深的浅模块，用 eli5 图解呈现，再为选中的一项并行设计几种接口。
 disable-model-invocation: true
 ---
 
@@ -14,11 +14,9 @@ disable-model-invocation: true
 
 判断一个模块是不是透传层，用**删除测试**：想象删掉它，复杂度随之消失的是透传层；复杂度散回 N 个调用方的，它在干活。
 
-## 2. 出报告
+## 2. 呈现
 
-候选写成自包含 HTML，放 `$TMPDIR/architecture-review-<时间戳>.html`（不进仓库），用 `open` 打开并告诉用户路径。脚手架、图表与语气见 [HTML-REPORT.md](HTML-REPORT.md)。
-
-每个候选一张卡：涉及文件、问题、改法、收益（用行为说：改价格规则只动一个文件）、before/after 图、推荐强度（`Strong` / `Worth exploring` / `Speculative`）、依赖类别（见下）。报告末尾给最先做哪一个及原因。此时不提接口方案，问用户想展开哪一个。
+按 [eli5](../eli5/SKILL.md) 把候选画成图解，文件放 `$TMPDIR`，不进仓库。每个候选讲清：涉及文件、问题、改法、收益（用行为说：改价格规则只动一个文件，不写「更易维护」）、改前改后对比图、推荐强度（值得做 / 值得探索 / 推测）、依赖类别（见下）。最后说最先做哪一个及原因。此时不提接口方案，问用户想展开哪一个。
 
 ## 3. 设计接口
 
