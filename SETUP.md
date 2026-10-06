@@ -45,7 +45,7 @@ herdr plugin install -y smarzban/herdr-file-viewer
 
 `keybindings.json` 里 `tui.input.tab` 是空数组，意图是腾出 Tab 给 thinking 切换，别当无效项删。
 
-**完成标准**：七个文件就位。模型字段留到步骤 4 校正。
+**完成标准**：五个文件就位。模型字段留到步骤 4 校正。
 
 ## 步骤 3：Skills、Pi 扩展与登录（人工关口）
 

@@ -47,12 +47,12 @@
 		"roles": {
 			"调研员": {
 				"model": "anthropic/claude-sonnet-5-5/medium",
-				"use": "大量搜索、读日志、找线索；不实现",
+				"use": "只读不改：大量搜索、读日志、读代码找问题、核对资料",
 				"fallback": ["openai-codex/gpt-6-luna/medium"]
 			},
 			"工程师": {
 				"model": "anthropic/claude-sonnet-5-5/high",
-				"use": "实现、调试"
+				"use": "要改代码：实现、调试"
 			},
 			"设计师": {
 				"model": "anthropic/claude-opus-5-5/medium",
