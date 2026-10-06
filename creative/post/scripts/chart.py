@@ -5,7 +5,6 @@ usage: chart.py spec.json out.png [--size 1600x900]
 
 Spec (every number must come from the verified facts file):
 {
-  "kicker": "optional eyebrow above the title",
   "title": "Line one.<br>Line two.",
   "sub": "optional one-sentence context",
   "foot": "method note, e.g. quality = LLM judge, blind to model name",
@@ -39,7 +38,6 @@ CSS = f"""
 *{{margin:0;padding:0;box-sizing:border-box}}
 body{{background:{BG};color:{INK};font-family:-apple-system,"Helvetica Neue",sans-serif;display:flex;
   flex-direction:column;padding:88px 120px 64px;-webkit-font-smoothing:antialiased}}
-.k{{font-size:17px;letter-spacing:.14em;text-transform:uppercase;color:{MUTE};margin-bottom:22px}}
 h1{{font-family:{SERIF};font-weight:400;font-size:60px;line-height:1.06;letter-spacing:-.015em;text-wrap:balance}}
 .sub{{font-size:21px;line-height:1.5;color:{MUTE};margin-top:20px;max-width:980px}}
 .main{{flex:1;display:flex;gap:88px;margin-top:64px;min-height:0}}
@@ -110,10 +108,9 @@ def render(spec):
         for p in spec["panels"])
     key = "".join(f'<span><i style="background:{COLORS[c]}"></i>{html.escape(n)}</span>'
                   for n, c in spec.get("series", {}).items())
-    kicker = f'<div class=k>{html.escape(spec["kicker"])}</div>' if spec.get("kicker") else ""
     sub = f'<div class=sub>{spec["sub"]}</div>' if spec.get("sub") else ""
     return (f"<!doctype html><meta charset=utf-8><style>{CSS}</style>"
-            f'{kicker}<h1>{spec["title"]}</h1>{sub}'
+            f'<h1>{spec["title"]}</h1>{sub}'
             f'<div class=main>{panels}</div>'
             f'<div class=foot><span>{html.escape(spec.get("foot", ""))}</span><div class=key>{key}</div></div>')
 
