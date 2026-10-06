@@ -5,7 +5,7 @@ usage: chart.py spec.json out.png [--size 1600x900]
 
 Spec (every number must come from the verified facts file):
 {
-  "kicker": "Coding agent · my own real work",
+  "kicker": "optional eyebrow above the title",
   "title": "Line one.<br>Line two.",
   "sub": "optional one-sentence context",
   "foot": "method note, e.g. quality = LLM judge, blind to model name",
@@ -110,9 +110,10 @@ def render(spec):
         for p in spec["panels"])
     key = "".join(f'<span><i style="background:{COLORS[c]}"></i>{html.escape(n)}</span>'
                   for n, c in spec.get("series", {}).items())
+    kicker = f'<div class=k>{html.escape(spec["kicker"])}</div>' if spec.get("kicker") else ""
     sub = f'<div class=sub>{spec["sub"]}</div>' if spec.get("sub") else ""
     return (f"<!doctype html><meta charset=utf-8><style>{CSS}</style>"
-            f'<div class=k>{html.escape(spec["kicker"])}</div><h1>{spec["title"]}</h1>{sub}'
+            f'{kicker}<h1>{spec["title"]}</h1>{sub}'
             f'<div class=main>{panels}</div>'
             f'<div class=foot><span>{html.escape(spec.get("foot", ""))}</span><div class=key>{key}</div></div>')
 
