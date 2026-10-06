@@ -31,5 +31,11 @@
   },
   "treeFilterMode": "no-tools",
   "tuiMode": "fullscreen",
-  "fullscreenExitOutput": "transcript"
+  "fullscreenExitOutput": "transcript",
+  "defaultTools": [
+    "+codemode"
+  ],
+  "codemode": {
+    "mode": "only"
+  }
 }

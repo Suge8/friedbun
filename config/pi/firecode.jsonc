@@ -51,7 +51,7 @@
 				"fallback": ["openai-codex/gpt-6-luna/medium"]
 			},
 			"工程师": {
-				"model": "anthropic/claude-opus-5-5/medium",
+				"model": "anthropic/claude-sonnet-5-5/high",
 				"use": "实现、调试"
 			},
 			"设计师": {
