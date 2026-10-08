@@ -69,7 +69,7 @@ pi install npm:pi-firecode
 
 ## Requirements
 
-Apple Silicon Mac, macOS 14 or later. SETUP.md also needs Homebrew and Node 20.6+.
+Apple Silicon Mac, macOS 14 or later. SETUP.md also needs Homebrew and Node 22.13+.
 
 ## License
 

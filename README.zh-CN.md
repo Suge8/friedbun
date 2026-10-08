@@ -69,7 +69,7 @@ pi install npm:pi-firecode
 
 ## 运行前提
 
-Apple Silicon Mac，macOS 14 及以上。按 SETUP.md 配置还需要 Homebrew 和 Node 20.6+。
+Apple Silicon Mac，macOS 14 及以上。按 SETUP.md 配置还需要 Homebrew 和 Node 22.13+。
 
 ## License
 
