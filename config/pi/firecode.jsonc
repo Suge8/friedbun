@@ -2,10 +2,7 @@
 	// 功能开关，默认全开；要关哪个就写 false，比如 "features": { "header": false }。
 	// 可选：header（启动横幅）/ statusbar（输入框边框状态）/ tools（工具行渲染）/ presets（预设切换）
 	// / rename（改会话名）/ stats（/tokens 统计）/ claudeSub（Claude 订阅适配：归因与令牌换发 401 自愈）
-	// / openaiNative（下方 openai 请求层）/ review（/fire-review）/ master（/fire-master）
-	// / bark（任务落定时推送 iPhone Bark；地址写在 ~/.pi/agent/bark-key，整行即 https://api.day.app/<key>/，
-	//   缺失即停用；可选 ~/.pi/agent/bark-crypto.json 存 {"key","iv"} 启用端到端加密，两文件都在仓库外；
-	//   有工人待拍板时升 timeSensitive 穿透专注模式，Worker 会话静默）
+	// / openaiNative（下方 openai 请求层）/ review（/fire-review）/ master（/fire-master）/ watcher（/fire-watch）
 
 	// 快捷键，启动时绑定，改完需重启 pi。
 	"keys": {
@@ -35,14 +32,6 @@
 	// 每个角色：model 原子 + use 适用场景 +
 	// 可选 fallback（供应商故障时同会话自动降级续跑，至多 2 个，同为原子写法）。Master 派单只报角色名；
 	// 某个模型没额度了就改这里（重启生效），或直接口头告诉 Master 换角色（不用改配置）。
-	// /fire-watch 观察员：每个回合结束后用便宜模型评估增量，盯跑偏/过度工程/漏收口；
-	// 模型必须是内置 provider（扩展注册的如 antigravity 在观察子会话里解析不到）。
-	"watcher": {
-		"enabled": false,
-		"model": "openai-codex/gpt-6.1-sol/medium",
-		"context": "minimal"
-	},
-
 	"master": {
 		"roles": {
 			"调研员": {
@@ -103,5 +92,13 @@
 		"timeoutMinutes": 40,
 		"tools": ["read", "grep", "find", "ls", "bash"],
 		"language": "zh"
+	},
+
+	// /fire-watch 观察员：每个回合结束后用便宜模型评估增量，盯跑偏/过度工程/漏收口；
+	// 模型必须是内置 provider（扩展注册的如 antigravity 在观察子会话里解析不到）。
+	"watcher": {
+		"enabled": false,
+		"model": "openai-codex/gpt-6.1-sol/medium",
+		"context": "minimal"
 	}
 }

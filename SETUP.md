@@ -12,7 +12,7 @@
 
 ## 人工关口
 
-只能读者本人做的事，到达时停下、给出明确指令、等确认再继续：Pi `/login`（步骤 3）；`bcu setup` 与系统设置授权（步骤 6）；填写 TinyFish key 与 Bark 地址（步骤 8）；在隔离浏览器里登录站点（步骤 7 之后按需）。
+只能读者本人做的事，到达时停下、给出明确指令、等确认再继续：Pi `/login`（步骤 3）；`bcu setup` 与系统设置授权（步骤 6）；填写 TinyFish key（步骤 8）；在隔离浏览器里登录站点（步骤 7 之后按需）。
 
 ## 步骤 1：Pi 与 Herdr
 
@@ -129,9 +129,7 @@ export TINYFISH_API_KEY='<tinyfish-key>'
 
 密钥只进新开的 shell：已开的 Herdr 窗格和其中的 pi 拿不到，新开窗格再启动 pi。
 
-Bark 推送地址写入 `~/.pi/agent/bark-key` 并 `chmod 600`，格式 `https://api.day.app/<key>/`（结尾带斜杠）。不用 Bark 就跳过，FireCode 检测不到文件即停用。
-
-**完成标准**：新 shell 里 `echo $TINYFISH_API_KEY` 非空；`ls -l ~/.pi/agent/bark-key` 为 `-rw-------`。
+**完成标准**：新 shell 里 `echo $TINYFISH_API_KEY` 非空。
 
 ## 落点清单
 
@@ -145,7 +143,6 @@ Bark 推送地址写入 `~/.pi/agent/bark-key` 并 `chmod 600`，格式 `https:/
 | Pi package | `settings.json` 的 `packages`：firecode | 新增 |
 | Pi 配置 | `~/.pi/agent/` 下 `settings.json`、`keybindings.json`、`models.json` | 合并 |
 | Pi 配置 | `~/.pi/agent/SYSTEM.md`、`extensions/firecode/config.jsonc` | 整体写入，原件留底 |
-| Bark | `~/.pi/agent/bark-key` | 新增 |
 | 终端 | `~/.config/` 下 `ghostty/config`、`ghostty/shaders/cursor.frag`、`starship.toml`、`fastfetch/` | 整体写入 |
 | zsh | `~/.config/my-agent-workstation/workstation.zsh`、`env.zsh` | 新增 |
 | zsh 入口 | `~/.zshrc` | 末尾追加一行 source，原件留底 |
