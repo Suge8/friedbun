@@ -7,7 +7,7 @@
 	// / stats（/tokens 统计）/ claudeSub（Claude 订阅适配：归因与令牌换发 401 自愈）
 	// / openaiNative（下方 openai 请求层）/ review（/fire-review）/ master（/fire-master）/ watcher（/fire-watch）
 
-	// 快捷键：加速档默认 alt+s，要换就写 "keys": { "fast": "..." }（启动时绑定，改完需重启 pi）。
+	// 快捷键：加速档默认 ctrl+shift+s，要换就写 "keys": { "fast": "..." }（启动时绑定，改完需重启 pi）。
 	// 改会话名用宿主的 app.session.rename 键位（默认 ctrl+r，在 keybindings.json 改），输入框里直接按。
 
 	// OpenAI 系请求层微调。
