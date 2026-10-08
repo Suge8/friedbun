@@ -41,7 +41,6 @@ pi install npm:pi-firecode
 | `~/.agents/skills/operations/better-browser-use/bin/bbu` | `~/.local/bin/bbu` | 软链 `ln -sf`，先 `mkdir -p ~/.local/bin`（workstation.zsh 把它加进 PATH） |
 
 - 合并：并入我们的键，冲突以我们的值为准，读者自己的键原样保留；`deviceId`、`lastChangelogVersion` 是作者本机状态，不并入。
-- `keybindings.json` 里 `tui.input.tab` 是空数组，意图是腾出 Tab 给 thinking 切换，保留。
 - skills 软链让本仓库的克隆成为 skills 的真身：装完不删，更新用 `git pull`。
 - `~/.zshrc` 末尾追加一行 `source ~/.config/friedbun/workstation.zsh`（须在 `compinit` 之后），并删掉其中已有的 autosuggestions、syntax-highlighting、starship、fastfetch 加载语句，避免重复加载。
 

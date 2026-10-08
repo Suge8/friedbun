@@ -1,5 +1,3 @@
-# Ghostty 配置，落点 ~/.config/ghostty/config。
-
 # ---- Font ---------------------------------------------------------------------
 # The CN build carries Latin, Nerd Font icons and CJK drawn at exactly two cells.
 font-family = Maple Mono NF CN
@@ -38,9 +36,6 @@ clipboard-read = allow
 scrollback-limit = 134217728
 
 # ---- Keybinds -----------------------------------------------------------------
-# Pi: LF inserts a real newline instead of submitting the prompt.
-keybind = shift+enter=text:\n
-
 # Herdr's default prefix is Ctrl+B (\x02). Cmd bindings send the prefix and action together.
 keybind = super+n=text:\x02N
 keybind = super+t=text:\x02c

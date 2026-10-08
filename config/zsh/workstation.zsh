@@ -1,22 +1,10 @@
 # 由 ~/.zshrc 末尾 source。密钥放 ~/.config/friedbun/env.zsh，不入库。
-# UU 远程的 tmux 以 umask 000 运行，从它启动的 shell 和 Herdr 会继承，新文件变成人人可写，
-# launchd、ssh 这类检查权限的工具随之拒绝加载；这里恢复 macOS 默认值。
-umask 022
 export PI_CACHE_RETENTION=long
 typeset -U path
 path=(~/.local/bin $path)
 [[ -r "$HOME/.config/friedbun/env.zsh" ]] && source "$HOME/.config/friedbun/env.zsh"
 
 [[ -o interactive ]] || return 0
-
-# UU 远程的「终端」跑在 UU 自带的 tmux 里，而 UU 客户端不带 COLORTERM，tmux 就把 24 位色压成 256 色。
-# 在 UU 会话内给这个 tmux 声明真彩色；终端特性在客户端接入时读取，所以从下一次连接起生效。
-if [[ -n $UUYC_IN_MUX ]]; then
-  export COLORTERM=truecolor
-  uu_mux=(/Applications/UURemote.app/Contents/Helpers/tmux/uuyc-mux -S "$HOME/Library/Application Support/UURemote/tmux.sock")
-  [[ $($uu_mux show -sv terminal-features) == *tmux-256color:RGB* ]] || $uu_mux set -as terminal-features tmux-256color:RGB
-  unset uu_mux
-fi
 
 HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-$(brew --prefix)}"
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
