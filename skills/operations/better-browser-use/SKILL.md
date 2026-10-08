@@ -10,7 +10,7 @@ allowed-tools: Bash(bbu:*), Bash(agent-browser:*)
 
 ## 车道
 
-- `bbu <cmd>`（默认）：开发调试。每个检出一个 Chrome for Testing，登录态按检出自动保存，console、errors、network 完整。
+- `bbu <cmd>`（默认）：开发调试。每个检出一个 Chrome for Testing，登录态按检出自动保存，console、errors、network 完整；命令后那行 `[agent-browser] … restore/save …` 是登录态存取状态，不是错误。
 - `bbu --login <cmd>`：用户本人的账号和有反爬的站点。所有 agent 共用一个 CloakBrowser，每个检出一个窗口，登录实时共享。引擎屏蔽 console/异常事件，此车道 `console`/`errors` 恒空，也不开窗口（`--headed`）。
 - `--as <名字>`（字母、数字、`_`）：同一检出里再开一个会话——默认车道下是另一个浏览器、另一份登录态（owner 与 guest 对测），`--login` 下是另一个窗口、同一份登录。同一检出里还有别的 agent 在用浏览器时，带 `--as <自己的名字>`，否则两边操作同一个页面。
 
