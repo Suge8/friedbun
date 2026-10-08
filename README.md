@@ -1,4 +1,4 @@
-<p align="center"><img alt="friedbun — my AI coding setup" src="assets/hero-en.jpg" width="100%"></p>
+<p align="center"><img alt="FriedBun — my AI coding setup" src="assets/hero-en.jpg" width="100%"></p>
 
 <p align="center"><b>English</b> · <a href="README.zh-CN.md">中文</a></p>
 
