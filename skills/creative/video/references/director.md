@@ -16,6 +16,8 @@
 
 只问会改变制作路线的缺口：受众与平台、比例与时长、旁白/无声动态图形/带字幕讲解、事实准确级别（随意、有源可依、参考复刻）、指定风格、参考视频或素材。比例时长未指定时默认 16:9、30-60 秒。用户只给主题就按最佳判断直接做。
 
+给了参考视频：先用 `references/director/anti-ppt-gate.md` 的命令量静止占比、硬切位置和镜头时长，再看接触表里最大元素占画面多少。只取它的节奏数字，和"每个物体都遵守的那一条造型规则"（如每个词都落在一个带铆钉的零件上）；不抄它的节拍顺序和画面。
+
 ### 2. 信源
 
 事实性、历史、科学、法律、医疗、金融、时事或具名实体主题，写运动方案前先核实核心主张，日期用绝对日期。事实只为支撑运动叙事，不把视频做成百科。
@@ -34,6 +36,8 @@
 
 找不到可运动的隐喻时先发明一个，再规划场景。
 
+写三条中心画面互不相同的论题（不是同一套卡片换三种讲法），再选一条：用户在场给用户挑，全自动时自选并说明理由。
+
 ### 4. 节拍图
 
 规划连续时间线，而不是页面。每个节拍写：
@@ -42,12 +46,13 @@
 - `narrative job`：hook、reveal、contrast、mechanism、consequence、proof、close
 - `main moving object`：承载运动的元素
 - `state change`：屏幕上物理发生了什么变化（起始态 → 结束态）
+- `carry`：本拍与下一拍的边界上存活并继续运动或缩放的元素，如手/光标、主体、变成下一场景的容器、从主体展开的舞台、推进到成为场景的卡片；写不出就写"硬切"，且只允许用于命中爆发、片尾、同一句旁白内的广角→特写
 - `camera/layer motion`：推进、平移、视差、环绕、裁切，或稳定底座
 - `text role`：标题、标签、字幕、计数器，或无
 - `asset need`：代码/SVG、生成图、截图、图标、实拍素材，或无
 - `PPT risk`：什么会让这个节拍感觉像一张幻灯片
 
-至少 80% 的节拍有超出 fade、slide、pop 的可见状态变化。节拍图写完对照 `references/director/anti-ppt-gate.md`，没过先重写。
+至少 80% 的节拍有超出 fade、slide、pop 的可见状态变化；至少一处 ≥1 秒完全静止（镜头不推、元素不漂），放在重点之前。节拍图写完对照 `references/director/anti-ppt-gate.md`，没过先重写。
 
 ### 5. 运动语法
 
@@ -78,6 +83,8 @@ python3 scripts/fish_tts.py \
 - **audio-first timing**：逐句生成旁白，脚本返回每句实际 `duration`，画面节拍跟声音排，不先写死时长再塞声音。
 - 音色在 fish.audio 挑中文音色，`--voice` 传 reference_id；模型默认免费档，量产或要 SLA 见 `--help`。
 
+音效用少数几种材质、同一个混响空间，事件数少于节拍数；每个事件配一个独立合成音，等于音频版幻灯片。音乐选明确允许复用的授权曲目，来源与授权写在项目里；有版权曲目只在用户提供并确认时用。
+
 ### 9. 实现路线
 
 | 路线 | 适用 | 栈 |
@@ -86,11 +93,15 @@ python3 scripts/fish_tts.py \
 | **B · 编辑拼贴** | 人物、历史、文化、情绪、品牌叙事 | gpt-image 造素材 → Remotion 驱动，读 `references/director/editorial-collage.md`（含个别镜头补 Seedance 的条件） |
 | **C · 模型直出** | 用户点名要实拍质感短片 | `references/model-generation.md`（Grok/Seedance） |
 
-A、B 共用 Remotion 引擎，写 composition 前读 `references/remotion.md`。路线 B 需要纸底、抠图零件、撕边揭示、马克笔批注、证据框、相机舞台和步进运动这类编辑感组件；视频项目的 `src/editorial/` 里有就复用，没有就在项目里自建。Lottie/Rive/Three.js 只用于真正受益的特定视觉层。
+A、B 共用 Remotion 引擎，写 composition 前读 `references/remotion.md`。路线 B 需要纸底、抠图零件、撕边揭示、马克笔批注、证据框、相机舞台和步进运动这类组件，在视频项目里自建一次，各镜复用。Lottie/Rive/Three.js 只用于真正受益的特定视觉层。
 
-渲染 `npx remotion render <CompositionId> out/<name>.mp4`；contact sheet 与静帧用 `npx remotion still` 或抽帧，产物放同项目 `out/`。
+路线 A 的产品演示用真实页面，或按截图在 Remotion 里重建界面；光标和点击要画出来，让每个界面反应都有可见的起因。整页缩成小卡片看不出动作：要么全屏配光标，要么只放其中一个组件。
 
-完成：成片 MP4 已渲染；contact sheet 过 anti-ppt-gate，读起来是连续演化，不是一组幻灯片缩略图。
+全帧率下单帧位移过大（1920 宽超过约 80px）会频闪成重影：降速、改步进，或用 `<CameraMotionBlur>`（samples 取小，它会损失色彩）。
+
+草稿用 `npx remotion render <CompositionId> out/draft.mp4 --scale=0.5`，确认后再按原尺寸终渲。contact sheet 与静帧用 `npx remotion still` 或抽帧，产物放同项目 `out/`。
+
+完成：成片 MP4 已渲染；contact sheet 过 anti-ppt-gate，读起来是连续演化，不是一组幻灯片缩略图；每条"成片检查"都已跑过。
 
 ## 输出
 

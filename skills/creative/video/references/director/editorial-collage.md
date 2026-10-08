@@ -62,7 +62,7 @@
 
 ## 4. Remotion 动效语汇（代替 AI 视频模型的运动 prompt）
 
-- **步进运动**：编辑拼贴的灵魂是 ~12fps 步进（`useStepped`），像手工定格，不追每帧丝滑。
+- **步进运动**：编辑拼贴的灵魂是 ~12fps 步进（把 frame 量化到 12fps 再算动画），像手工定格，不追每帧丝滑。
   丝滑 60fps 缓动反而露 AI 广告味。镜头运动（push/pan）保持全帧率，元素运动步进。
 - **每镜一个镜头动作**：slow push-in / lateral pan / parallax truck 三选一，点题镜 static。
   相邻镜头动作要变。
@@ -76,7 +76,7 @@
 | 层 | 谁做 |
 |---|---|
 | 海报/零件的样子 | gpt-image（五段式 prompt） |
-| 相机、视差、组装、揭示 | Remotion 相机舞台 + 编辑感组件 |
+| 相机、视差、组装、揭示 | Remotion 相机舞台与纸片组件 |
 | 标题、标注、批注、字幕 | Remotion 叠加（不烧进图，除非风格需要 ransom-note 等特殊字效） |
 | 图表与证据 | Remotion 组件，数据代码画 |
 | 有机微动（人做动作） | 仅该镜走 Seedance `--first-frame`，运动 prompt 用"5 轴"：一个镜头动作 + 纸片层视差 + 保持质感 + 情绪 + 色板，幅度写 subtle，文字区留白 |
