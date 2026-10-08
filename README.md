@@ -2,7 +2,7 @@
 
 <p align="center"><b>English</b> · <a href="README.zh-CN.md">中文</a></p>
 
-25 skills, multi-agent orchestration with FireCode, and an agent that can use Mac apps — all set up from one link.
+25 skills, multi-agent orchestration with FireCode, and an agent that takes over your whole Mac. One message sets it all up.
 
 Just the skills (the skills CLI installs them into Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot and 70+ other agents):
 
@@ -18,11 +18,11 @@ Clone https://github.com/Suge8/friedbun and set up this Mac by following its SET
 
 ## In action
 
-### The agent uses your Mac
+### The agent runs your Mac
 
-The agent works real Mac apps on its own. Here it splits a bill in Calculator and writes it up in TextEdit, all in the background, so your mouse stays yours. This is [bcu](https://github.com/Suge8/better-computer-use).
+Your agent operates any app on your Mac by itself — in the background, without touching your mouse. Powered by [bcu](https://github.com/Suge8/better-computer-use).
 
-<p align="center"><img alt="The agent works Calculator and TextEdit in the background" src="assets/bcu-demo.gif" width="100%"></p>
+<p align="center"><img alt="The agent operating Mac apps in the background" src="assets/bcu-demo.gif" width="100%"></p>
 
 ### One agent runs a team
 

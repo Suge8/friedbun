@@ -2,7 +2,7 @@
 
 <p align="center"><a href="README.md">English</a> · <b>中文</b></p>
 
-25 个 skill、FireCode 多代理编排，还能让 agent 操作 Mac 应用，一个链接装好。
+25 个 skill、FireCode 多代理编排，Agent 接管你的整台 Mac。一句话装好。
 
 只要 skills（用 skills CLI 可以装进 Claude Code、Codex、Cursor、Gemini CLI、GitHub Copilot 等七十多种 agent）：
 
@@ -18,11 +18,11 @@ npx skills add Suge8/friedbun
 
 ## 实际效果
 
-### agent 能直接操作你的 Mac
+### Agent 接管你的 Mac
 
-agent 自己在计算器里算好账单，再写进文本编辑。全程在后台，你的鼠标照常用。靠的是 [bcu](https://github.com/Suge8/better-computer-use)。
+Agent 能自己操作你电脑上的任何应用，全程在后台，不抢你的鼠标。靠的是 [bcu](https://github.com/Suge8/better-computer-use)。
 
-<p align="center"><img alt="agent 在后台操作计算器和文本编辑" src="assets/bcu-demo.gif" width="100%"></p>
+<p align="center"><img alt="Agent 在后台操作 Mac 应用" src="assets/bcu-demo.gif" width="100%"></p>
 
 ### 一个 agent 带一队子代理
 
