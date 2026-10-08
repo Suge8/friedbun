@@ -26,4 +26,3 @@
 | 复盘会话，提出改进 agent 环境的候选 | `retro` |
 
 
-管理、更新与归档规则见 `../docs/skills-management.md`。
