@@ -21,11 +21,10 @@ npm install --global --ignore-scripts @earendil-works/pi-coding-agent@latest
 curl -fsSL https://herdr.dev/install.sh -o /tmp/herdr-install.sh && /bin/sh /tmp/herdr-install.sh
 export PATH="$HOME/.local/bin:$PATH"
 herdr channel set stable
-herdr integration install pi
 herdr plugin install -y smarzban/herdr-file-viewer
 ```
 
-`config/herdr/config.toml` 复制到 `~/.config/herdr/config.toml`。侧边栏那行会话名由 pi 集成上报，`prefix+f` 的文件浏览器来自上面的插件，两者缺一对应内容就消失。
+`config/herdr/config.toml` 复制到 `~/.config/herdr/config.toml`。侧边栏的 pi 状态、会话名与子代理/审查进行中都由 FireCode 上报（步骤 3 安装），不要装 herdr 官方的 pi 集成（`herdr integration install pi`，设置面板里的 install 同理）：两者并存时 FireCode 的上报会被丢弃。`prefix+f` 的文件浏览器来自上面的插件。
 
 **完成标准**：`pi --version` 与 `herdr --version` 各自打印版本号；`herdr config check` 输出 `ok`。
 
@@ -139,7 +138,7 @@ export TINYFISH_API_KEY='<tinyfish-key>'
 | 装了什么 | 落点 | 对已有文件的改动 |
 | --- | --- | --- |
 | 全局 npm | `pi`、`agent-browser`、`cloakbrowser` | 新增 |
-| Herdr | `command -v herdr`、`~/.config/herdr/`（配置、插件、会话状态）；`herdr integration install pi` 写入 Pi 配置目录 | 新增 |
+| Herdr | `command -v herdr`、`~/.config/herdr/`（配置、插件、会话状态） | 新增 |
 | Skills | `~/.agents/skills`（指向 `<repo>/skills` 的 symlink） | 新增，原目录留底 |
 | Pi package | `settings.json` 的 `packages`：firecode | 新增 |
 | Pi 配置 | `~/.pi/agent/` 下 `settings.json`、`keybindings.json`、`models.json` | 合并 |
