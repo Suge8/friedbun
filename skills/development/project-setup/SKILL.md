@@ -36,5 +36,5 @@ description: 项目体检：新项目开工、半途补缺、开源前检查或�
 写进根 AGENTS.md，标签沿用 `gh label list` 已有的：
 
 ```md
-- 工单：动手前 `gh issue edit <n> --add-assignee @me` 认领，已有 assignee 的不抢，未合并就放弃时撤掉；PR 描述写 `Closes #<n>`，合并自动关闭；先后关系用 `--blocked-by <n>`；`#N` 先 `gh issue view`，失败再 `gh pr view`（编号共享）。
+- 工单：动手前 `gh issue edit <n> --add-assignee @me` 认领，已有 assignee 的不抢，未合并就放弃时撤掉；PR 描述写 `Closes #<n>`，合并自动关闭；先后关系用 `gh issue create --blocked-by <n>` 或 `gh issue edit --add-blocked-by <n>`；`#N` 先 `gh issue view`，失败再 `gh pr view`（编号共享）。
 ```
