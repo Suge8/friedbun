@@ -1,4 +1,7 @@
 {
+	// 界面与给模型看的文字语言 zh/en；省略时跟随系统 locale。改完重启 pi。
+	"language": "zh",
+
 	// 功能开关，默认全开；要关哪个就写 false，比如 "features": { "header": false }。
 	// 可选：header（启动横幅）/ statusbar（输入框边框状态）/ tools（工具行渲染）/ presets（预设切换）
 	// / stats（/tokens 统计）/ claudeSub（Claude 订阅适配：归因与令牌换发 401 自愈）
@@ -75,7 +78,6 @@
 	// reviewers：审查者，每个是独立 pi 子进程；首轮全量审，之后只盯没收拾干净的问题。
 	// maxRounds：轮数硬上限。timeoutMinutes：单个审查者/顾问超时分钟数。
 	// tools：审查者可用工具，只读不改文件；留 bash 是为了跑测试取证。
-	// language：审查报告语言 zh/en。
 	// 本节字段必须齐全；拼错字段名会直接报配置错误而不是静默忽略。
 	"review": {
 		"advisor": "anthropic/claude-fable-5-1/high",
@@ -86,8 +88,7 @@
 		"maxRounds": 5,
 		"advisorAfterFailures": 2,
 		"timeoutMinutes": 40,
-		"tools": ["read", "grep", "find", "ls", "bash"],
-		"language": "zh"
+		"tools": ["read", "grep", "find", "ls", "bash"]
 	},
 
 	// /fire-watch 观察员：每个回合结束后用便宜模型评估增量，盯跑偏/过度工程/漏收口；
