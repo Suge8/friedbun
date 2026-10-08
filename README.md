@@ -1,68 +1,59 @@
-<p align="center"><img alt="FriedBun — my AI coding setup" src="assets/hero-en.jpg" width="100%"></p>
+<p align="center"><img alt="FriedBun：我每天在用的 AI 编程配置" src="assets/hero-zh.jpg" width="100%"></p>
 
-<p align="center"><a href="README.zh-CN.md">中文</a> · <b>English</b></p>
+<p align="center"><b>中文</b> · <a href="README.en.md">English</a></p>
 
-25 skills, multi-agent orchestration with FireCode, and an agent that takes over your whole Mac. One message sets it all up.
+25 个 skill、FireCode 多代理编排，Agent 接管你的整台 Mac。一句话装好。
 
-Just the skills (the skills CLI installs them into Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot and 70+ other agents):
+只要 skills（用 skills CLI 可以装进 Claude Code、Codex、Cursor、Gemini CLI、GitHub Copilot 等七十多种 agent）：
 
 ```bash
 npx skills add Suge8/friedbun
 ```
 
-For everything, paste this to your coding agent:
+要整套配置，把这句话发给你的 coding agent：
 
 ```text
-Clone https://github.com/Suge8/friedbun and set up this Mac by following its SETUP.md.
+克隆 https://github.com/Suge8/friedbun，按其中的 SETUP.md 把这台 Mac 配好。
 ```
 
-## In action
+## 实际效果
 
-### Your agent works the way good engineers do
+### Agent 照老手的做法干活
 
-25 skills show it the proven way to do things: check primary sources before answering, write the test before the code, make promo images, drive a browser, and more.
+25 个 skill 教它按成熟的路子来：先查一手资料再下结论，把代码写得极简、架构清爽，出宣传图，操作浏览器，等等。
 
-<p align="center"><img alt="The FriedBun mascot handing out four skills: check sources first, tests before code, make promo images, drive the browser" src="assets/skills-en.jpg" width="100%"></p>
+<p align="center"><img alt="FriedBun 包子分发四个 skill：先查一手资料、代码极简架构清爽、出宣传图、操作浏览器" src="assets/skills-zh.jpg" width="100%"></p>
 
-### A terminal set up for agents
+### 为 agent 配好的终端
 
-Ghostty, Herdr panes and a Starship prompt, with Pi and FireCode running in the same window. The colors are Catppuccin and follow your system's light or dark mode.
+Ghostty、Herdr 分屏和 Starship 提示符，Pi 和 FireCode 跑在同一个窗口里。Catppuccin 配色，跟随系统深浅色。
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/terminal-dark.png">
-    <img alt="Ghostty with Herdr: a shell pane running tests next to Pi with FireCode" src="assets/terminal-light.png" width="100%">
-  </picture>
-</p>
+<p align="center"><img alt="Ghostty 里的 Herdr：左边跑测试，右边是带 FireCode 的 Pi" src="assets/terminal-dark.png" width="100%"></p>
 
-### One agent runs a team
+### 一个 agent 带一队子代理
 
-With [FireCode](https://github.com/Suge8/firecode), one agent hands work to sub-agents running in parallel. Important changes get reviewed by several models at once; anything they fail goes back to the agent and is reviewed again until it passes.
+用 [FireCode](https://github.com/Suge8/firecode)，一个 agent 把活派给几个并行的子代理。重要的改动由几个不同模型同时审查，没通过的退回给 agent 修，修完再审，直到通过。
 
-<p align="center"><img alt="FireCode sending work to three sub-agents" src="https://raw.githubusercontent.com/Suge8/firecode/main/design/promo/hero.gif" width="100%"></p>
+<p align="center"><img alt="FireCode 把任务派给三个子代理" src="https://raw.githubusercontent.com/Suge8/firecode/main/design/promo/hero.zh.gif" width="100%"></p>
 
-### The agent runs your Mac
+### Agent 接管你的 Mac
 
-Your agent operates any app on your Mac by itself — in the background, without touching your mouse. Powered by [bcu](https://github.com/Suge8/better-computer-use).
+Agent 能自己操作你电脑上的任何应用，全程在后台，不抢你的鼠标。靠的是 [bcu](https://github.com/Suge8/better-computer-use)。
 
-<p align="center"><img alt="The agent operating Mac apps in the background" src="assets/bcu-demo.gif" width="100%"></p>
-
-## What's inside
-
-Each skill is a folder under [`skills/`](skills), grouped into workflow, development, frontend, creative, operations and web-search. `workflow` started as a fork of [mattpocock/skills](https://github.com/mattpocock/skills).
+<p align="center"><img alt="Agent 在后台操作 Mac 应用" src="assets/bcu-demo.gif" width="100%"></p>
 
 <details>
-<summary>What the full setup installs</summary>
+<summary>整套配置会装什么</summary>
 
-- [Pi](https://pi.dev) coding agent with FireCode, my settings, keybindings and model roles, and my system prompt (`SYSTEM.md`). The prompt changes the agent's tone and habits; if you don't want that, restore the `.bak` it leaves behind.
-- Terminal: [Herdr](https://herdr.dev), [Ghostty](https://ghostty.org), [Starship](https://starship.rs), fastfetch and a zsh snippet.
-- bcu for Mac apps; [agent-browser](https://github.com/vercel-labs/agent-browser) and [CloakBrowser](https://cloakbrowser.dev) for the web, in a separate browser from the one you use.
-- The skills, linked to `~/.agents/skills`.
+- [Pi](https://pi.dev) coding agent 加 FireCode，我的设置、快捷键、模型角色，以及我的系统提示词 `SYSTEM.md`。它装上后会改变 agent 的语气和习惯，不想要就用它留下的 `.bak` 还原。
+- 终端：[Herdr](https://herdr.dev)、[Ghostty](https://ghostty.org)、[Starship](https://starship.rs)、fastfetch 和一段 zsh 配置。
+- 操作 Mac 应用的 bcu；操作网页的 [agent-browser](https://github.com/vercel-labs/agent-browser) 和 [CloakBrowser](https://cloakbrowser.dev)，用的是单独的浏览器，不碰你平时用的那个。
+- skills，链接到 `~/.agents/skills`。
 
-The agent installs everything by itself. At the end it asks you for just two things: log in to your model account in Pi, and give bcu two macOS permissions (Accessibility and Screen Recording). Files you already have get a `.bak` copy first. [SETUP.md](SETUP.md) lists every file it touches.
+agent 全程自己装，最后只请你做两件事：在 Pi 里登录模型账号，给 bcu 勾两个系统权限（辅助功能、屏幕录制）。你已有的文件都会先留一份 `.bak`。[SETUP.md](SETUP.md) 列出了它改动的每个文件。
 
 </details>
 
-If this saves you time, a ⭐ helps others find it.
+如果它帮你省了时间，点个 ⭐ 能让更多人看到。
 
-Apple Silicon, macOS 14+ · [MIT](LICENSE) · by Fried Bun ([@Suge_dif](https://x.com/Suge_dif))
+Apple Silicon、macOS 14+ · [MIT](LICENSE) · 作者 Fried Bun（[@Suge_dif](https://x.com/Suge_dif)）
