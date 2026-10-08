@@ -7,7 +7,6 @@
 	// 快捷键，启动时绑定，改完需重启 pi。
 	"keys": {
 		"rename": "ctrl+r", // 改当前会话名（/resume 列表里另有 keybindings.json 的 alt+r）
-		"cyclePreset": "ctrl+shift+u", // 在下面 presets 之间轮切
 		"fast": "ctrl+f" // 开关当前供应商的加速档（见下方 priority 说明）
 	},
 
