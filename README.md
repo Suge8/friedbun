@@ -4,7 +4,7 @@
 
 25 skills, multi-agent orchestration with FireCode, and an agent that can use Mac apps — all set up from one link.
 
-Just the skills:
+Just the skills (the skills CLI installs them into Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot and 70+ other agents):
 
 ```bash
 npx skills add Suge8/friedbun
@@ -18,13 +18,28 @@ Clone https://github.com/Suge8/friedbun and set up this Mac by following its SET
 
 ## In action
 
-The agent splits a dinner bill in Calculator and writes it down in TextEdit, using [bcu](https://github.com/Suge8/better-computer-use). The orange arrow is the agent's cursor. The whole clip runs in the background, and the real mouse doesn't move.
+### The agent uses your Mac
 
-<p align="center"><img alt="The agent's orange cursor works Calculator and TextEdit" src="assets/bcu-demo.gif" width="100%"></p>
+The agent works real Mac apps on its own. Here it splits a bill in Calculator and writes it up in TextEdit, all in the background, so your mouse stays yours. This is [bcu](https://github.com/Suge8/better-computer-use).
 
-With [FireCode](https://github.com/Suge8/firecode), one agent hands work to several sub-agents running in parallel, each on its own model.
+<p align="center"><img alt="The agent works Calculator and TextEdit in the background" src="assets/bcu-demo.gif" width="100%"></p>
+
+### One agent runs a team
+
+With [FireCode](https://github.com/Suge8/firecode), one agent hands work to sub-agents running in parallel. Important changes get reviewed by several models at once; anything they fail goes back to the agent and is reviewed again until it passes.
 
 <p align="center"><img alt="FireCode sending work to three sub-agents" src="https://raw.githubusercontent.com/Suge8/firecode/main/design/promo/hero.gif" width="100%"></p>
+
+### A terminal set up for agents
+
+Ghostty, Herdr panes and a Starship prompt, with Pi and FireCode running in the same window. The colors are Catppuccin and follow your system's light or dark mode.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/terminal-dark.png">
+    <img alt="Ghostty with Herdr: a shell pane running tests next to Pi with FireCode" src="assets/terminal-light.png" width="100%">
+  </picture>
+</p>
 
 ## What's inside
 
@@ -48,5 +63,7 @@ Each skill is a folder under [`skills/`](skills). `workflow` started as a fork o
 Files you already have get a `.bak` copy before they change. The agent stops when it needs you: to log in, grant macOS permissions, or paste an API key. [SETUP.md](SETUP.md) lists every file it touches.
 
 </details>
+
+If this saves you time, a ⭐ helps others find it.
 
 Apple Silicon, macOS 14+ · [MIT](LICENSE) · by Fried Bun ([@Suge_dif](https://x.com/Suge_dif))
