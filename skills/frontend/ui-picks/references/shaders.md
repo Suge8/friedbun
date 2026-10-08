@@ -6,7 +6,7 @@
 
 - 流体、火焰、玻璃、Shatter、VHS 等效果覆盖实时界面；站点 [canvasui.dev](https://canvasui.dev)，机读 <https://canvasui.dev/llms.txt>。
 - 获取：`npx shadcn@latest add @canvas-ui/<组件>-react`（`react` 可换 `solid`/`vue`/`svelte`/`vanilla`），源码落进 `components/canvasui/` 自由改；也可把 shadcn MCP 指向该 registry。
-- 红线：完整效果依赖实验性 html-in-canvas API（Chrome/Edge 140+ 且开 flag），其余浏览器降级为 WebGL overlay，上线前实测降级表现和移动端功耗。
+- 红线：多数组件依赖实验性 html-in-canvas API（Chrome 需开 `chrome://flags/#canvas-draw-element`，线上用 Chrome origin trial；各组件页注明是否适用）；每个效果另有 `-webgpu` 后缀的 WebGPU 版。上线前实测其他浏览器的表现和移动端功耗。
 
 ## Paper Shaders — 轻量 shader 背景 / 纹理
 

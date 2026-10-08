@@ -51,11 +51,11 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 ### Amicro — 卡片编排微交互（React）
 
 - 站点 [amicro.vercel.app](https://amicro.vercel.app)，无 llms.txt，纯客户端渲染，选组件靠站点浏览。
-- 获取：从站点组件页复制源码（依赖 Motion）。官方 `npx @subhanhq/amicro@latest add` 实测不可用（npm 包无可执行入口，2026-08 验证）。
+- 获取：从站点组件页复制源码（依赖 Motion）。官方 `npx @subhanhq/amicro@latest add` 不可用（npm 包 1.0.1 无可执行入口，2026-10 验证）。
 
 ### transitions.dev — CSS 状态转场片段（框架无关）
 
-- 站点 [transitions.dev](https://transitions.dev)。获取：`npx transitions-pro add <name>`（免费款无需账号，`list` 看全量；Pro 需浏览器登录）或站点卡片复制。片段自含 `:root` 语义变量、`t-*` 命名空间类和 reduced-motion guard。
+- 站点 [transitions.dev](https://transitions.dev)。获取：`npx transitions-dev add <name>`（免费款无需账号，`list` 看全量；Pro 需浏览器登录）或站点卡片复制。片段自含 `:root` 语义变量、`t-*` 命名空间类和 reduced-motion guard。
 - 红线：多款默认带 blur，与 ui-craft 动效参考「blur 只在视觉语言需要且实测流畅时加入」冲突，实测流畅且视觉语言支持才保留。
 
 ### morphicons — SVG 图标 morph（React / Vue / Svelte / RN / vanilla）
@@ -82,7 +82,7 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 
 ### Appica UI — 产品控件整包（React 19 / Tailwind v4 / Base UI）
 
-- 机读 <https://appica.dev/llms.txt>，文档页加 `.md` 取纯文本，MIT。
+- 机读 <https://appica.dev/ui/react/llms.txt>，文档页加 `.md` 取纯文本，MIT。
 - 安装：`pnpm add @appica/ui-react`，全局样式里 `@import '@appica/ui-react/styles.css'` 并加 `@source '../node_modules/@appica/ui-react/dist'`（相对该 CSS 文件的真实路径，写裸包名会静默失效、整体无样式）；按子路径逐个导入 `@appica/ui-react/button`。
 - 红线：React 19 与 Tailwind v4 是硬门槛，不降级适配；它按角色命名的 token（`bg-background-muted`）和项目已有 shadcn token 二选一。
 
@@ -100,8 +100,8 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 
 ### Beautiful UI — AI-native 界面原语（React / TypeScript）
 
-- 思考态、流式回答、人工审批、工具调用、AI 编辑器；站点 [beautiful-ui-five.vercel.app](https://beautiful-ui-five.vercel.app/)，无 llms.txt / registry，按站内目录选取。MIT（2026-08 验证）。
-- 获取：示例右上角 Copy code；部分另需 `glimm`、`liveline`、`iconoir-react`。
+- 思考态、流式回答、人工审批、工具调用、AI 编辑器；站点 [beautifului.dev](https://www.beautifului.dev/)，shadcn registry 目录 <https://www.beautifului.dev/r/registry.json>，无 llms.txt。MIT。
+- 获取：`npx shadcn@latest add https://www.beautifului.dev/r/<组件>.json`；部分另需 `glimm`、`liveline`、`iconoir-react`。
 
 ### assistant-ui — AI 聊天 runtime（React / TS）
 
