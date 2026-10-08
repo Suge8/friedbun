@@ -5,13 +5,13 @@ import argparse
 import base64
 import json
 import sys
-import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
 ENDPOINT = "https://chatgpt.com/backend-api/codex/responses"
 DEFAULT_MODEL = "gpt-5.6-sol"
+AUTH_PATH = Path.home() / ".codex/auth.json"
 
 
 def load_auth(path: Path) -> tuple[str, str]:
@@ -26,20 +26,10 @@ def load_auth(path: Path) -> tuple[str, str]:
     return access_token, account_id
 
 
-def build_payload(
-    prompt: str,
-    model: str,
-    size: str | None = None,
-    quality: str | None = None,
-    refs: list[Path] | None = None,
-) -> dict:
-    tool: dict = {"type": "image_generation", "output_format": "png"}
-    if size:
-        tool["size"] = size
-    if quality:
-        tool["quality"] = quality
+# 托管的 image_generation 工具不遵守 size/quality 参数：画幅与质量由模型按 prompt 文字决定
+def build_payload(prompt: str, model: str, refs: list[Path]) -> dict:
     content: list[dict] = [{"type": "input_text", "text": prompt}]
-    for ref in refs or []:
+    for ref in refs:
         mime = "image/png" if ref.suffix.lower() == ".png" else "image/jpeg"
         encoded = base64.b64encode(ref.read_bytes()).decode()
         content.append(
@@ -57,7 +47,7 @@ def build_payload(
                 "content": content,
             }
         ],
-        "tools": [tool],
+        "tools": [{"type": "image_generation", "output_format": "png"}],
         "tool_choice": "auto",
         "parallel_tool_calls": False,
         "stream": True,
@@ -94,7 +84,7 @@ def walk(value):
 
 
 def generate(args) -> dict:
-    access_token, account_id = load_auth(args.auth)
+    access_token, account_id = load_auth(AUTH_PATH)
     headers = {
         "Authorization": f"Bearer {access_token}",
         "ChatGPT-Account-ID": account_id,
@@ -102,7 +92,7 @@ def generate(args) -> dict:
         "Accept": "text/event-stream",
         "User-Agent": "gpt-image-skill/1.0",
     }
-    payload = build_payload(args.prompt, args.model, args.size, args.quality, args.ref)
+    payload = build_payload(args.prompt, args.model, args.ref)
     image_item = None
     server_error = None
     for event in iter_sse(ENDPOINT, payload, headers, args.timeout):
@@ -120,9 +110,7 @@ def generate(args) -> dict:
     return {
         "ok": True,
         "path": str(args.out),
-        "id": image_item.get("id"),
         "size": image_item.get("size"),
-        "quality": image_item.get("quality"),
         "revised_prompt": image_item.get("revised_prompt"),
     }
 
@@ -135,7 +123,6 @@ def parse_args():
         "prompt", nargs="?", help="Image prompt. Reads stdin when omitted."
     )
     parser.add_argument("--out", required=True, type=Path, help="Output PNG path.")
-    parser.add_argument("--auth", type=Path, default=Path.home() / ".codex/auth.json")
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--timeout", type=int, default=240)
     parser.add_argument(
@@ -145,8 +132,6 @@ def parse_args():
         default=[],
         help="Reference image path. Repeatable.",
     )
-    parser.add_argument("--size", help="e.g. 1024x1024, 1024x1536, 1536x1024")
-    parser.add_argument("--quality", help="low, medium, high")
     return parser.parse_args()
 
 
