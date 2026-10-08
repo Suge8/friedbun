@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# bbu = agent-browser + 登录态。bbu 独占 session 命名，浏览器的启动、复用、回收归 agent-browser。
+# 默认车道：每个检出一个 Chrome for Testing，登录态按检出存取（agent-browser restore）。
+# --login：全机一个 CloakBrowser + agent 专用 profile，每个检出一个窗口，登录实时共享。
+# --as <名字>：同一检出里再开一个会话；默认车道是另一份登录态，--login 是另一个窗口。
+# import <域名>...：从用户日常浏览器复制这些站点的 cookie 进共享浏览器。
+# 文中 #编号 均为 vercel-labs/agent-browser 的 issue，修复后删掉对应绕行。
+set -euo pipefail
+
+DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+BBU_HOME="${BBU_HOME:-$HOME/.bbu}"
+# 默认的 1h 闲置回收豁免有窗口和挂接外部浏览器的会话；显式设置后它们同样回收。
+export AGENT_BROWSER_IDLE_TIMEOUT_MS="${AGENT_BROWSER_IDLE_TIMEOUT_MS:-3600000}"
+# 登录态文件每个检出一份、cookie 明文；上游只在显式设置时清理过期文件。
+export AGENT_BROWSER_STATE_EXPIRE_DAYS="${AGENT_BROWSER_STATE_EXPIRE_DAYS:-30}"
+
+die() { echo "bbu: $*" >&2; exit 2; }
+
+login=0 as=""
+while :; do
+  case "${1:-}" in
+    --login) login=1; shift ;;
+    --as) as="${2:?bbu: --as needs a name}"; shift 2 ;;
+    *) break ;;
+  esac
+done
+# restore 按 "<key>-" 前缀找登录态文件：身份名带 '-' 会读到别的身份的登录态。
+[[ "$as" =~ ^[[:alnum:]_]*$ ]] || die "--as name may contain only letters, digits and '_'"
+for arg; do
+  case "$arg" in --session|--session=*) die "session is named by bbu; use --as <name> for another session" ;; esac
+done
+
+# 同一会话被并发冷启动时，两个守护进程互删 socket、双双失败（启动无锁，#2074）。会话的准备步骤
+# 在一把全机锁里串行，每次几毫秒。锁挂在 fd 9 上：守护进程会继承打开的 fd，所以锁内一切
+# agent-browser 调用都经 ab_ 并关掉 fd 9，否则锁被守护进程一直占着。
+mkdir -p "$BBU_HOME"
+exec 9>>"$BBU_HOME/bbu.lock"
+perl -MFcntl=:flock -e 'open my $f, ">&=9" or die "bbu: $!\n"; flock $f, LOCK_EX or die "bbu: $!\n"'
+ab_() { agent-browser "$@" 9>&-; }
+
+# 共享浏览器的每条命令必须带同一套启动参数：参数不同时 agent-browser 会悄悄换一个浏览器。
+shared() {
+  local bin profile="$BBU_HOME/profile" seed
+  bin="${CLOAKBROWSER_BINARY_PATH:-$(ls -d "${CLOAKBROWSER_CACHE_DIR:-$HOME/.cloakbrowser}"/chromium-*/{Chromium.app/Contents/MacOS/Chromium,chrome} 2>/dev/null | sort -V | tail -n 1)}"
+  [ -x "$bin" ] || die "CloakBrowser not found; run: npm install -g cloakbrowser && cloakbrowser install"
+  # 不给种子时 CloakBrowser 每次启动随机换一台设备；同一份 cookie 配不同设备是反爬信号。种子与 profile 同生同删。
+  seed="$profile/bbu-fingerprint-seed"
+  [ -s "$seed" ] || { (umask 077; mkdir -p "$profile"); echo $(( (RANDOM << 15 | RANDOM) % 90000 + 10000 )) > "$seed"; }
+  AGENT_BROWSER_SESSION=bbu-login AGENT_BROWSER_EXECUTABLE_PATH="$bin" AGENT_BROWSER_PROFILE="$profile" \
+    AGENT_BROWSER_ARGS="--fingerprint=$(< "$seed")" ab_ "$@"
+}
+
+if [ "${1:-}" = import ]; then
+  url="$(shared get cdp-url)"
+  exec 9>&-
+  exec node "$DIR/cdp.mjs" import "$url" "${@:2}"
+fi
+
+if [ "$login" = 0 ]; then
+  AGENT_BROWSER_SESSION="$(ab_ session id --scope worktree --prefix bbu)${as:+_$as}"
+  export AGENT_BROWSER_SESSION AGENT_BROWSER_RESTORE="$AGENT_BROWSER_SESSION"
+  ab() { agent-browser "$@"; }
+  ab_ session info >/dev/null
+else
+  # 每条 --login 命令都经过共享会话：它启动或复用浏览器，并把 agent 的活动计入共享浏览器的闲置计时。
+  url="$(shared get cdp-url)"
+  AGENT_BROWSER_SESSION="$(ab_ session id --scope worktree --prefix bbu-login)${as:+_$as}"
+  export AGENT_BROWSER_SESSION
+  ab() { agent-browser --cdp "$url" --pin-tab "$@"; }
+  # 每个会话占一个独立窗口：同一窗口里的后台标签被浏览器降速，动画与截图停摆。绑定是
+  # agent-browser 记在 <socketDir>/<会话>.target 的 targetId；缺失或窗口已不在（浏览器重启过）就在
+  # 默认存储空间开新窗口（window new 每次新建隔离存储空间、登录不共享：#1624），先不带 --pin-tab
+  # 切过去再固定，否则接入时会先多开一个空标签（#1986）。
+  socket_dir="$(shared --json session info | sed -n 's/.*"socketDir":"\([^"]*\)".*/\1/p')"
+  target="$(sed -n 's/.*"targetId":"\([^"]*\)".*/\1/p' "$socket_dir/$AGENT_BROWSER_SESSION.target" 2>/dev/null || true)"
+  port="${url#ws://127.0.0.1:}"
+  if [ -n "$target" ] && curl -sf "http://127.0.0.1:${port%%/*}/json/list" | grep -q "$target"; then
+    ab_ --cdp "$url" --pin-tab session info >/dev/null
+  else
+    ab_ --cdp "$url" tab "$(node "$DIR/cdp.mjs" window "$url")" >/dev/null
+  fi
+  # 关掉窗口里唯一的标签即关窗口；挂接会话的 close 只断开，不碰共享浏览器。
+  [ "${1:-}" = close ] && ab_ --cdp "$url" --pin-tab tab close >/dev/null
+fi
+exec 9>&-
+
+[ "${1:-}" = close ] || { ab "$@"; exit; }
+# close 在会话守护进程退出前就返回，紧接着的命令会落到正在退出的进程上（#1837），所以等它真正退出。
+pid=$(ab --json session info | sed -n 's/.*"backgroundPid":\([0-9]*\).*/\1/p')
+ab "$@"
+while kill -0 "$pid" 2>/dev/null; do sleep 0.05; done

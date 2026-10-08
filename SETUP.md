@@ -49,10 +49,10 @@ herdr plugin install -y smarzban/herdr-file-viewer
 
 ## 步骤 3：Skills、Pi 扩展与登录（人工关口）
 
-Skills 落在所有 agent 共用的 `~/.agents/skills`，Pi 自动从这里读：
+Skills 在本仓库的 `skills/`，链接到所有 agent 共用的 `~/.agents/skills`，Pi 自动从这里读。本仓库的克隆因此是 skills 的真身：装完不删，更新在仓库里 `git pull`。`~/.agents/skills` 已存在时按落地规则 3 先改名留底：
 
 ```bash
-git clone https://github.com/Suge8/skills ~/.agents/skills
+ln -s <repo>/skills ~/.agents/skills
 ```
 
 Pi 扩展：
@@ -86,11 +86,11 @@ brew install --cask ghostty font-maple-mono-nf-cn
 | `config/ghostty/cursor.frag` | `~/.config/ghostty/shaders/cursor.frag` |
 | `config/starship.toml` | `~/.config/starship.toml` |
 | `config/fastfetch/config.jsonc`、`logo.txt` | `~/.config/fastfetch/` |
-| `config/zsh/workstation.zsh` | `~/.config/my-agent-workstation/workstation.zsh` |
+| `config/zsh/workstation.zsh` | `~/.config/friedbun/workstation.zsh` |
 
 Ghostty 的 `macos-option-as-alt = true` 是步骤 4 alt 预设键的前提。Ghostty 与 Herdr 统一用 Catppuccin，随系统明暗在 Mocha 与 Latte 间切换，Pi 的 system 主题从终端取色；窗格里的 Pi 若明暗不对，先看 `herdr status` 的服务端版本是否落后于客户端，落后就 `herdr server stop` 后重开 `herdr`（会结束窗格进程）；Starship 提示符只用标准字符和终端色名，远程终端缺 Nerd Font 也能正常显示。
 
-向 `~/.zshrc` **末尾追加一行** `source ~/.config/my-agent-workstation/workstation.zsh`，必须在 `compinit` 之后。读者 `.zshrc` 里已有的 autosuggestions / starship / syntax-highlighting / fastfetch 加载语句删掉，避免重复加载。
+向 `~/.zshrc` **末尾追加一行** `source ~/.config/friedbun/workstation.zsh`，必须在 `compinit` 之后。读者 `.zshrc` 里已有的 autosuggestions / starship / syntax-highlighting / fastfetch 加载语句删掉，避免重复加载。
 
 **完成标准**：新开 Ghostty 窗口出现 fastfetch 与 starship 提示符，输入时有灰色补全建议，`echo $PI_CACHE_RETENTION` 输出 `long`。
 
@@ -122,7 +122,7 @@ agent-browser 用 npm 装：安装脚本把命令直接链到原生程序，每�
 
 ## 步骤 8：凭据（人工关口）
 
-web-search 的 `--quick` 与 `fetch` 走 TinyFish，密钥写进 `~/.config/my-agent-workstation/env.zsh`（`chmod 600`，步骤 5 的片段会 source 它）：
+web-search 的 `--quick` 与 `fetch` 走 TinyFish，密钥写进 `~/.config/friedbun/env.zsh`（`chmod 600`，步骤 5 的片段会 source 它）：
 
 ```zsh
 export TINYFISH_API_KEY='<tinyfish-key>'
@@ -140,12 +140,12 @@ export TINYFISH_API_KEY='<tinyfish-key>'
 | --- | --- | --- |
 | 全局 npm | `pi`、`agent-browser`、`cloakbrowser` | 新增 |
 | Herdr | `command -v herdr`、`~/.config/herdr/`（配置、插件、会话状态）；`herdr integration install pi` 写入 Pi 配置目录 | 新增 |
-| Skills | `~/.agents/skills`（clone） | 新增 |
+| Skills | `~/.agents/skills`（指向 `<repo>/skills` 的 symlink） | 新增，原目录留底 |
 | Pi package | `settings.json` 的 `packages`：firecode | 新增 |
 | Pi 配置 | `~/.pi/agent/` 下 `settings.json`、`keybindings.json`、`models.json` | 合并 |
 | Pi 配置 | `~/.pi/agent/SYSTEM.md`、`extensions/firecode/config.jsonc` | 整体写入，原件留底 |
 | 终端 | `~/.config/` 下 `ghostty/config`、`ghostty/shaders/cursor.frag`、`starship.toml`、`fastfetch/` | 整体写入 |
-| zsh | `~/.config/my-agent-workstation/workstation.zsh`、`env.zsh` | 新增 |
+| zsh | `~/.config/friedbun/workstation.zsh`、`env.zsh` | 新增 |
 | zsh 入口 | `~/.zshrc` | 末尾追加一行 source，原件留底 |
 | Homebrew | ghostty、font-maple-mono-nf-cn、bcu（tap `suge8/tap`）；starship、fastfetch、zsh-autosuggestions、zsh-syntax-highlighting | 新增 |
 | BCU | `/Applications/bcu.app` 及两项授权 | 新增 |
