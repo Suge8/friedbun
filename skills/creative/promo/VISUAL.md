@@ -9,9 +9,9 @@
 1. **用途与位置**："background for a website hero section, wide crop safe, generous empty area on the left for headline text"——留白位置跟着最终排版走
 2. **构图**：单焦点、不对称构图、大面积留白（active negative space）
 3. **气质**：优先沿用现有界面和品牌资产；`DESIGN.md` 存在时可取其色板和情绪词，否则根据项目选择明确方向
-4. **比例**：按目标平台横竖版指定
+4. **比例**：按目标平台横竖版写进 prompt（gpt-image 没有尺寸参数）
 
-**反 AI 味清单（每个提示词末尾附加）**：no text, no letters, no watermark, no busy details, no oversaturated neon, no glossy plastic 3D render look, no fake lens flare, no cluttered composition。
+**反 AI 味清单（每个提示词末尾附加；链 A 的 Logo 字标提案去掉 no text）**：no text, no letters, no watermark, no busy details, no oversaturated neon, no glossy plastic 3D render look, no fake lens flare, no cluttered composition。
 
 **迭代**：先构图（布局和留白），再细节，最后气质，一次只改一个方向；先说清哪里不满意再改提示词，不盲目重摇。
 
