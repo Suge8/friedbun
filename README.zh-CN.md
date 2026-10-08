@@ -1,6 +1,6 @@
 <p align="center"><img alt="FriedBun：我每天在用的 AI 编程配置" src="assets/hero-zh.jpg" width="100%"></p>
 
-<p align="center"><a href="README.md">English</a> · <b>中文</b></p>
+<p align="center"><b>中文</b> · <a href="README.md">English</a></p>
 
 25 个 skill、FireCode 多代理编排，Agent 接管你的整台 Mac。一句话装好。
 
@@ -18,17 +18,11 @@ npx skills add Suge8/friedbun
 
 ## 实际效果
 
-### Agent 接管你的 Mac
+### Agent 照老手的做法干活
 
-Agent 能自己操作你电脑上的任何应用，全程在后台，不抢你的鼠标。靠的是 [bcu](https://github.com/Suge8/better-computer-use)。
+25 个 skill 教它按成熟的路子来：先查一手资料再下结论，先写测试再实现，出宣传图，操作浏览器，等等。
 
-<p align="center"><img alt="Agent 在后台操作 Mac 应用" src="assets/bcu-demo.gif" width="100%"></p>
-
-### 一个 agent 带一队子代理
-
-用 [FireCode](https://github.com/Suge8/firecode)，一个 agent 把活派给几个并行的子代理。重要的改动由几个不同模型同时审查，没通过的退回给 agent 修，修完再审，直到通过。
-
-<p align="center"><img alt="FireCode 把任务派给三个子代理" src="https://raw.githubusercontent.com/Suge8/firecode/main/design/promo/hero.zh.gif" width="100%"></p>
+<p align="center"><img alt="FriedBun 包子分发四个 skill：先查一手资料、先写测试再实现、出宣传图、操作浏览器" src="assets/skills-zh.jpg" width="100%"></p>
 
 ### 为 agent 配好的终端
 
@@ -41,26 +35,31 @@ Ghostty、Herdr 分屏和 Starship 提示符，Pi 和 FireCode 跑在同一个�
   </picture>
 </p>
 
+### 一个 agent 带一队子代理
+
+用 [FireCode](https://github.com/Suge8/firecode)，一个 agent 把活派给几个并行的子代理。重要的改动由几个不同模型同时审查，没通过的退回给 agent 修，修完再审，直到通过。
+
+<p align="center"><img alt="FireCode 把任务派给三个子代理" src="https://raw.githubusercontent.com/Suge8/firecode/main/design/promo/hero.zh.gif" width="100%"></p>
+
+### Agent 接管你的 Mac
+
+Agent 能自己操作你电脑上的任何应用，全程在后台，不抢你的鼠标。靠的是 [bcu](https://github.com/Suge8/better-computer-use)。
+
+<p align="center"><img alt="Agent 在后台操作 Mac 应用" src="assets/bcu-demo.gif" width="100%"></p>
+
 ## 里面有什么
 
-- **workflow**：查一手资料、挑计划的毛病、先写测试再实现、事后复盘一次会话。
-- **development**：测试、原型、架构体检、子代理调研、PR 描述、发版。
-- **frontend**：界面品味指南和组件选型表。
-- **creative**：出图、宣传图和演示动图、产品文案、社媒帖、视频。
-- **operations**：操作 Mac 应用（bcu）和浏览器（better-browser-use），控制 Herdr 终端窗格，通过 SSH 管服务器。
-- **web-search**：联网搜索、抓网页正文。
-
-每个 skill 是 [`skills/`](skills) 下的一个文件夹。`workflow` 最早分叉自 [mattpocock/skills](https://github.com/mattpocock/skills)。
+每个 skill 是 [`skills/`](skills) 下的一个文件夹，分为 workflow、development、frontend、creative、operations、web-search 几组。`workflow` 最早分叉自 [mattpocock/skills](https://github.com/mattpocock/skills)。
 
 <details>
 <summary>整套配置会装什么</summary>
 
-- [Pi](https://pi.dev) coding agent 加 FireCode，我的设置、快捷键、模型角色，以及我的系统提示词 `SYSTEM.md`。它会改变 agent 的语气和习惯，所以 agent 会先提醒你，不想要可以跳过。
+- [Pi](https://pi.dev) coding agent 加 FireCode，我的设置、快捷键、模型角色，以及我的系统提示词 `SYSTEM.md`。它装上后会改变 agent 的语气和习惯，不想要就用它留下的 `.bak` 还原。
 - 终端：[Herdr](https://herdr.dev)、[Ghostty](https://ghostty.org)、[Starship](https://starship.rs)、fastfetch 和一段 zsh 配置。
 - 操作 Mac 应用的 bcu；操作网页的 [agent-browser](https://github.com/vercel-labs/agent-browser) 和 [CloakBrowser](https://cloakbrowser.dev)，用的是单独的浏览器，不碰你平时用的那个。
 - skills，链接到 `~/.agents/skills`。
 
-你已有的文件改动前会先留一份 `.bak`。需要你本人的时候 agent 会停下：登录、给 macOS 授权、填 API key。[SETUP.md](SETUP.md) 列出了它改动的每个文件。
+agent 全程自己装，最后只请你做两件事：在 Pi 里登录模型账号，给 bcu 勾两个系统权限（辅助功能、屏幕录制）。你已有的文件都会先留一份 `.bak`。[SETUP.md](SETUP.md) 列出了它改动的每个文件。
 
 </details>
 
