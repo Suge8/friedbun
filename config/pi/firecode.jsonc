@@ -31,8 +31,8 @@
 
 	// 配置里凡是指定模型的位置都写同一个模型原子："provider/model/thinking"（思考档取最后一段：
 	// off minimal low medium high xhigh max），presets、watcher、master、review 一致。
-	// /fire-master 角色表：固定角色（调研员/工程师/设计师/哨兵）按名做键，
-	// 可只配子集；每个角色：model 原子 + use 适用场景 +
+	// /fire-master 角色表：角色名自定、按名做键（指挥官提示词点名“哨兵”，这个要保留）；
+	// 每个角色：model 原子 + use 适用场景 +
 	// 可选 fallback（供应商故障时同会话自动降级续跑，至多 2 个，同为原子写法）。Master 派单只报角色名；
 	// 某个模型没额度了就改这里（重启生效），或直接口头告诉 Master 换角色（不用改配置）。
 	// /fire-watch 观察员：每个回合结束后用便宜模型评估增量，盯跑偏/过度工程/漏收口；
@@ -46,22 +46,29 @@
 	"master": {
 		"roles": {
 			"调研员": {
-				"model": "anthropic/claude-sonnet-5-5/medium",
-				"use": "只读不改：大量搜索、读日志、读代码找问题、核对资料",
-				"fallback": ["openai-codex/gpt-6-luna/medium"]
+				"model": "anthropic/claude-haiku-5-5/low",
+				"use": "只读不改：联网搜索、查文档与版本、读日志、按线索定位代码与核对资料",
+				"fallback": ["anthropic/claude-sonnet-5-5/medium", "openai-codex/gpt-6-luna/medium"]
 			},
 			"工程师": {
 				"model": "anthropic/claude-sonnet-5-5/high",
-				"use": "要改代码：实现、调试"
+				"use": "要改代码：实现、调试；需要深读代码找缺陷的审计也派它（只读）",
+				"fallback": ["openai-codex/gpt-6.1-sol/high"]
+			},
+			"批量工": {
+				"model": "anthropic/claude-haiku-5-5/medium",
+				"use": "规格明确、靠测试或类型检查就能验收的批量改动：按模式迁移、改名、补样板；量大时按文件划界并行多派",
+				"fallback": ["anthropic/claude-sonnet-5-5/medium", "openai-codex/gpt-6-luna/medium"]
 			},
 			"设计师": {
 				"model": "anthropic/claude-opus-5-5/medium",
-				"use": "视觉、前端"
+				"use": "视觉、前端",
+				"fallback": ["openai-codex/gpt-6.1-sol/high"]
 			},
 			"哨兵": {
-				"model": "openai-codex/gpt-6-luna/low",
+				"model": "anthropic/claude-haiku-5-5/low",
 				"use": "CI、部署、长测试等待",
-				"fallback": ["anthropic/claude-sonnet-5-5/low"]
+				"fallback": ["anthropic/claude-sonnet-5-5/low", "openai-codex/gpt-6-luna/low"]
 			}
 		}
 	},
