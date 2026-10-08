@@ -97,12 +97,10 @@ Ghostty 的 `macos-option-as-alt = true` 是步骤 4 alt 预设键的前提。Gh
 ## 步骤 6：桌面控制 BCU（人工关口）
 
 ```bash
-git clone https://github.com/Suge8/better-computer-use ~/Project/better-computer-use
-cd ~/Project/better-computer-use && npm install && npm link
-ln -s ~/Project/better-computer-use/skills/better-computer-use ~/.agents/skills/operations/better-computer-use
+brew install --cask suge8/tap/bcu
 ```
 
-前两条克隆、构建并把 `bcu` 命令接到全局，第三条把同一仓库里的 skill 接进共用目录。npm 提示 esbuild 的 install-scripts 未批准可以忽略，构建不依赖它。helper app 在首次运行命令时自动安装。然后转达读者：终端运行 `bcu setup`，在「系统设置 → 隐私与安全性」给 `bcu.app` 勾选**辅助功能**和**屏幕录制**，回终端按回车完成校验。
+装好的是签名并公证过的 `/Applications/bcu.app`，`bcu` 命令由 Homebrew 链接到 PATH，用法 skill 已随步骤 3 的 skills 仓库就位。然后转达读者：终端运行 `bcu setup`，在「系统设置 → 隐私与安全性」给 `bcu.app` 勾选**辅助功能**和**屏幕录制**，回终端按回车完成校验。更新用 `brew upgrade`，授权保留。
 
 **完成标准**：`bcu doctor` 裸退出码为 0。
 
@@ -137,15 +135,15 @@ export TINYFISH_API_KEY='<tinyfish-key>'
 
 | 装了什么 | 落点 | 对已有文件的改动 |
 | --- | --- | --- |
-| 全局 npm | `pi`、`cloakbrowser`；`bcu`（`npm link` 指向克隆） | 新增 |
+| 全局 npm | `pi`、`cloakbrowser` | 新增 |
 | Herdr | `command -v herdr`、`~/.config/herdr/`（配置、插件、会话状态）；`herdr integration install pi` 写入 Pi 配置目录 | 新增 |
-| Skills 与 BCU | `~/.agents/skills`、`~/Project/better-computer-use`（均为 clone）、一个 skill symlink | 新增 |
+| Skills | `~/.agents/skills`（clone） | 新增 |
 | Pi package | `settings.json` 的 `packages`：firecode | 新增 |
 | Pi 配置 | `~/.pi/agent/` 下 `settings.json`、`keybindings.json`、`models.json` | 合并 |
 | Pi 配置 | `~/.pi/agent/SYSTEM.md`、`extensions/firecode/config.jsonc` | 整体写入，原件留底 |
 | 终端 | `~/.config/` 下 `ghostty/config`、`ghostty/shaders/cursor.frag`、`starship.toml`、`fastfetch/` | 整体写入 |
 | zsh | `~/.config/my-agent-workstation/workstation.zsh`、`env.zsh` | 新增 |
 | zsh 入口 | `~/.zshrc` | 末尾追加一行 source，原件留底 |
-| Homebrew | ghostty、font-maple-mono-nf-cn；starship、fastfetch、zsh-autosuggestions、zsh-syntax-highlighting、agent-browser | 新增 |
-| BCU helper | `/Applications/bcu.app`（或 `~/Applications/bcu.app`）及两项授权 | 新增 |
+| Homebrew | ghostty、font-maple-mono-nf-cn、bcu（tap `suge8/tap`）；starship、fastfetch、zsh-autosuggestions、zsh-syntax-highlighting、agent-browser | 新增 |
+| BCU | `/Applications/bcu.app` 及两项授权 | 新增 |
 | 隔离浏览器 | cloakbrowser 自管目录、agent 专用 profile `~/.bbu/` | 新增 |
