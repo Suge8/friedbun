@@ -58,7 +58,7 @@ git clone https://github.com/Suge8/skills ~/.agents/skills
 Pi 扩展：
 
 ```bash
-pi install git:github.com/Suge8/firecode
+pi install npm:pi-firecode
 ```
 
 然后让读者启动 `pi` 执行 `/login`，至少完成一个供应商；作者用到 `openai-codex`、`anthropic`、`xai`、`deepseek`、`kimi-coding`。web-search 的默认搜索用 `anthropic` 与 `openai-codex` 的登录，登了哪家就只搜哪家。
@@ -67,11 +67,11 @@ pi install git:github.com/Suge8/firecode
 
 ## 步骤 4：校正模型
 
-`pi --list-models` 的输出是唯一可选集。`settings.json` 的 `defaultProvider` / `defaultModel` / `enabledModels`（数组顺序即 shift+tab 循环顺序）和 `firecode.jsonc` 里所有 `"provider/model/thinking"` 原子，前两段都必须出现在这份输出里；读者没有的模型，按 `firecode.jsonc` 里各处注释描述的档次换成读者有的同档模型，思考档沿用。`master.roles` 的角色名固定，只换值。
+`pi --list-models` 的输出是唯一可选集。`settings.json` 的 `defaultProvider` / `defaultModel` / `enabledModels`（数组顺序即 shift+tab 循环顺序）和 `firecode.jsonc` 里所有 `"provider/model/thinking"` 原子，前两段都必须出现在这份输出里；读者没有的模型，按 `firecode.jsonc` 里各处注释描述的档次换成读者有的同档模型，思考档沿用。`master.roles` 只换各角色的模型原子，角色名保留（指挥官提示词点名“哨兵”）。
 
 `watcher` 每回合结束后额外调用一次模型，有开销；作者关着，读者接受后再开。
 
-**完成标准**：重启 `pi` 状态栏出现 FireCode 行，`alt+1` 切到对应模型。配置形状错误 FireCode 启动时会报出，照提示修。
+**完成标准**：重启 `pi` 后输入框上下边框出现 FireCode 状态（下边框右侧是模型与上下文占用），`alt+1` 切到对应模型。配置形状错误 FireCode 启动时会报出，照提示修。
 
 ## 步骤 5：终端
 
