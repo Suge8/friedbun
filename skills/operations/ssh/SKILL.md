@@ -5,25 +5,11 @@ description: "已授权 SSH：按 ~/.ssh/config 别名连接服务器/路由器�
 
 # SSH
 
-事实源：`~/.ssh/config`，主机索引：`~/.ssh/AGENTS.md`。
+事实源：`~/.ssh/config`，主机索引：`~/.ssh/AGENTS.md`。用别名连接，`ssh -G ALIAS` 看生效配置。
 
-优先用别名：
-
-```bash
-ssh ALIAS 'uname -a; pwd'
-ssh -G ALIAS
-```
-
-传文件优先不用 `scp`，OpenWrt 常缺 `sftp-server`：
+传文件不用 `scp`：OpenSSH 9 起它默认走 SFTP，OpenWrt 常缺 `sftp-server`。改用管道：
 
 ```bash
 cat local | ssh ALIAS 'cat > /remote/path'
 tar -C localdir -cf - . | ssh ALIAS 'mkdir -p /remote/dir && tar -C /remote/dir -xf -'
-```
-
-排障保留原始错误：
-
-```bash
-ssh -vvv ALIAS 'true'
-nc -vz HOST PORT
 ```
