@@ -76,12 +76,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("prompt", nargs="?", help="video description; omit to read stdin")
     parser.add_argument("--out", required=True, help="absolute output .mp4 path")
-    parser.add_argument("--model", default="seedance-2.0-mini")
+    parser.add_argument("--model", default="seedance-2.0-mini",
+                        help="seedance-2.0-mini (cheapest) | seedance-2.0-fast | seedance-2.0")
     parser.add_argument("--duration", type=int, default=5, help="4-15 seconds")
     parser.add_argument("--resolution", default="480p", choices=["480p", "720p", "1080p"])
     parser.add_argument("--ratio", default="16:9",
                         help="16:9 | 9:16 | 1:1 | 4:3 | 3:4 | 21:9 | adaptive")
-    parser.add_argument("--no-audio", action="store_true")
+    parser.add_argument("--no-audio", action="store_true", help="skip AI voice/sfx (on by default)")
     parser.add_argument("--first-frame", help="image path or URL the video starts on")
     parser.add_argument("--last-frame", help="image path or URL the video ends on")
     parser.add_argument("--ref", action="append", default=[],
@@ -113,9 +114,8 @@ def main():
     base, key = load_config()
     created = json.loads(api(base, key, TASKS_PATH, {
         "model": args.model,
-        # 网关校验要求 prompt 字段，火山原生格式用数组，双发保兼容
+        # 网关校验要求顶层 prompt，素材走火山原生的 content 数组
         "prompt": prompt,
-        "input": content,
         "content": content,
         "resolution": args.resolution,
         "ratio": args.ratio,

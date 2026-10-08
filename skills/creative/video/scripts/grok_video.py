@@ -10,11 +10,11 @@ import tempfile
 from pathlib import Path
 
 SESSIONS_DIR = Path.home() / ".grok" / "sessions"
-# Grok scans ~/.agents as a skill root, so the inner grok can see this very
+# Grok scans ~/.agents as a skill root, so the inner grok can see the video
 # skill and re-run this script forever. The env guard breaks that recursion.
 GUARD_ENV = "VIDEO_GEN_SKILL_ACTIVE"
 INNER_RULES = (
-    "You are the video generator. Never invoke the video-gen skill or run "
+    "You are the video generator. Never invoke the video skill or run "
     "grok_video.py; use the built-in imagine video workflow "
     "(image generation + image_to_video) directly."
 )
@@ -66,7 +66,7 @@ def main():
 
     if os.environ.get(GUARD_ENV):
         fail(
-            "recursion guard: already inside a video-gen run; "
+            "recursion guard: already inside a grok_video.py run; "
             "use the built-in imagine video workflow directly"
         )
     prompt = args.prompt or sys.stdin.read().strip()

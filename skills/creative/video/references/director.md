@@ -47,7 +47,7 @@
 - `asset need`：代码/SVG、生成图、截图、图标、实拍素材，或无
 - `PPT risk`：什么会让这个节拍感觉像一张幻灯片
 
-至少 80% 的节拍有超出 fade、slide、pop 的可见状态变化。
+至少 80% 的节拍有超出 fade、slide、pop 的可见状态变化。节拍图写完对照 `references/director/anti-ppt-gate.md`，没过先重写。
 
 ### 5. 运动语法
 
@@ -64,7 +64,7 @@
 跳过视觉设计直接写动画，是成片平庸的头号根因。
 
 1. **风格 bake-off**：按 `references/director/editorial-collage.md` §1 挑 2-3 个候选风格，每个出 1 张代表性静态板（gpt-image 或代码草图）。用户在场给用户挑；全自动时按主题年代/文化/调性自己定并说明理由。
-2. **Hero Frame**：选定风格后先做 3-6 张关键节拍的导演板（静帧），对照 `references/director/anti-ppt-gate.md` 后再写运动代码。
+2. **Hero Frame**：选定风格后先做 3-6 张关键节拍的导演板（静帧），过 anti-ppt-gate 后再写运动代码。
 
 ### 8. 旁白与声音
 
@@ -76,27 +76,21 @@ python3 scripts/fish_tts.py \
 ```
 
 - **audio-first timing**：逐句生成旁白，脚本返回每句实际 `duration`，画面节拍跟声音排，不先写死时长再塞声音。
-- 音色：默认可用；更好的是在 fish.audio 挑中文音色，`--voice` 传 reference_id。
-- 默认 `s2.1-pro-free`（免费，质量同 pro）；量产或要 SLA 时充 API credit 后 `--model s2.1-pro`。
+- 音色在 fish.audio 挑中文音色，`--voice` 传 reference_id；模型默认免费档，量产或要 SLA 见 `--help`。
 
 ### 9. 实现路线
 
 | 路线 | 适用 | 栈 |
 |---|---|---|
-| **A · Remotion 纯代码** | 数据图表、UI/产品演示、几何系统 | 当前视频项目 + 编辑组件集 |
-| **B · 编辑拼贴** | 人物、历史、文化、情绪、品牌叙事 | gpt-image 造素材 → Remotion 驱动，读 `references/director/editorial-collage.md` |
+| **A · Remotion 纯代码** | 数据图表、UI/产品演示、几何系统 | Remotion 视频项目 |
+| **B · 编辑拼贴** | 人物、历史、文化、情绪、品牌叙事 | gpt-image 造素材 → Remotion 驱动，读 `references/director/editorial-collage.md`（含个别镜头补 Seedance 的条件） |
 | **C · 模型直出** | 用户点名要实拍质感短片 | `references/model-generation.md`（Grok/Seedance） |
 
-A、B 共享同一引擎：当前视频项目，编辑感组件集在 `src/editorial/`（PaperField / PhotoCutout / TornReveal / MarkerStroke / TapeLabel / EditorialChart / EvidenceFrame / CameraStage + `useStepped` 步进运动）。写 composition 前读 `references/remotion.md`。路线 B 个别镜头需要有机微动（人物动作类）时，单镜走 Seedance `--first-frame` 补。Lottie/Rive/Three.js 只用于真正受益的特定视觉层。
+A、B 共用 Remotion 引擎，写 composition 前读 `references/remotion.md`。路线 B 需要纸底、抠图零件、撕边揭示、马克笔批注、证据框、相机舞台和步进运动这类编辑感组件；视频项目的 `src/editorial/` 里有就复用，没有就在项目里自建。Lottie/Rive/Three.js 只用于真正受益的特定视觉层。
 
-- 渲染：`npx remotion render <CompositionId> out/<name>.mp4`
-- contact sheet / 静帧：`npx remotion still ...` 或抽帧，产物放同项目 `out/` 与可选 `质检/`
+渲染 `npx remotion render <CompositionId> out/<name>.mp4`；contact sheet 与静帧用 `npx remotion still` 或抽帧，产物放同项目 `out/`。
 
-### 10. 反 PPT 闸门
-
-运动方案、Hero Frame 和成片都对照 `references/director/anti-ppt-gate.md`；方案没过先重写运动方案再写代码。
-
-完成：成片 MP4 已渲染；contact sheet 读起来是连续演化，不是一组幻灯片缩略图。
+完成：成片 MP4 已渲染；contact sheet 过 anti-ppt-gate，读起来是连续演化，不是一组幻灯片缩略图。
 
 ## 输出
 

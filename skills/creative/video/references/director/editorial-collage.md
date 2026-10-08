@@ -1,12 +1,8 @@
 # 编辑拼贴路线（Vox 式）
 
-人物、历史、文化、情绪类主题的默认视觉系统。素材由 gpt-image 生成，动效全部由 Remotion
-驱动（当前视频项目 `src/editorial/` 组件集）——不经过 AI 视频模型，
-文字永远清晰、可重渲染、成本趋近于零。个别镜头需要有机微动（人物做动作、动物动）时，
-才按 `references/model-generation.md` 单独用 Seedance `--first-frame` 补那一镜。
+人物、历史、文化、情绪类主题的默认视觉系统。素材由 gpt-image 生成，动效全部由 Remotion 驱动，不经过 AI 视频模型，文字永远清晰、可重渲染、成本趋近于零。个别镜头需要有机微动（人物做动作、动物动）时，只那一镜按 `references/model-generation.md` 用 Seedance `--first-frame` 补。
 
-创作引擎提炼自 vox-director（MIT, Atlas Cloud）+ Vox 制作方法采访。拼贴的"样子"诞生在生图
-prompt 里，动效是之后加的：图不到位，动效救不回来。
+提炼自 vox-director（MIT, Atlas Cloud）+ Vox 制作方法采访。拼贴的"样子"诞生在生图 prompt 里，动效是之后加的：图不到位，动效救不回来。
 
 ## 1. 风格选型（bake-off 之前读这节）
 
@@ -21,10 +17,9 @@ prompt 里，动效是之后加的：图不到位，动效救不回来。
 | 配色 ⭐ | limited 2-3 色 · duotone · monochrome + 1 accent · riso 荧光粉+联邦蓝 · Bauhaus 三原色 · 70s mustard/rust · cream/kraft 底 |
 | 印刷质感 | halftone dots · Ben-Day dots · riso 套印错位 · letterpress · newsprint · 折痕 · 剪刀边 vs 撕边 |
 
-现成组合参考：`american-retro`（暖米底+红蓝、粗 grotesque）、`swiss-modern`（大量留白、
+组合示例：`american-retro`（暖米底+红蓝、粗 grotesque）、`swiss-modern`（大量留白、
 网格、Helvetica）、`punk-zine`（复印机黑白+一色荧光、ransom-note 字）、`newsprint-editorial`
-（报纸底+红笔批注）、`chinese-ink`（宣纸底+木刻+朱印）。库里没有就现调一个——匹配主题的
-年代与文化，不匹配语言（英文讲中国史照样该中式）。
+（报纸底+红笔批注）、`chinese-ink`（宣纸底+木刻+朱印）。示例没有合适的就现调——匹配主题的年代与文化，不匹配语言（英文讲中国史照样该中式）。
 
 ## 2. 生图 prompt 五段式（gpt-image 出海报/零件）
 
@@ -43,7 +38,7 @@ prompt 里，动效是之后加的：图不到位，动效救不回来。
 ```
 
 规则：以正向描述为主，实际出过的具体瑕疵才在末尾用一行点名避开；分层描述越清晰，Remotion 里能拆的视差层越多；
-每张 $0（订阅内），重滚到"真·分层拼贴"为止。
+重滚到"真·分层拼贴"为止。
 
 ### 独立零件（免抠图技巧）
 
@@ -81,7 +76,7 @@ prompt 里，动效是之后加的：图不到位，动效救不回来。
 | 层 | 谁做 |
 |---|---|
 | 海报/零件的样子 | gpt-image（五段式 prompt） |
-| 相机、视差、组装、揭示 | Remotion `CameraStage` + 组件集 |
+| 相机、视差、组装、揭示 | Remotion 相机舞台 + 编辑感组件 |
 | 标题、标注、批注、字幕 | Remotion 叠加（不烧进图，除非风格需要 ransom-note 等特殊字效） |
-| 图表与证据 | Remotion `EditorialChart` / `EvidenceFrame`，数据代码画 |
+| 图表与证据 | Remotion 组件，数据代码画 |
 | 有机微动（人做动作） | 仅该镜走 Seedance `--first-frame`，运动 prompt 用"5 轴"：一个镜头动作 + 纸片层视差 + 保持质感 + 情绪 + 色板，幅度写 subtle，文字区留白 |
