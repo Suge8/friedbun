@@ -4,6 +4,8 @@
 
 25 skills, multi-agent orchestration with FireCode, and an agent that can use Mac apps — all set up from one link.
 
+Just the skills:
+
 ```bash
 npx skills add Suge8/friedbun
 ```

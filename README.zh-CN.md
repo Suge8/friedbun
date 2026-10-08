@@ -4,6 +4,8 @@
 
 25 个 skill、FireCode 多代理编排，还能让 agent 操作 Mac 应用，一个链接装好。
 
+只要 skills：
+
 ```bash
 npx skills add Suge8/friedbun
 ```
