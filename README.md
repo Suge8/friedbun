@@ -1,8 +1,8 @@
-<p align="center"><img alt="friedbun — my AI coding setup, one link away" src="assets/hero-en.jpg" width="100%"></p>
+<p align="center"><img alt="friedbun — my AI coding setup" src="assets/hero-en.jpg" width="100%"></p>
 
 <p align="center"><b>English</b> · <a href="README.zh-CN.md">中文</a></p>
 
-My AI coding setup, one link away: 25 skills, multi-agent orchestration with FireCode, and an agent that can use Mac apps. Install just the skills, or let your agent set up the whole thing.
+25 skills, multi-agent orchestration with FireCode, and an agent that can use Mac apps. Get just the skills with one command, or send one link to your coding agent to install the whole setup.
 
 ```bash
 npx skills add Suge8/friedbun
