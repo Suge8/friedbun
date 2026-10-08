@@ -2,7 +2,7 @@
 
 你是读者的 coding agent。`config/` 下是作者机器上真实在用的文件，不是模板；你的工作是把它们落到系统标准位置，并装上作者用的那几个包。
 
-环境要求：Apple Silicon、macOS 14+、Homebrew、Node 20.6+。`<repo>` 指本仓库根目录的绝对路径。
+环境要求：Apple Silicon、macOS 14+、Homebrew、Node 22.13+。`<repo>` 指本仓库根目录的绝对路径。
 
 ## 落地规则
 
@@ -12,7 +12,7 @@
 
 ## 人工关口
 
-只能读者本人做的事，到达时停下、给出明确指令、等确认再继续：Pi `/login`（步骤 3）；`bcu setup` 与系统设置授权（步骤 6）；填写 TinyFish key（步骤 8）；在隔离浏览器里登录站点（步骤 7 之后按需）。
+只能读者本人做的事，到达时停下、给出明确指令、等确认再继续：Pi `/login`（步骤 3）；`bcu setup` 与系统设置授权（步骤 6）；填写 TinyFish key（步骤 8）；首次 `bbu import` 时在钥匙串弹窗点「始终允许」、复制不了登录态的站点在控制台网页里登录（步骤 7 之后按需）。
 
 ## 步骤 1：Pi 与 Herdr
 
@@ -107,15 +107,18 @@ brew install --cask suge8/tap/bcu
 ## 步骤 7：浏览器自动化
 
 ```bash
-brew install agent-browser
+npm install --global --allow-scripts=agent-browser agent-browser && agent-browser install
 npm install --global cloakbrowser && cloakbrowser install
+mkdir -p ~/.local/bin && ln -sf ~/.agents/skills/operations/better-browser-use/bin/bbu ~/.local/bin/bbu
 ```
 
-只用免费版，不运行 `cloakbrowser login` 领 Pro 许可证：Pro 版运行中要一直连 cloakbrowser.dev 校验，国内网络时通时断，浏览器会被自动关掉，非正常退出还会把唯一的会话名额占住 15 分钟。`install` 下载有 10 分钟硬超时，网慢中断时用 `curl -C -` 从 GitHub Releases 下同名包，解压到 `~/.cloakbrowser/chromium-<版本>/`。
+agent-browser 用 npm 装：安装脚本把命令直接链到原生程序，每次调用约 10ms，否则多走一层约 100ms 的 Node 包装；Homebrew 版不带控制台网页，bbu 靠它把页面交给不在电脑前的读者。
 
-自动化只走隔离浏览器：默认 Chrome for Testing，需要登录态时用 cloakbrowser 加 agent 专用的持久 profile；从不动读者的日常浏览器。需要登录态的站点由读者在 agent 弹出的窗口里登录一次。路径由 skill 自己查找，不需要环境变量。
+只用免费版，不运行 `cloakbrowser login` 领 Pro 许可证：Pro 版运行中要一直连 cloakbrowser.dev 校验，国内网络时通时断，浏览器会被自动关掉，非正常退出还会把唯一的会话名额占住 15 分钟。免费版在 macOS 上是 Chromium 145，Linux 上是 146。`install` 下载有 10 分钟硬超时，网慢中断时用 `curl -C -` 从 GitHub Releases 下同名包，解压到 `~/.cloakbrowser/chromium-<版本>/`。
 
-**完成标准**：`agent-browser --version` 正常输出；`cloakbrowser info --quick` 显示 `Installed: true`。
+自动化只走隔离浏览器：开发调试用 Chrome for Testing；读者本人的账号走全机共享的一个 cloakbrowser 加 agent 专用 profile，登录态按站点从读者日常浏览器复制 cookie（macOS 上的 Chromium 系浏览器），复制不了的站点由读者在控制台网页里登录一次。日常浏览器只被读取，从不被操作。路径由 skill 自己查找，不需要环境变量。
+
+**完成标准**：`readlink "$(command -v agent-browser)"` 指向原生程序（不以 `.js` 结尾）；`cloakbrowser info --quick` 显示 `Installed: true`；`bbu --login open about:blank` 与 `bbu --login close` 裸退出码都为 0。
 
 ## 步骤 8：凭据（人工关口）
 
@@ -135,7 +138,7 @@ export TINYFISH_API_KEY='<tinyfish-key>'
 
 | 装了什么 | 落点 | 对已有文件的改动 |
 | --- | --- | --- |
-| 全局 npm | `pi`、`cloakbrowser` | 新增 |
+| 全局 npm | `pi`、`agent-browser`、`cloakbrowser` | 新增 |
 | Herdr | `command -v herdr`、`~/.config/herdr/`（配置、插件、会话状态）；`herdr integration install pi` 写入 Pi 配置目录 | 新增 |
 | Skills | `~/.agents/skills`（clone） | 新增 |
 | Pi package | `settings.json` 的 `packages`：firecode | 新增 |
@@ -144,6 +147,6 @@ export TINYFISH_API_KEY='<tinyfish-key>'
 | 终端 | `~/.config/` 下 `ghostty/config`、`ghostty/shaders/cursor.frag`、`starship.toml`、`fastfetch/` | 整体写入 |
 | zsh | `~/.config/my-agent-workstation/workstation.zsh`、`env.zsh` | 新增 |
 | zsh 入口 | `~/.zshrc` | 末尾追加一行 source，原件留底 |
-| Homebrew | ghostty、font-maple-mono-nf-cn、bcu（tap `suge8/tap`）；starship、fastfetch、zsh-autosuggestions、zsh-syntax-highlighting、agent-browser | 新增 |
+| Homebrew | ghostty、font-maple-mono-nf-cn、bcu（tap `suge8/tap`）；starship、fastfetch、zsh-autosuggestions、zsh-syntax-highlighting | 新增 |
 | BCU | `/Applications/bcu.app` 及两项授权 | 新增 |
-| 隔离浏览器 | cloakbrowser 自管目录、agent 专用 profile `~/.bbu/` | 新增 |
+| 隔离浏览器 | cloakbrowser 自管目录、agent 专用 profile `~/.bbu/`、`~/.local/bin/bbu` 软链 | 新增 |
