@@ -21,7 +21,7 @@ Named patterns these accounts never use: opening with "Excited to", "Big news", 
 ## Growth
 
 - Small accounts get reach by replying under big, fresh posts on the same topic (hours old, high views), shaped as in Replies; the full post lives on the profile.
-- Author diversity (xai-org/x-algorithm): within one feed load a second post from the same author scores 62.5%, a third 43.75%, floor 25%. Space own posts a few hours apart; a day apart for the strongest ones.
+- Author diversity (xai-org/x-algorithm README, step 5): in one feed load each post after an author's first is multiplied by a decaying factor down to a floor; the production constants are not public. Space own posts a few hours apart; a day apart for the strongest ones.
 - English tech audience peaks US morning, roughly 13:00–17:00 UTC.
 - Up to 4 images per post. 16:9 (1600×900) shows uncropped; top data posts also use tall tables (about 4:5) when rows need the room.
 - Put links and the method/caveats line in the first reply.
