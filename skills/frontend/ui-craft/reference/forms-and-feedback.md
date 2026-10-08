@@ -1,6 +1,6 @@
 # 表单标注与反馈放置
 
-在不让用户猜、不隐藏关键状态的前提下减少文字。判断依据是信息何时有用、用户在哪里处理，而不是更少的 DOM 节点。依据：W3C WAI 表单教程、GOV.UK 与 USWDS 表单模式、NN/g *Placeholders in Form Fields Are Harmful*、OWASP Authentication Cheat Sheet。「提交与 Toast 时机」中的标签页隐藏暂停一条吸收自 [emilkowalski/skills](https://github.com/emilkowalski/skills)（MIT，Copyright (c) 2026 Emil Kowalski）。
+在不让用户猜、不隐藏关键状态的前提下减少文字。判断依据是信息何时有用、用户在哪里处理，而不是更少的 DOM 节点。
 
 ## 放置决策
 

@@ -1,6 +1,6 @@
 # 手势驱动交互
 
-适用于拖拽、swipe-to-dismiss、bottom sheet、carousel、drag-to-reorder。动效从当前呈现值开始、继承用户速度、投射动量、随时可被抓住反向。spring 起调值和实现坑见 `motion.md`。来源：Apple WWDC 2018 *Designing Fluid Interfaces*（动量投射与 rubber-band 公式）、Emil Kowalski 的 Sonner/Vaul 实现（速度阈值 dismiss、多点保护）；「触屏轴向」一节吸收自 [emilkowalski/skills](https://github.com/emilkowalski/skills) 的 mobile-native（MIT，Copyright (c) 2026 Emil Kowalski）。
+适用于拖拽、swipe-to-dismiss、bottom sheet、carousel、drag-to-reorder。动效从当前呈现值开始、继承用户速度、投射动量、随时可被抓住反向。spring 起调值和实现坑见 `motion.md`。
 
 ## 跟踪
 
@@ -60,9 +60,8 @@ Apple 用 damping ratio + response 表达 spring，与 `stiffness/damping/mass` 
 | 旋转 | 0.8 | 0.4 |
 | Drawer / Sheet | 0.8 | 0.3 |
 
-默认 damping 1.0（无回弹）；只有释放本身带动量（甩、抛）时才降到约 0.8。刚淡入的菜单出现回弹是错的，被甩出的卡片回弹是对的。Motion 的 `bounce/duration` 对应：默认 `bounce: 0`，动量手势 `bounce: 0.2`。
+默认 damping 1.0（无回弹）；只有释放本身带动量（甩、抛）时才降到约 0.8。刚淡入的菜单出现回弹是错的，被甩出的卡片回弹是对的。
 
-## 触屏轴向与 reduced-motion
+## 触屏轴向
 
 - 手势表面用 `touch-action` 声明浏览器仍可处理的轴：横向 carousel `pan-y`，竖向 sheet 把手 `pan-x`，完全自绘手势 `none`（只用在用户不需要滚过去的元素上）。原生滚动的 carousel 优先 `scroll-snap-type: x mandatory` 加 `scroll-snap-align: start`，浏览器自带物理比手写 spring 好。
-- reduced-motion 下位移用短 cross-fade 替代。

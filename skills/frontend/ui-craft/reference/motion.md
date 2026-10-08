@@ -1,7 +1,5 @@
 # 动效取值与实现
 
-部分规则吸收自 [emilkowalski/skills](https://github.com/emilkowalski/skills)（MIT，Copyright (c) 2026 Emil Kowalski）的 emil-design-eng、animate、review-animations：工具阶梯、`scale(0)` 禁令、Base UI 属性、clip-path 配方、长按确认、手风琴、滚动揭示、装饰性 spring、慢放检查。
-
 ## Token
 
 项目没有动效 token 时从这里起：
@@ -123,8 +121,7 @@
 - 使用 Motion 时在应用边界设 `MotionConfig reducedMotion="user"`，局部保留 opacity/color 替代；Presence 切换默认关首帧入场，列表替换或共享几何用 layout/popLayout。
 - Tailwind v4 的独立 `translate`、`scale`、`rotate` 属性可能被 keyframe 的 `transform` 覆盖；组合前检查最终 computed style。
 - One-shot 动画结束后回到静态样式；用 `fill-mode: both` 时终态与组件状态一致。
-- Hover 动效只在 `@media (hover: hover) and (pointer: fine)` 下启用（Tailwind v4 的 `hover:` 已自带 `(hover: hover)`）；语义和关键反馈同时支持 focus、键盘与 touch。
-- Toast 全应用共用一个 Stack；tone、图标和颜色映射只有一处事实源。
+- Hover 动效的媒体查询守卫见 `mobile.md`；语义和关键反馈同时支持 focus、键盘与 touch。
 
 ## 检查动效
 

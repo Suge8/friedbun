@@ -1,6 +1,6 @@
 # 无障碍细则
 
-源自 jakubkrehel/skills（MIT，commit a6733339）的 better-accessibility，只保留模型默认不会做对的部分。基线是 WCAG 2.2 AA，复杂组件按 WAI-ARIA APG。项目用 Base UI、Radix 或原生 `<dialog>` 时，焦点陷阱、还焦、Escape 与嵌套归原语，不手写。
+只保留模型默认不会做对的部分。基线是 WCAG 2.2 AA，复杂组件按 WAI-ARIA APG。项目用 Base UI、Radix 或原生 `<dialog>` 时，焦点陷阱、还焦、Escape 与嵌套归原语，不手写。
 
 ## 焦点
 
@@ -15,8 +15,6 @@
 
 - Escape 先关最后打开的：tooltip，然后菜单，然后弹窗。
 - Tabs：面板即时渲染时自动激活（方向键聚焦即切换），切换代价高时手动激活（Enter/Space）。Home/End 跳首尾。
-- Menu button：Enter/Space/↓ 打开并聚焦第一项，↑ 打开并聚焦最后一项，Escape 关闭并还焦按钮。
-- Combobox：↓ 打开或进入列表，Enter 接受，Escape 关闭并回到输入框，输入即过滤。
 - `<textarea>` 中 Enter 换行，⌘/Ctrl+Enter 提交。
 - 站点导航用 `<nav>` 加列表，不用 `role="menu"`：它承诺应用式方向键行为。
 

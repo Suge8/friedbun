@@ -1,6 +1,6 @@
 # 配色
 
-源自 jakubkrehel/skills（MIT，commit a6733339）的 better-colors，只保留模型默认不会用对的取值与做法；交互探索可用 oklch.fyi。
+只保留模型默认不会用对的取值与做法。
 
 ## 用法
 
