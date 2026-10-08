@@ -1,78 +1,49 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/hero-zh-dark.jpg">
-    <img alt="friedbun：把这个仓库发给你的 agent，拿走我的整套配置" src="assets/hero-zh-light.jpg" width="100%">
-  </picture>
-</p>
+<p align="center"><img alt="friedbun：给你的 AI agent 一双手、一支团队和一身本事" src="assets/hero-zh.jpg" width="100%"></p>
 
 <p align="center"><a href="README.md">English</a> · <b>中文</b></p>
 
-我的整套 coding agent 工作站：25 个 agent skill、我机器上真实在用的配置文件、背后的工具，打包成你的 agent 能直接装到你 Mac 上的样子。
+给 coding agent 装上 skills、多代理团队和桌面操控，一个链接装好。
 
-**只要 skills：**
+**只要 skills**
 
 ```bash
 npx skills add Suge8/friedbun
 ```
 
-**整套工作站**：把这句话发给你的 coding agent：
+**整套配置**：把这句话发给你的 coding agent：
 
 ```text
 克隆 https://github.com/Suge8/friedbun，按其中的 SETUP.md 把这台 Mac 配好。
 ```
 
-agent 会装好所有东西，把配置并入你已有的文件（改动前先留一份 `.bak`），只在必须你本人动手的地方停下：登录、给 macOS 授权、填 API key。
+## 一身本事：25 个 skill
 
-## 里面有什么
+<p align="center"><img alt="六组共 25 个 skill" src="assets/skills.jpg" width="100%"></p>
 
-### Skills
+agent 学会我的干活方式：查一手资料、先写会失败的测试再写代码、按品味指南检查界面、做出这页上这样的图和演示动图。很多 skill 遇到合适的任务会自己启用。
 
-[`skills/`](skills) 下 25 个 skill，分六组。其中 11 个是手动 skill，点名才用；其余按描述自动触发。
+## 一支团队：FireCode
 
-| 分组 | Skills |
-| --- | --- |
-| `workflow` | `research` · `grilling` · `implement` · `retro`：从对齐到交付按顺序用；分叉自 [mattpocock/skills](https://github.com/mattpocock/skills) |
-| `development` | `better-test` · `prototype` · `architecture-audit` · `fan-out` · `writing-for-agents` · `pr` · `ship` · `project-setup` · `eli5` |
-| `frontend` | `ui-craft` · `ui-picks` |
-| `creative` | `gpt-image` · `promo` · `copywriting` · `post` · `video` |
-| `operations` | `better-computer-use` · `better-browser-use` · `herdr` · `ssh` |
-| `web-search` | `web-search`：用你在 Pi 里的登录走 Anthropic、OpenAI 官方搜索，TinyFish 出快速结果和网页正文 |
+<p align="center"><img alt="FireCode 并行派出三个子代理" src="https://raw.githubusercontent.com/Suge8/firecode/main/design/promo/hero.zh.gif" width="100%"></p>
 
-建议先看这几个：`implement` 先写验收测试、看它失败，再实现整个切片；`better-test` 判断哪些测试值得存在；`ui-craft` 是 agent 动任何界面前要读的品味指南；这页上的图都出自 `promo` 和 `gpt-image`。
+一个 agent 变成指挥官，把任务派给并行干活的子代理，每个子代理用自己的模型。多个模型并行审查你的改动，没通过的地方直接退回去修。[FireCode 仓库 →](https://github.com/Suge8/firecode)
 
-### 配置
+## 一双手：bcu
 
-[`config/`](config) 是我机器上真实在用的文件，不是模板：
+<p align="center"><img alt="bcu 的 agent 光标在 Mac 应用里滚动菜单、选中商品、填表并下单" src="assets/bcu-demo.gif" width="100%"></p>
 
-- **Pi**：settings、快捷键、模型、FireCode 角色表，以及我的系统提示词 `SYSTEM.md`。它会把你 agent 的语气和工作习惯换成我的，所以 SETUP.md 让 agent 先提醒你，你可以跳过。
-- **终端**：Ghostty（带光标 shader）、Herdr、Starship、fastfetch 和一段 zsh 配置。全部跟随系统明暗：深色 Catppuccin Mocha，浅色 Latte。
+agent 自己在 Mac 应用里点击、输入、滚动，没有 API 的应用也能把活干完。应用允许时它在后台操作，你的鼠标键盘照常归你用。[bcu 仓库 →](https://github.com/Suge8/better-computer-use)
 
-### 工具
+<details>
+<summary><b>整套配置会装什么</b></summary>
 
-[Pi](https://pi.dev) 做 coding agent，上面跑 FireCode · [Herdr](https://herdr.dev) 终端复用 · [Ghostty](https://ghostty.org) + [Starship](https://starship.rs) + zsh · bcu 操控桌面 · [agent-browser](https://github.com/vercel-labs/agent-browser) 和 [CloakBrowser](https://cloakbrowser.dev) 操作网页，只用隔离浏览器，不碰你日常用的那个。
+- **Coding agent**：[Pi](https://pi.dev) 加 FireCode，我的设置、快捷键和模型角色，以及我的系统提示词 `SYSTEM.md`。它会把语气和工作习惯换成我的，agent 会先提醒你，不想要可以跳过。
+- **终端**：[Herdr](https://herdr.dev) 终端复用、[Ghostty](https://ghostty.org)、[Starship](https://starship.rs)、fastfetch 和一段 zsh 配置，全部跟随系统明暗。
+- **桌面与网页**：bcu，以及 [agent-browser](https://github.com/vercel-labs/agent-browser) 和 [CloakBrowser](https://cloakbrowser.dev)，只在隔离浏览器里操作，不碰你日常用的浏览器。
+- **Skills**：[`skills/`](skills)，链接到 `~/.agents/skills`。`workflow` 分叉自 [mattpocock/skills](https://github.com/mattpocock/skills)。
 
-## 为它写的两个工具
+改动已有配置前先留一份 `.bak`。登录、给 macOS 授权、填 API key 这几步只能你本人做，agent 会停下等你。[SETUP.md](SETUP.md) 列出了它改动的每个文件。
 
-**[bcu](https://github.com/Suge8/better-computer-use)** 让 agent 在命令行里看见并操作任何 macOS 应用。它把窗口读成一棵可操作的元素树，优先在后台完成动作，只有应用非要前台才切过去。
+</details>
 
-```bash
-brew install --cask suge8/tap/bcu
-```
-
-<p align="center"><img alt="bcu 在后台填写并勾选一个测试应用，窗口始终没有被激活" src="assets/bcu-demo.gif" width="100%"></p>
-
-**[FireCode](https://github.com/Suge8/firecode)** 给 Pi 加上多代理编排和对抗式代码审查：指挥官把任务派给子代理，每个角色用自己的模型；多个模型并行审查每次改动，每条 FAIL 直接退回给 agent 修。
-
-```bash
-pi install npm:pi-firecode
-```
-
-## 运行前提
-
-Apple Silicon Mac，macOS 14 及以上。按 SETUP.md 配置还需要 Homebrew 和 Node 22.13+。
-
-## License
-
-[MIT](LICENSE)。这是个人配置，按原样分享，不承诺兼容以后的版本。SETUP.md 末尾列出了装的每样东西和改的每个文件，可以照着手动还原。
-
-作者 Fried Bun · [@Suge_dif](https://x.com/Suge_dif)
+需要 Apple Silicon Mac、macOS 14 及以上（整套配置还需要 Homebrew 和 Node 22.13+）。[MIT](LICENSE) · 作者 Fried Bun · [@Suge_dif](https://x.com/Suge_dif)
