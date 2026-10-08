@@ -27,18 +27,7 @@
 
 ### 3. 接上切换
 
-```tsx
-// 伪代码——按项目框架调整
-const variant = searchParams.get('variant') ?? 'A';
-return (
-  <>
-    {variant === 'A' && <VariantA {...data} />}
-    {variant === 'B' && <VariantB {...data} />}
-    {variant === 'C' && <VariantC {...data} />}
-    <PrototypeSwitcher variants={['A','B','C']} current={variant} />
-  </>
-);
-```
+按 `?variant=`（默认 `A`）渲染对应变体，并挂上切换器。
 
 ### 4. 底部浮动切换器
 
@@ -51,7 +40,7 @@ return (
 
 - 点击用框架 router 更新 URL search param（Next 用 `router.replace`，React Router 用 `navigate`），变体可分享、刷新后保持。
 - `←` / `→` 键也能切换；`<input>`、`<textarea>`、`[contenteditable]` 聚焦时不拦截。
-- 视觉上与页面区分（高对比胶囊、细阴影），一看就不属于被评估的设计。
+- 视觉上与页面区分（高对比胶囊、细阴影）。
 - production 构建中隐藏（`process.env.NODE_ENV !== 'production'` 或等效检查），误合并也不会发给用户。
 
 切换器做成独立组件，放在项目共享 UI 的位置。
@@ -62,7 +51,7 @@ return (
 
 ### 6. 记录与清理
 
-记下胜出的变体及理由，再按 [SKILL](SKILL.md) 第 6 条记录原型。胜者按生产标准重写进真实代码（原型代码没有测试、错误处理极少），完整变体集合留在一次性分支：
+按 [SKILL](SKILL.md) 第 6 条记录，并写明胜出变体及理由。胜者按生产标准重写进真实代码：
 
-- **A**：胜者并入现有页面；主分支删除落选变体和切换器。
-- **B**：胜者升为真实路由；主分支删除一次性路由和切换器。
+- **A**：胜者并入现有页面，落选变体和切换器不进主分支。
+- **B**：胜者升为真实路由，一次性路由和切换器不进主分支。
