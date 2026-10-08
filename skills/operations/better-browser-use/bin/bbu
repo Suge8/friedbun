@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# bbu = agent-browser + 持久登录态。bbu 独占 session 命名，启动、复用、回收全由 agent-browser daemon 负责。
+# 默认车道：Chrome for Testing，session 按工作树隔离，登录态按工作树自动存取。
+# --login：CloakBrowser + agent 专用 profile；一个 profile 只能被一个 Chrome 打开，所以 session 固定。
+# --as <身份>：默认车道内的另一个独立浏览器（多账号流程），session 与登录态都按身份分开。
+set -euo pipefail
+
+BBU_HOME="${BBU_HOME:-$HOME/.bbu}"
+# agent-browser 的默认闲置回收豁免有窗口的浏览器；显式设置后同样回收它们。
+export AGENT_BROWSER_IDLE_TIMEOUT_MS="${AGENT_BROWSER_IDLE_TIMEOUT_MS:-3600000}"
+# 登录态文件每个工作树+身份一份、cookie 明文；上游只在显式设置时清理过期文件。
+export AGENT_BROWSER_STATE_EXPIRE_DAYS="${AGENT_BROWSER_STATE_EXPIRE_DAYS:-30}"
+
+login=0 as=""
+while :; do
+  case "${1:-}" in
+    --login) login=1; shift ;;
+    --as) as="${2:?bbu: --as needs a name}"; shift 2 ;;
+    *) break ;;
+  esac
+done
+for arg in "$@"; do
+  case "$arg" in --session|--session=*) echo "bbu: session is named by bbu; use --as <name> for another browser" >&2; exit 2 ;; esac
+done
+
+if [ "$login" = 1 ]; then
+  [ -z "$as" ] || { echo "bbu: --as applies to the default lane only" >&2; exit 2; }
+  BIN="${BBU_BIN:-$(ls -d "$HOME"/.cloakbrowser/chromium-*/Chromium.app/Contents/MacOS/Chromium 2>/dev/null | sort -V | tail -n 1)}"
+  [ -x "$BIN" ] || { echo "bbu: CloakBrowser not found; run: cloakbrowser install (or set BBU_BIN)" >&2; exit 1; }
+  profile="$BBU_HOME/profile"
+  # 不给种子时 CloakBrowser 每次启动随机换一台设备；同一份 cookie 配不同设备是反爬信号。
+  # 种子存在 profile 里，与它同生同删。
+  seed="$profile/bbu-fingerprint-seed"
+  [ -s "$seed" ] || { (umask 077; mkdir -p "$profile"); echo $(( (RANDOM << 15 | RANDOM) % 90000 + 10000 )) > "$seed"; }
+  read -r fingerprint < "$seed"
+  export AGENT_BROWSER_EXECUTABLE_PATH="$BIN"
+  export AGENT_BROWSER_PROFILE="$profile"
+  export AGENT_BROWSER_ARGS="--fingerprint=$fingerprint"
+  export AGENT_BROWSER_SESSION=bbu-login
+else
+  worktree="$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")"
+  export AGENT_BROWSER_SESSION="bbu-$worktree${as:+__$as}"
+  # 登录态按工作树+身份隔离：多个浏览器共用一份快照时，新浏览器会载入落后于在线浏览器的旧
+  # refresh token，轮换制站点判复用而吊销整条会话。
+  # 文件名是 "<key>-<session>.json"，上游按 "<key>-" 前缀取最新一份：key 带 '-' 就会读到
+  # 别的工作树或身份的登录态（bbu-app 读到 bbu-app-guest 的），所以 key 只留字母数字和 '_'。
+  key="bbu_$worktree${as:+__$as}"
+  export AGENT_BROWSER_RESTORE="${key//[^[:alnum:]_]/_}"
+fi
+
+exec agent-browser "$@"
