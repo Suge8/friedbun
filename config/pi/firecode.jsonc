@@ -1,20 +1,17 @@
 {
 	// 功能开关，默认全开；要关哪个就写 false，比如 "features": { "header": false }。
 	// 可选：header（启动横幅）/ statusbar（输入框边框状态）/ tools（工具行渲染）/ presets（预设切换）
-	// / rename（改会话名）/ stats（/tokens 统计）/ claudeSub（Claude 订阅适配：归因与令牌换发 401 自愈）
+	// / stats（/tokens 统计）/ claudeSub（Claude 订阅适配：归因与令牌换发 401 自愈）
 	// / openaiNative（下方 openai 请求层）/ review（/fire-review）/ master（/fire-master）/ watcher（/fire-watch）
 
-	// 快捷键，启动时绑定，改完需重启 pi。
-	"keys": {
-		"rename": "ctrl+r", // 改当前会话名（/resume 列表里另有 keybindings.json 的 alt+r）
-		"fast": "ctrl+f" // 开关当前供应商的加速档（见下方 priority 说明）
-	},
+	// 快捷键：加速档默认 alt+s，要换就写 "keys": { "fast": "..." }（启动时绑定，改完需重启 pi）。
+	// 改会话名用宿主的 app.session.rename 键位（默认 ctrl+r，在 keybindings.json 改），输入框里直接按。
 
 	// OpenAI 系请求层微调。
 	// nativeCompaction：上下文快满时让 OpenAI 官方接口自己压缩历史，代替 pi 本地压缩。
 	// textVerbosity：回答啰嗦程度（low 少废话），仅 OpenAI 支持。
 	// priority：加速档，加钱换更快出字——OpenAI 官方称最高约 2.5× 速、按加价计费；
-	// xAI 官方称 2× 价、提速幅度没公布。ctrl+f 只切当前供应商这一项；没列在 providers 里的供应商无加速档。
+	// xAI 官方称 2× 价、提速幅度没公布。加速键只切当前供应商这一项；没列在 providers 里的供应商无加速档。
 	"openai": {
 		"nativeCompaction": true,
 		"providers": {
