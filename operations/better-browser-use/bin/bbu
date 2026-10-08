@@ -30,7 +30,7 @@ for arg; do
   case "$arg" in --session|--session=*) die "session is named by bbu; use --as <name> for another session" ;; esac
 done
 
-# 同一会话被并发冷启动时，两个守护进程互删 socket、双双失败（启动无锁）。会话的准备步骤
+# 同一会话被并发冷启动时，两个守护进程互删 socket、双双失败（启动无锁，#2074）。会话的准备步骤
 # 在一把全机锁里串行，每次几毫秒。锁挂在 fd 9 上：守护进程会继承打开的 fd，所以锁内一切
 # agent-browser 调用都经 ab_ 并关掉 fd 9，否则锁被守护进程一直占着。
 mkdir -p "$BBU_HOME"
