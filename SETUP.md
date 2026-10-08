@@ -10,11 +10,8 @@
 npm install --global --ignore-scripts @earendil-works/pi-coding-agent@latest
 npm install --global --allow-scripts=agent-browser agent-browser && agent-browser install
 npm install --global cloakbrowser && cloakbrowser install
-curl -fsSL https://herdr.dev/install.sh -o /tmp/herdr-install.sh && /bin/sh /tmp/herdr-install.sh
-export PATH="$HOME/.local/bin:$PATH"
-herdr channel set stable
+brew install herdr starship fastfetch zsh-autosuggestions zsh-syntax-highlighting
 herdr plugin install -y smarzban/herdr-file-viewer
-brew install starship fastfetch zsh-autosuggestions zsh-syntax-highlighting
 brew install --cask ghostty font-maple-mono-nf-cn suge8/tap/bcu
 pi install npm:pi-firecode
 ```
@@ -41,7 +38,7 @@ pi install npm:pi-firecode
 | `config/fastfetch/` 两个文件 | `~/.config/fastfetch/` | 整体写入 |
 | `config/zsh/workstation.zsh` | `~/.config/friedbun/workstation.zsh` | 整体写入 |
 | `<repo>/skills` | `~/.agents/skills` | 软链 `ln -s`，已有目录先改名 `.bak` |
-| `~/.agents/skills/operations/better-browser-use/bin/bbu` | `~/.local/bin/bbu` | 软链 `ln -sf` |
+| `~/.agents/skills/operations/better-browser-use/bin/bbu` | `~/.local/bin/bbu` | 软链 `ln -sf`，先 `mkdir -p ~/.local/bin`（workstation.zsh 把它加进 PATH） |
 
 - 合并：并入我们的键，冲突以我们的值为准，读者自己的键原样保留；`deviceId`、`lastChangelogVersion` 是作者本机状态，不并入。
 - `keybindings.json` 里 `tui.input.tab` 是空数组，意图是腾出 Tab 给 thinking 切换，保留。

@@ -3,6 +3,8 @@
 # launchd、ssh 这类检查权限的工具随之拒绝加载；这里恢复 macOS 默认值。
 umask 022
 export PI_CACHE_RETENTION=long
+typeset -U path
+path=(~/.local/bin $path)
 [[ -r "$HOME/.config/friedbun/env.zsh" ]] && source "$HOME/.config/friedbun/env.zsh"
 
 [[ -o interactive ]] || return 0
