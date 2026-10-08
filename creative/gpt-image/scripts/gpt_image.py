@@ -104,12 +104,16 @@ def generate(args) -> dict:
     }
     payload = build_payload(args.prompt, args.model, args.size, args.quality, args.ref)
     image_item = None
+    server_error = None
     for event in iter_sse(ENDPOINT, payload, headers, args.timeout):
+        if event.get("type") in ("error", "response.failed"):
+            error = event.get("error") or event.get("response", {}).get("error") or {}
+            server_error = f"{error.get('code')}: {error.get('message')}"
         for item in walk(event):
             if item.get("type") == "image_generation_call" and item.get("result"):
                 image_item = item
     if not image_item:
-        raise RuntimeError("no image_generation_call.result in SSE response")
+        raise RuntimeError(server_error or "no image_generation_call.result in SSE response")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_bytes(base64.b64decode(image_item["result"]))
