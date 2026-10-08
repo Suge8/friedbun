@@ -3,7 +3,6 @@ name: copywriting
 disable-model-invocation: true
 description: 撰写或优化以转化为目标的网站和产品文案：标题、Hero、CTA、价值主张、落地页、定价页、功能页和产品描述
 metadata:
-  version: 2.0.0
   source: coreyhaines31/marketingskills
 ---
 
@@ -11,7 +10,7 @@ metadata:
 
 ## 开始前
 
-先读已有产品与营销事实源：`.agents/product-marketing.md`、`.claude/product-marketing.md`、旧版 `product-marketing-context.md`，以及项目的 PRODUCT、README 和当前页面。只补问会改变成稿的缺口：
+先读已有产品与营销事实源：`.agents/product-marketing.md`（有就以它为准）、项目的 PRODUCT、README 和当前页面。只补问会改变成稿的缺口：
 
 - 页面类型与唯一主行动；
 - 目标用户、痛点、异议和用户自己的说法；
@@ -27,7 +26,7 @@ metadata:
 - CTA 写「动作 + 获得物」。
 - 保持项目既有语气。
 
-逐项避开这些失败模式：Submit、Learn More 式空 CTA；「Great product!」「Love it!」式无具体结果的评价；"That being said" "It's worth noting that" "At its core" "In today's digital landscape" "When it comes to the realm of" "This begs the question" "Let's delve into"、段首 "In conclusion"、成串的 moreover/furthermore；每句都加过渡词。
+逐项避开这些失败模式：Submit、Learn More 式空 CTA；「Great product!」「Love it!」式无具体结果的评价；套话开头与过渡（"That being said" "It's worth noting that" "At its core" "In today's digital landscape" "Let's delve into"、段首 "In conclusion"、成串的 moreover/furthermore），每句都加过渡词。
 
 ## 页面重点
 
