@@ -2,7 +2,7 @@
 
 <p align="center"><a href="README.md">English</a> · <b>中文</b></p>
 
-25 个 skill、FireCode 多代理编排，还能让 agent 操作 Mac 应用。只要 skills 用一行命令；要整套配置，把一个链接发给你的 coding agent 就能装好。
+25 个 skill、FireCode 多代理编排，还能让 agent 操作 Mac 应用，一个链接装好。
 
 ```bash
 npx skills add Suge8/friedbun

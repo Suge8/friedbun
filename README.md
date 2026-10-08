@@ -2,7 +2,7 @@
 
 <p align="center"><b>English</b> · <a href="README.zh-CN.md">中文</a></p>
 
-25 skills, multi-agent orchestration with FireCode, and an agent that can use Mac apps. Get just the skills with one command, or send one link to your coding agent to install the whole setup.
+25 skills, multi-agent orchestration with FireCode, and an agent that can use Mac apps — all set up from one link.
 
 ```bash
 npx skills add Suge8/friedbun
