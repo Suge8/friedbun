@@ -36,7 +36,10 @@
 			"调研员": {
 				"model": "anthropic/claude-haiku-5-5/low",
 				"use": "只读不改：联网搜索、查文档与版本、读日志、按线索定位代码与核对资料",
-				"fallback": ["anthropic/claude-sonnet-5-5/medium", "openai-codex/gpt-6-luna/medium"]
+				"fallback": [
+					"anthropic/claude-sonnet-5-5/medium",
+					"openai-codex/gpt-6-luna/medium"
+				]
 			},
 			"工程师": {
 				"model": "anthropic/claude-sonnet-5-5/high",
@@ -44,9 +47,9 @@
 				"fallback": ["openai-codex/gpt-6.1-sol/high"]
 			},
 			"批量工": {
-				"model": "anthropic/claude-haiku-5-5/medium",
+				"model": "anthropic/claude-sonnet-5-5/medium",
 				"use": "规格明确、靠测试或类型检查就能验收的批量改动：按模式迁移、改名、补样板；量大时按文件划界并行多派",
-				"fallback": ["anthropic/claude-sonnet-5-5/medium", "openai-codex/gpt-6-luna/medium"]
+				"fallback": ["openai-codex/gpt-6-luna/medium"]
 			},
 			"设计师": {
 				"model": "anthropic/claude-opus-5-5/medium",
@@ -56,7 +59,10 @@
 			"哨兵": {
 				"model": "anthropic/claude-haiku-5-5/low",
 				"use": "CI、部署、长测试等待",
-				"fallback": ["anthropic/claude-sonnet-5-5/low", "openai-codex/gpt-6-luna/low"]
+				"fallback": [
+					"anthropic/claude-sonnet-5-5/low",
+					"openai-codex/gpt-6-luna/low"
+				]
 			}
 		}
 	},
