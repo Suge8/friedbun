@@ -11,8 +11,6 @@
     "anthropic/claude-fable-5-1",
     "anthropic/claude-sonnet-5-5",
     "anthropic/claude-opus-5-5",
-    "anthropic/claude-opus-4-6",
-    "xai/grok-4.7",
     "deepseek/deepseek-flash"
   ],
   "hideThinkingBlock": true,

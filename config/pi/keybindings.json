@@ -1,9 +1,0 @@
-{
-  "tui.editor.cursorWordRight": [
-    "alt+right",
-    "ctrl+right"
-  ],
-  "tui.editor.cursorRight": [
-    "right"
-  ]
-}

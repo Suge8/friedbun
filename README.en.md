@@ -45,7 +45,7 @@ Your agent operates any app on your Mac by itself — in the background, without
 <details>
 <summary>What the full setup installs</summary>
 
-- [Pi](https://pi.dev) coding agent with FireCode, my settings, keybindings and model roles, and my system prompt (`SYSTEM.md`). The prompt changes the agent's tone and habits; if you don't want that, restore the `.bak` it leaves behind.
+- [Pi](https://pi.dev) coding agent with FireCode, my settings and model roles, and my system prompt (`SYSTEM.md`). The prompt changes the agent's tone and habits; if you don't want that, restore the `.bak` it leaves behind.
 - Terminal: [Herdr](https://herdr.dev), [Ghostty](https://ghostty.org), [Starship](https://starship.rs), fastfetch and a zsh snippet.
 - bcu for Mac apps; [agent-browser](https://github.com/vercel-labs/agent-browser) and [CloakBrowser](https://cloakbrowser.dev) for the web, in a separate browser from the one you use.
 - The skills, linked to `~/.agents/skills`.

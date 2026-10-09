@@ -27,7 +27,6 @@ pi install npm:pi-firecode
 | 文件 | 落点 | 方式 |
 | --- | --- | --- |
 | `config/pi/settings.json` | `~/.pi/agent/settings.json` | 合并 |
-| `config/pi/keybindings.json` | `~/.pi/agent/keybindings.json` | 合并 |
 | `config/pi/models.json` | `~/.pi/agent/models.json` | 合并 |
 | `config/pi/SYSTEM.md` | `~/.pi/agent/SYSTEM.md` | 整体写入 |
 | `config/pi/firecode.jsonc` | `~/.pi/agent/extensions/firecode/config.jsonc` | 整体写入 |
@@ -58,7 +57,7 @@ export TINYFISH_API_KEY='<tinyfish-key>'
 
 把下面两件事一次交给读者，等读者说做完：
 
-1. 新开一个 Ghostty 窗口运行 `pi`，输入 `/login`，至少登录一家模型供应商。作者用 `anthropic`、`openai-codex`、`xai`、`deepseek`、`kimi-coding`；web-search 默认搜索只用 `anthropic` 和 `openai-codex` 中已登录的那家。
+1. 新开一个 Ghostty 窗口运行 `pi`，输入 `/login`，至少登录一家模型供应商。作者用 `anthropic`、`openai-codex`、`deepseek`、`kimi-coding`；web-search 默认搜索只用 `anthropic` 和 `openai-codex` 中已登录的那家。
 2. 在终端运行 `bcu setup`，在「系统设置 → 隐私与安全性」给 `bcu.app` 打开**辅助功能**和**屏幕录制**，回终端按回车。
 
 **完成标准**：`pi --list-models` 至少列出一个模型；`bcu doctor` 裸退出码为 0。

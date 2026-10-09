@@ -45,7 +45,7 @@ Agent 能自己操作你电脑上的任何应用，全程在后台，不抢你�
 <details>
 <summary>整套配置会装什么</summary>
 
-- [Pi](https://pi.dev) coding agent 加 FireCode，我的设置、快捷键、模型角色，以及我的系统提示词 `SYSTEM.md`。它装上后会改变 agent 的语气和习惯，不想要就用它留下的 `.bak` 还原。
+- [Pi](https://pi.dev) coding agent 加 FireCode，我的设置、模型角色，以及我的系统提示词 `SYSTEM.md`。它装上后会改变 agent 的语气和习惯，不想要就用它留下的 `.bak` 还原。
 - 终端：[Herdr](https://herdr.dev)、[Ghostty](https://ghostty.org)、[Starship](https://starship.rs)、fastfetch 和一段 zsh 配置。
 - 操作 Mac 应用的 bcu；操作网页的 [agent-browser](https://github.com/vercel-labs/agent-browser) 和 [CloakBrowser](https://cloakbrowser.dev)，用的是单独的浏览器，不碰你平时用的那个。
 - skills，链接到 `~/.agents/skills`。
