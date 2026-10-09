@@ -1,6 +1,6 @@
 # 手势驱动交互
 
-适用于拖拽、swipe-to-dismiss、bottom sheet、carousel、drag-to-reorder。动效从当前呈现值开始、继承用户速度、投射动量、随时可被抓住反向。spring 起调值和实现坑见 `motion.md`。
+适用于拖拽、swipe-to-dismiss、bottom sheet、carousel、drag-to-reorder。动效从当前呈现值开始、继承用户速度、投射动量、随时可被抓住反向。spring 起调值（含 Apple damping/response 对照）和实现坑见 `motion.md`。
 
 ## 跟踪
 
@@ -14,7 +14,7 @@
 
 ## 释放：动量决定去向
 
-- dismiss 判定用速度，不只用距离：`velocity = |distance| / elapsedMs`，超过约 0.11 即 dismiss，轻甩即可。
+- dismiss 判定用速度，不只用距离：`velocity = |distance| / elapsedMs`，超过阈值即 dismiss，轻甩即可：Toast 类小元素约 0.11 px/ms（Sonner），bottom sheet 约 0.4 px/ms（Vaul）。
 - 提交还是回弹由释放时速度的符号决定，不由当前位置决定。
 - 落点用动量投射，再吸附到离投射终点最近的 snap point：
 
@@ -49,18 +49,6 @@ function rubberband(overshoot, dimension, constant = 0.55) {
 - 手势可及的动效用 spring，不用 CSS transition/keyframes：中断时从元素当前屏幕值继续，从逻辑目标值重启会跳变。
 - 动画途中被再次抓住立即跟手；关闭中的 sheet 被抓住直接跟随，不先关完再重开。
 - 反向重定向时混合当前速度，避免速度断崖。
-
-## Spring 参数（Apple 映射）
-
-Apple 用 damping ratio + response 表达 spring，与 `stiffness/damping/mass` 是两套表达，任选一套：
-
-| 交互 | Damping | Response |
-|---|---:|---:|
-| 移动 / 重定位 | 1.0 | 0.4 |
-| 旋转 | 0.8 | 0.4 |
-| Drawer / Sheet | 0.8 | 0.3 |
-
-默认 damping 1.0（无回弹）；只有释放本身带动量（甩、抛）时才降到约 0.8。刚淡入的菜单出现回弹是错的，被甩出的卡片回弹是对的。
 
 ## 触屏轴向
 

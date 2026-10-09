@@ -27,7 +27,9 @@
 | 需求 | 工具 |
 |---|---|
 | hover、按下、换色、由 class 或属性控制的状态切换 | CSS transition |
-| 挂载入场，无 JS 状态 | `@starting-style` |
+| 挂载入场，无 JS 状态 | `@starting-style`（Baseline 2024-08） |
+| 展开收起 | `grid-template-rows: 0fr → 1fr` |
+| Tab / 分段控件的选中指示块 | 绝对定位块的 `translate`；不等宽或跨容器共享位置用 Motion `layoutId` 或同文档 View Transitions |
 | 预定动画，页面忙于加载时仍要流畅 | CSS animation（不占主线程） |
 | 需要 JS 控制、不想加依赖 | WAAPI `element.animate()` |
 | spring、共享布局、退场、手势驱动的值 | Motion |
@@ -53,6 +55,7 @@
 | Tooltip | 125ms，opacity + `scale(.97→1)` | 同时长反向 |
 | Popover / Dropdown | 140–180ms，从触发方向位移 4–6px，`scale(.98→1)` | 100–130ms 反向收起 |
 | Dialog | 180–220ms，opacity + `translateY(8px)` + `scale(.98→1)` | 140–170ms，位移 4px |
+| Tab 面板、同级内容替换 | 160–200ms，opacity + 水平位移 8–12px，方向随选项先后 | 同时长反向，或直接交叉淡出 |
 | Drawer / Sheet | 至多 500ms，`translateY(100%→0)`，`--ease-drawer` | 反向 |
 | Toast | 180–220ms，从堆叠方向进入 | 130–160ms 淡出，剩余项 180ms 重排 |
 
@@ -63,7 +66,7 @@
 - 切 tab、hover 列表行、筛选重排、打开菜单等高频交互即时呈现；同一区域只在本会话首次进入时错峰。
 - Tooltip 首次 hover 保留延时防误触；已有 Tooltip 打开时，相邻 Tooltip 立即显示并跳过入场（Base UI 的 `[data-instant]` 设 `transition-duration: 0ms`）。
 - 首屏默认可见。条件区块收起时同步处理 `inert` 和焦点。
-- 手风琴是少数允许动 `height` 的场景：保持短（≈200ms），用 JS 或 headless 原语量出内容高度，不动画到 `auto`。
+- 展开收起：外层 `display: grid` 过渡 `grid-template-rows: 0fr → 1fr`（≈200ms），内层 `min-height: 0; overflow: hidden`；不动画 `height: auto`。`interpolate-size: allow-keywords` 只有 Chromium 129+ 支持（Firefox、Safari 未支持，2026-10 核实），只能当增强。headless 原语已给出内容高度变量时用原语。
 - 列表新增可用轻量 enter，删除后用 FLIP 重排；高频流式更新即时呈现。
 
 ## clip-path 配方
@@ -90,17 +93,45 @@
 - 同时把 elevation 降一级更像物理按压。超过 200px 的元素用位移和阴影，缩放会让文字发虚。
 - 用 `transition-property: scale`（或 transform）保持可中断，中途松手平滑回弹。
 - 纯文字链接和导航项只换颜色。
+- Hover 反馈同样克制：换底色或边框色，或升一级 elevation，位移不超过 2px，不放大卡片。
 
 ## 弹簧与空间连续性
 
 - 颜色、opacity 和短 hover 用 CSS tween；手势、共享布局、可中断位移和有深度的 Card 编排才用 spring。单个按钮在 CSS 层解决。
 - 项目没有 spring token 时，微型图标或布局切换从 `{ stiffness: 500, damping: 30, mass: 0.8 }` 起调；Card、CoverFlow 等较大空间编排从 `{ stiffness: 220, damping: 24, mass: 0.8 }` 起调。默认无明显回弹，只有动量手势或 playful 语气允许轻微 overshoot（bounce 0.1–0.3）。
-- Motion 的 `duration/bounce` 与 `stiffness/damping/mass` 是两套配置，只写其中一套。
+- Motion 的 `duration/bounce` 与 `stiffness/damping/mass` 是两套配置，只写其中一套。Apple 式 damping ratio + response 是第三套表达，用于对照原生手感：
+
+| 交互 | Damping | Response |
+|---|---:|---:|
+| 移动 / 重定位 | 1.0 | 0.4 |
+| 旋转 | 0.8 | 0.4 |
+| Drawer / Sheet | 0.8 | 0.3 |
+
+- 默认 damping 1.0（无回弹）；只有释放本身带动量（甩、抛）时才降到约 0.8。刚淡入的菜单出现回弹是错的，被甩出的卡片回弹是对的。
 - 装饰性的跟随指针效果用 Motion `useSpring` 插值，不直接绑定指针坐标；用户正在读或操作的数据不为风格而动。
 - 一组元素由一个交互状态驱动；位置、旋转、缩放、opacity 和 z-order 由 `index - activeIndex` 等同一几何关系派生。每个组件只保留一个主运动意图。
 - 图标或文案替换用固定占位和叠层；presence 初始渲染静止，退出完成前保留旧层，共享布局从旧几何连续过渡到新几何。
 
+## 选中指示块
+
+等宽的 Tab 或分段控件纯 CSS 即可，选中块是一个随索引平移的伪元素：
+
+```css
+.segmented { position: relative; display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; padding: 2px; background: var(--track); border-radius: var(--radius); }
+.segmented::before {
+  content: ""; position: absolute; inset-block: 2px; left: 2px;
+  width: calc((100% - 4px) / var(--count)); border-radius: calc(var(--radius) - 2px);
+  background: var(--thumb); box-shadow: var(--shadow-border);
+  translate: calc(var(--index) * 100%) 0;
+  transition: translate var(--duration-state) var(--ease-move);
+}
+```
+
+`--count` 与 `--index` 由选中状态写入。选项不等宽时测量选中项的 `offsetLeft/offsetWidth` 写入变量，或用 Motion `layoutId`。文字颜色随选中块同步变化，用上面的 clip-path 配方。
+
 ## 视图级转场（路由）
+
+- 同文档 View Transitions 自 2025-10 起是 Baseline（Chrome 111+、Safari 18+、Firefox 144+），`:active-view-transition-type()` 自 2026-01；跨文档（`@view-transition`）Firefox 未支持，只作增强。
 
 - 路由推移交给浏览器 View Transitions：旧侧是快照、退场零重渲染，新转场启动即跳过旧转场。只有转场期间仍需与旧内容交互时才自建双层退场树。
 - 根显式退出（`:root { view-transition-name: none }`），只命名当前在动的那一层；嵌套层由 `:active-view-transition-type()` 决定谁动，静止层 `animation: none`。
@@ -114,7 +145,7 @@
 
 - 只声明实际变化的属性，不写 `transition: all`。
 - 可被快速重复触发的进出场用 transition：可中断重定向；keyframes 中断即从零重播。
-- Motion 的 `x`/`y`/`scale` 简写在主线程 rAF 运行，页面负载下掉帧；确定性动画用 CSS 或 WAAPI，JS 动画需要硬件加速时写完整 `transform` 字符串。
+- Motion 的 `x`/`y`/`scale` 简写在主线程运行，页面忙时掉帧；确定性动画用 CSS 或 WAAPI，JS 动画需要硬件加速时写完整 `transform` 字符串（motion.dev/docs/performance，2026-10）。
 - 拖拽跟随直接写目标元素的 `transform`；在父容器改 CSS 变量会触发全子树样式重算。
 - `will-change` 只在测量证明有收益时用，动画后释放。
 - 同一节点的同一属性只由 CSS 或 Motion 中一个系统控制；需要组合时拆 wrapper。

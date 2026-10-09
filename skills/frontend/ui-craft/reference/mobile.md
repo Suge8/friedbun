@@ -15,7 +15,7 @@
 | 内容停在刘海外、边缘留色块 | viewport 加 `viewport-fit=cover`，固定页头、底部栏、toast、sheet 用 `env(safe-area-inset-*)` 补内距（`calc(1rem + env(safe-area-inset-bottom, 0px))`）；没有该 meta 时 `env()` 全为 0 |
 | 长按选中按钮文字或弹出系统菜单 | 控件（button、tab、chip、拖拽把手）加 `user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;`；正文、地址、错误信息、订单号保持可选，不加在 `body` 上 |
 | 横滑 carousel 时页面跟着上下抖 | 手势表面用 `touch-action` 声明保留的轴，见 `gestures.md` |
-| 状态栏颜色与页面不搭 | 每个配色方案一条 `theme-color`，取页面顶部（页头背景）的颜色；类名切主题时由 JS 同步更新 |
+| 状态栏、浏览器栏颜色与页面不搭 | Chrome / Android：每个配色方案一条 `theme-color`，取页头背景色；类名切主题时由 JS 同步更新。iOS 26+ Safari 不再读 `theme-color`，栏色取自 `html`/`body` 背景，或视口顶部 fixed / sticky 条的背景：让这两处与页面顶部同色，顶部固定条不加 `backdrop-filter`（Safari 26 不对带它的条取色，WebKit bug 319479，2026-07 报告，状态 NEW） |
 | Android 键盘弹出时底部输入框被遮住 | viewport 加 `interactive-widget=resizes-content`，让键盘缩小布局视口 |
 
 ## 基线

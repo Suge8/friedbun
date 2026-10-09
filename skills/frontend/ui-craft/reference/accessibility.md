@@ -1,10 +1,10 @@
 # 无障碍细则
 
-只保留模型默认不会做对的部分。基线是 WCAG 2.2 AA，复杂组件按 WAI-ARIA APG。项目用 Base UI、Radix 或原生 `<dialog>` 时，焦点陷阱、还焦、Escape 与嵌套归原语，不手写。
+只保留模型默认不会做对的部分。基线是 WCAG 2.2 AA，复杂组件按 WAI-ARIA APG。项目用 Base UI、Radix 或原生 `<dialog>` 时，焦点陷阱、还焦、Escape 与嵌套归原语，不手写。没有组件库的项目优先原生 `popover`、`<dialog>`、`command`/`commandfor`（Baseline 2025-12）和 anchor positioning（Baseline 2026-01），不为弹层新增依赖。
 
 ## 焦点
 
-- 优先保留浏览器原生焦点环，只加 `outline-offset: 2px`。设计需要自定义时用项目的焦点 token，至少 2px 实线，并沿整圈核对它穿过的每种相邻颜色（组件底色、页面、图片、渐变、hover/选中态）；`currentColor` 也要同样核对过才算数。
+- 优先保留浏览器原生焦点环，只加 `outline-offset: 2px`；只在键盘聚焦时出环（`:focus-visible`），鼠标点按钮、卡片不留环。文本框聚焦无论鼠标键盘都显示，用边框色加深表达即可（对相邻色 ≥ 3:1），不必叠外圈。设计需要自定义时用项目的焦点 token，至少 2px 实线，并沿整圈核对它穿过的每种相邻颜色（组件底色、页面、图片、渐变、hover/选中态）；`currentColor` 也要同样核对过才算数。
 - `forced-colors: active` 下保留系统颜色调整或显式用 `Highlight`，不用 `forced-color-adjust: none` 冻结作者颜色。
 - 包裹层需要随内部输入亮起时用 `:focus-within`。
 - 弹窗打开时聚焦第一个可聚焦元素；破坏性确认聚焦最不具破坏性的动作。关闭时还焦到触发器，触发器已不存在时还到最近的逻辑容器。弹窗加 `overscroll-behavior: contain`。
@@ -15,7 +15,7 @@
 
 - Escape 先关最后打开的：tooltip，然后菜单，然后弹窗。
 - Tabs：面板即时渲染时自动激活（方向键聚焦即切换），切换代价高时手动激活（Enter/Space）。Home/End 跳首尾。
-- `<textarea>` 中 Enter 换行，⌘/Ctrl+Enter 提交。
+- 表单里的 `<textarea>` 中 Enter 换行，⌘/Ctrl+Enter 提交；聊天输入框反过来，Enter 发送、Shift+Enter 换行，输入法组合中（`event.isComposing`）的 Enter 只用于选字，不发送。
 - 站点导航用 `<nav>` 加列表，不用 `role="menu"`：它承诺应用式方向键行为。
 
 ## 名称与语义
