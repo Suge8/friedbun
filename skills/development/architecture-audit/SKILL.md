@@ -42,4 +42,4 @@ disable-model-invocation: true
 
 - 只有一个适配器的端口是假设，两个（通常是生产 + 测试）才是真的；不够两个就别开端口，那只是多一层间接。
 - 内部接缝可以给自己的测试用，不为此暴露到接口上。
-- 加深后，浅模块上的旧单元测试删掉；新测试按 [better-test](../better-test/SKILL.md) 只经新接口断言可观察结果。
+- 加深后，浅模块上的旧单元测试删掉；改动按 [better-test](../better-test/SKILL.md) 从新接口的真实入口验证。
