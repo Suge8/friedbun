@@ -1,0 +1,24 @@
+{
+  "name": "video",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio --no-open",
+    "typecheck": "tsc",
+    "layout": "node scripts/layout.mjs",
+    "render": "rm -f out/render.mp4 && remotion render Main out/render.mp4 --crf=22",
+    "render:nomusic": "rm -f out/nomusic.aac out/render-nomusic.mp4 && remotion render Main out/nomusic.aac --codec=aac --props='{\"noMusic\":true}' && ffmpeg -loglevel error -i out/render.mp4 -i out/nomusic.aac -map 0:v -map 1:a -c copy out/render-nomusic.mp4 && rm out/nomusic.aac"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.534",
+    "@remotion/cli": "4.0.534",
+    "@remotion/media": "4.0.534",
+    "@remotion/renderer": "4.0.534",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "duration": 0,
+  "voice": "",
+  "format": "short",
+  "captions": false,
+  "marks": {},
+  "beats": [
+    {
+      "id": "hook",
+      "from": "l1",
+      "start": 0,
+      "end": 0
+    },
+    {
+      "id": "payoff",
+      "from": "l2",
+      "start": 0,
+      "end": 0,
+      "payoff": true
+    }
+  ],
+  "lines": [
+    {
+      "id": "l1",
+      "text": "第一句旁白，屏上的写法。",
+      "gap": 0.2
+    },
+    {
+      "id": "l2",
+      "text": "兑现那句。",
+      "say": "读法和屏上不同时才写 say。"
+    }
+  ],
+  "cues": []
+}

@@ -1,0 +1,20 @@
+{
+  "short": {
+    "speed": 1.15,
+    "gap": 0.15,
+    "tail": 0.8,
+    "hold": 0.5,
+    "shot": 3,
+    "still": 0.8,
+    "subject": 0.5
+  },
+  "explainer": {
+    "speed": 1,
+    "gap": 0.4,
+    "tail": 1.5,
+    "hold": 1,
+    "shot": 7,
+    "still": 2.5,
+    "subject": 0.33
+  }
+}

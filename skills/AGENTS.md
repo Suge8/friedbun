@@ -17,7 +17,7 @@
 | 项目宣传物料与演示图 | `promo` |
 | 转化文案：标题、Hero、CTA、落地页 | `copywriting` |
 | 实测数据写成社媒帖：核数、文案、数据图、发布 | `post` |
-| 视频策划、Remotion 实现与生成 | `video` |
+| 视频策划、Remotion 实现、声音与成片检查、模型直出 | `video` |
 | 提交、版本、Tag 与发布 | `ship` |
 | 架构体检：找该加深的浅模块并设计接口 | `architecture-audit` |
 | 调研、审计、设计探索的子代理扇出档位（低 / 中 / 高） | `fan-out` |
