@@ -5,6 +5,7 @@ import argparse
 import base64
 import json
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -27,8 +28,16 @@ def load_auth(path: Path) -> tuple[str, str]:
 
 
 # 托管的 image_generation 工具不遵守 size/quality 参数：画幅与质量由模型按 prompt 文字决定
-def build_payload(prompt: str, model: str, refs: list[Path]) -> dict:
-    content: list[dict] = [{"type": "input_text", "text": prompt}]
+# 只开 background 参数时模型常把纸张、桌面或投影画进底，零件抠不干净；点名不要它们后底才透明
+TRANSPARENT_SUFFIX = (
+    " The subject alone on a fully transparent background with empty margin around it:"
+    " no paper, no backdrop, no surface, no cast shadow, no glow."
+)
+
+
+def build_payload(prompt: str, model: str, refs: list[Path], transparent: bool) -> dict:
+    text = prompt + TRANSPARENT_SUFFIX if transparent else prompt
+    content: list[dict] = [{"type": "input_text", "text": text}]
     for ref in refs:
         mime = "image/png" if ref.suffix.lower() == ".png" else "image/jpeg"
         encoded = base64.b64encode(ref.read_bytes()).decode()
@@ -47,7 +56,13 @@ def build_payload(prompt: str, model: str, refs: list[Path]) -> dict:
                 "content": content,
             }
         ],
-        "tools": [{"type": "image_generation", "output_format": "png"}],
+        "tools": [
+            {
+                "type": "image_generation",
+                "output_format": "png",
+                "background": "transparent" if transparent else "auto",
+            }
+        ],
         "tool_choice": "auto",
         "parallel_tool_calls": False,
         "stream": True,
@@ -92,7 +107,7 @@ def generate(args) -> dict:
         "Accept": "text/event-stream",
         "User-Agent": "gpt-image-skill/1.0",
     }
-    payload = build_payload(args.prompt, args.model, args.ref)
+    payload = build_payload(args.prompt, args.model, args.ref, args.transparent)
     image_item = None
     server_error = None
     for event in iter_sse(ENDPOINT, payload, headers, args.timeout):
@@ -132,7 +147,33 @@ def parse_args():
         default=[],
         help="Reference image path. Repeatable.",
     )
+    parser.add_argument(
+        "--transparent", action="store_true", help="Transparent background PNG."
+    )
     return parser.parse_args()
+
+
+# 过载、限流、服务端错误和断连都是暂时的：等一会儿重试；鉴权和请求本身的错误直接报
+RETRY_WAITS = (15, 45)
+
+
+def transient(error: Exception) -> bool:
+    if isinstance(error, urllib.error.HTTPError):
+        return error.code == 429 or error.code >= 500
+    if isinstance(error, (urllib.error.URLError, ConnectionError, TimeoutError)):
+        return True
+    return any(k in str(error) for k in ("overloaded", "rate_limit", "server_error"))
+
+
+def generate_with_retry(args) -> dict:
+    for wait in RETRY_WAITS:
+        try:
+            return generate(args)
+        except Exception as error:
+            if not transient(error):
+                raise
+            time.sleep(wait)
+    return generate(args)
 
 
 def main() -> int:
@@ -143,7 +184,7 @@ def main() -> int:
         print(json.dumps({"ok": False, "error": "empty prompt"}), file=sys.stderr)
         return 2
     try:
-        print(json.dumps(generate(args), ensure_ascii=False))
+        print(json.dumps(generate_with_retry(args), ensure_ascii=False))
         return 0
     except urllib.error.HTTPError as error:
         body = error.read(1200).decode("utf-8", "replace")
