@@ -1,6 +1,6 @@
 ---
 name: ui-picks
-description: UI 库选型表：做界面时按场景从表里取组件移植进项目，覆盖装饰特效、卡片编排、状态转场、微交互小件、产品控件、营销/仪表盘块、AI 聊天界面、界面音效
+description: UI 库选型表：做界面时按场景从表里取组件移植进项目，覆盖装饰特效、卡片编排、状态转场、微交互小件、产品控件、营销/仪表盘块、技术图解与主视觉、AI 聊天界面、界面音效
 ---
 
 # UI Picks
@@ -37,6 +37,7 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 | 产品控件整包，React 19 + Tailwind v4 | Appica UI |
 | 复杂交互控件（签名、快捷键录制、@提及、滑动操作、长按确认、主题切换转场） | Arc |
 | 营销页与仪表盘的动效块（hero、卡片块、定价块、图表） | Spectrum UI |
+| 把一个技术概念画成会动的机器（文档配图、落地页或官网主视觉） | Anatomy |
 | AI 界面视觉件（思考态、流式、审批、工具调用） | Beautiful UI / Fluid Functionalism |
 | AI 聊天 runtime（线程、流式、工具调用） | assistant-ui |
 | 界面音效 | UI SFX |
@@ -97,6 +98,12 @@ description: UI 库选型表：做界面时按场景从表里取组件移植进�
 - 建立在 shadcn + Radix + Motion 上，机读 <https://ui.spectrumhq.in/llms.txt>，Apache-2.0。
 - 获取：`npx shadcn@latest add @spectrumui/<组件>`，或 `claude mcp add spectrum-ui -- npx -y @spectrumui/mcp` 后直接让 MCP 装；每个组件页有已验证命令。
 - 红线：每个组件按 registry 拉自己的依赖（motion、vaul、react-use-measure 等），移植流程第 2 步逐个对账。
+
+### Anatomy — 可交互的等轴测机器图（框架无关 TS→SVG/HTML / React / 自定义元素）
+
+- 把概念做成一台由几十到上百个立体零件组成、会动的机器，零件运动和读数出自同一份模型；只有一种画风：线稿等轴测、四档明暗、一个强调色。站点 [skills.wheresryan.sh/anatomy](https://skills.wheresryan.sh/anatomy)，源码 [wheresryan22/anatomy](https://github.com/wheresryan22/anatomy)，MIT，零依赖，Node ≥ 20.10。
+- 现做一张：在目标项目里 `npx skills add wheresryan22/anatomy`（默认装进当前项目，`-g` 才装到全局），按它的流程做。用现成的 33 张图：`npm i anatomy-figures`，React 组件或 `<anatomy-*>` 自定义元素，颜色走 26 个 `--anatomy-*` 变量，映射到项目 token。
+- 红线：小图 30–90 分钟、主视觉级 2–4 小时，开工前跟用户说清；画风和项目视觉语言不搭时不用；原生 APP 只能 WebView 嵌入或导出静态 SVG。
 
 ### Beautiful UI — AI-native 界面原语（React / TypeScript）
 
