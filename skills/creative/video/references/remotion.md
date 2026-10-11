@@ -8,7 +8,7 @@
 
 把 skill 的 `template/` 整个复制成项目目录，`npm install`；需要系统里有 ffmpeg 和 ffprobe。每个文件开头的注释写了它管什么、怎么用，命令在 `package.json` 的 scripts 和两个 Python 脚本的 `--help` 里。分工：
 
-- 画面从 `src/Film.tsx` 的 `Scene` 写起，兑现前的冻结、字幕和声音它已经接好；镜头、零件、文字条、颗粒在 `src/stage.tsx`，动画时间在 `src/motion.ts`，字号在 `src/type.ts`，字体在 `src/fonts.ts`。
+- 画面从 `src/Film.tsx` 的 `Scene` 写起，兑现前的冻结、字幕和声音它已经接好；镜头、零件、文字条、颗粒在 `src/stage.tsx`，动画时间在 `src/motion.ts`，字号在 `src/type.ts`，安全区在 `src/safe-zones.json`（按高宽比分 9:16、3:4、横版三档，`src/safe.ts` 取用），字体在 `src/fonts.ts`。
 - 时间只经 `src/timeline.ts` 从 `timeline.json` 取；声音只改 `timeline.json`，不改 `Soundtrack`。
 - 旁白用 `scripts/fish_tts.py`，素材准备和成片检查用 `scripts/media.py`，排版检查是 `npm run layout`；都在项目目录运行。
 - `npm run render:nomusic` 拿 `out/render.mp4` 的画面配一条不含配乐的音轨，先跑完 `npm run render` 再跑它。

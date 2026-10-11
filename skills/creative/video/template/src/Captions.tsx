@@ -1,7 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { FONTS } from "./fonts";
-import zones from "./safe-zones.json";
 import { line, timeline } from "./timeline";
+import { safeZone } from "./safe";
 import { textSize } from "./type";
 
 // 字幕：timeline.json 的 captions 为 true 时由 Film.tsx 叠在最上层，和画面一起冻结。取旁白原文按标点切成短句，时间按句内字数分配，句末标点不上屏；
@@ -26,12 +26,10 @@ export const Captions: React.FC<{ ink?: string; stroke?: string; plate?: string 
   const t = useCurrentFrame() / fps;
   const cue = cues.find((c) => t >= c.start && t < c.end);
   if (!cue) return null;
-  const vertical = height > width;
-  const k = width / (vertical ? 1080 : 1920);
-  const z = zones[vertical ? "vertical" : "horizontal"];
+  const z = safeZone(width, height);
   const size = textSize("caption", width, height);
   return (
-    <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: z.bottom * k, paddingLeft: z.left * k, paddingRight: z.right * k }}>
+    <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: z.bottom, paddingLeft: z.left, paddingRight: z.right }}>
       <div style={{
         color: ink, fontFamily: FONTS.display.family, fontWeight: 800, fontSize: size, lineHeight: 1.25, textAlign: "center", textWrap: "balance",
         WebkitTextStroke: plate ? undefined : `${Math.round(size * 0.18)}px ${stroke}`, paintOrder: "stroke fill",

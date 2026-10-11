@@ -11,11 +11,13 @@ const TRANSIENT = 0.5;
 const write = process.stdout.write.bind(process.stdout);
 process.stdout.write = () => true;
 const inputProps = { layoutCheck: true, noMusic: true };
+// remotion.config.ts 的 ANGLE 设置只管 CLI；这里走 API，要自己传，否则 WebGL（3D 画面、@remotion/effects）退回软件渲染，慢十倍还会超时
+const chromiumOptions = { gl: "angle" };
 const serveUrl = await bundle({ entryPoint: path.resolve("src/index.ts") });
-const composition = await selectComposition({ serveUrl, id: "Main", inputProps });
+const composition = await selectComposition({ serveUrl, id: "Main", inputProps, chromiumOptions });
 const seen = new Map();
 await renderFrames({
-  composition, serveUrl, inputProps, outputDir: null, imageFormat: "none", everyNthFrame: EVERY,
+  composition, serveUrl, inputProps, chromiumOptions, outputDir: null, imageFormat: "none", everyNthFrame: EVERY,
   concurrency: 4, onStart: () => {}, onFrameUpdate: () => {},
   onBrowserLog: ({ text }) => {
     if (!text.startsWith("LAYOUT ")) return;

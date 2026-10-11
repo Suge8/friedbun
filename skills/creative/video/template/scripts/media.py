@@ -33,8 +33,8 @@ TRUE_PEAK_MARGIN = 0.2
 MASTER_PASSES = 3
 ONSET_DB = -30.0
 MASTER_PRECISION = 0.3
-# 短于这个时长的静止不记录；兑现前的静止时长由时间表的 hold 定
-STILL_DETECT = 0.5
+# 短于这个时长的静止不记录；要比最短的 hold（0.5 秒）短一截，否则帧数取整后刚好 hold 长的静止会漏检
+STILL_DETECT = 0.4
 # 先按面积缩到 160×90 再判静止：颗粒、纸纹这类细碎跳动被平均掉，只有成片的变化才算在动
 FREEZE_PREFILTER = "scale=160:90:flags=area"
 FREEZE_NOISE = "-50dB"
@@ -51,6 +51,13 @@ SEAM_HALF = 0.4
 SEAM_COLS = 6
 PHONE_WIDTH = 360
 SAFE_ZONES = json.loads((Path(__file__).resolve().parent.parent / "src/safe-zones.json").read_text())
+
+
+def safe_zone(width, height):
+    """按高宽比取一档安全区（规则同 src/safe.ts），换算到当前尺寸。"""
+    zone = max((z for z in SAFE_ZONES.values() if height / width >= z["minAspect"]), key=lambda z: z["minAspect"])
+    scale = width / (1080 if height > width else 1920)
+    return {k: round(zone[k] * scale) for k in ("top", "bottom", "left", "right")}
 FORMATS = json.loads((Path(__file__).resolve().parent.parent / "src/formats.json").read_text())
 
 
@@ -208,9 +215,7 @@ def review(src, spec, timeline, out_dir):
     for old in out_dir.glob("*.png"):
         old.unlink()
     vertical = spec["height"] > spec["width"]
-    # 安全区按 1080×1920 / 1920×1080 定义，其他尺寸按宽度等比换算
-    scale = spec["width"] / (1080 if vertical else 1920)
-    safe = {k: round(v * scale) for k, v in SAFE_ZONES["vertical" if vertical else "horizontal"].items()}
+    safe = safe_zone(spec["width"], spec["height"])
     box = (f"drawbox=x={safe['left']}:y={safe['top']}:w=iw-{safe['left'] + safe['right']}"
            f":h=ih-{safe['top'] + safe['bottom']}:color=red@0.7:t=4,")
     last = spec["duration"] - 1 / spec["fps"]

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { continueRender, delayRender, getInputProps, useCurrentFrame, useVideoConfig } from "remotion";
-import zones from "./safe-zones.json";
+import { safeZone } from "./safe";
 import { timeline } from "./timeline";
 import { textSize } from "./type";
 
@@ -64,9 +64,8 @@ export const LayoutProbe: React.FC = () => {
   });
   const measure = () => {
     const vertical = height > width;
-    const k = width / (vertical ? 1080 : 1920);
-    const z = zones[vertical ? "vertical" : "horizontal"];
-    const safe = { left: z.left * k, top: z.top * k, right: width - z.right * k, bottom: height - z.bottom * k };
+    const z = safeZone(width, height);
+    const safe = { left: z.left, top: z.top, right: width - z.right, bottom: height - z.bottom };
     // 整个在画外的字看不见，不算；压字只算画面里看得见的部分
     const boxes = textBoxes(anchor.current!.getBoundingClientRect()).filter(
       ({ r }) => r.right > 0 && r.bottom > 0 && r.left < width && r.top < height,
