@@ -1,5 +1,6 @@
 import { AbsoluteFill, Img, random, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { FONTS } from "./fonts";
+import { textSize } from "./type";
 
 export type Cam = { x: number; y: number; z: number };
 
@@ -42,9 +43,9 @@ export const Part: React.FC<{
 export const Strip: React.FC<{ id: string; x: number; y: number; paper: string; ink: string; children: React.ReactNode; rot?: number; size?: number; weight?: number; opacity?: number; torn?: boolean }> = ({
   id, x, y, paper, ink, children, rot = -1.5, size, weight = 700, opacity = 1, torn = true,
 }) => {
-  // 默认字号是 look.md 的"重要支撑文字"下限，按画面宽度换算（宽 1080 时 56px）；纸条高约为字号的 1.9 倍
-  const { width } = useVideoConfig();
-  const fontSize = size ?? Math.round((56 * width) / 1080);
+  // 默认字号是"重要支撑文字"的下限；纸条高约为字号的 1.9 倍
+  const { width, height } = useVideoConfig();
+  const fontSize = size ?? textSize("support", width, height);
   const edge = (side: string) => Array.from({ length: 9 }, (_, i) => `${i * 12.5}% ${side === "top" ? random(`${id}t${i}`) * 8 : 100 - random(`${id}b${i}`) * 8}%`);
   return (
     <div style={{

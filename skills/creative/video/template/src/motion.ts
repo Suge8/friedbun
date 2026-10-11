@@ -1,3 +1,4 @@
+// 动画时间：useTime() 取当前秒数（stepped 按 12fps 步进），tween 做分段缓动的多关键帧插值，zoom 做对数空间的镜头缩放
 import { Easing, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { time, type Time } from "./timeline";
 

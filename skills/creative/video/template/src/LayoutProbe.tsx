@@ -2,13 +2,12 @@ import { useLayoutEffect, useRef } from "react";
 import { continueRender, delayRender, getInputProps, useCurrentFrame, useVideoConfig } from "remotion";
 import zones from "./safe-zones.json";
 import { timeline } from "./timeline";
+import { textSize } from "./type";
 
 // 只在 npm run layout 时启用：量出每段可见文字的位置和图片零件的范围，有问题就打印一行给 scripts/layout.mjs 汇总
 const MIN_OPACITY = 0.15;
 const TOLERANCE = 2;
 const OVERLAP = 0.1;
-// look.md 的标签字号下限：竖版按宽 1080、横版按宽 1920 计
-const MIN_FONT = { vertical: 48, horizontal: 56 };
 // 盖住画面这么大比例以上的图片算背景，不算主体
 const BACKDROP = 0.6;
 
@@ -80,7 +79,7 @@ export const LayoutProbe: React.FC = () => {
     // 第 0 帧是封面：要有一行完全显出来的标题，不能是入场前的空画面或半透明
     if (frame === 0 && !boxes.some((b) => b.opacity > 0.9)) issues.push({ type: "cover_without_title", text: "第 0 帧没有完全显出的文字" });
     for (const b of boxes) {
-      if (b.px < MIN_FONT[vertical ? "vertical" : "horizontal"] * k - TOLERANCE) issues.push({ type: "too_small", text: `${b.text}（${Math.round(b.px)}px）` });
+      if (b.px < textSize("label", width, height) - TOLERANCE) issues.push({ type: "too_small", text: `${b.text}（${Math.round(b.px)}px）` });
       if (b.r.left < safe.left - TOLERANCE || b.r.top < safe.top - TOLERANCE || b.r.right > safe.right + TOLERANCE || b.r.bottom > safe.bottom + TOLERANCE)
         issues.push({ type: "outside_safe", text: b.text });
     }

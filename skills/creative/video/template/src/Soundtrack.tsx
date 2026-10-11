@@ -1,3 +1,4 @@
+// 按 timeline.json 放旁白、音效和配乐（noMusic 为 true 时不放配乐）；声音只改时间表，不改这个组件
 import { Audio } from "@remotion/media";
 import { getInputProps, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { frames, line, time, timeline, type Timeline } from "./timeline";

@@ -6,20 +6,14 @@
 
 ## 起项目
 
-把 skill 的 `template/` 整个复制成项目目录，`npm install`。需要系统里有 ffmpeg 和 ffprobe。模板已经接好：
+把 skill 的 `template/` 整个复制成项目目录，`npm install`；需要系统里有 ffmpeg 和 ffprobe。每个文件开头的注释写了它管什么、怎么用，命令在 `package.json` 的 scripts 和两个 Python 脚本的 `--help` 里。分工：
 
-- `timeline.json` 决定画面尺寸、帧率、时长、片型（`format`，对应 `src/formats.json` 里的一组语速、停顿、静止参数）和全部时刻；字段含义和锚点写法见 `src/timeline.ts`，组件用其中的 `frames()`、`time()`、`beat()`、`line()` 取时间。
-- `scripts/fish_tts.py --timeline timeline.json` 按 lines 合成旁白并写回每句、每拍的起止时间；`scripts/media.py` 是媒体工具：配乐截取统一电平（level）、量音效（sfx）、裁零件透明边（trim）、成片响度统一（master）和成片检查（check）。都在项目目录运行。
-- `src/Soundtrack.tsx` 按时间表放旁白、音效和配乐，旁白期间配乐自动让位；声音只改时间表，不改这个组件。
-- `src/motion.ts`：`useTime()` 取当前秒数（`{ stepped: true }` 按 12fps 步进，只用于纸拼贴、印刷、像素这类风格），`tween(t, keys)` 做分段缓动的多关键帧插值，`zoom(t, keys)` 做对数空间的镜头缩放；关键帧时刻可写锚点。
-- `src/stage.tsx`：镜头 `Camera`（里面只放世界，要读的标题放在它外面，不随镜头缩放）、零件 `Part`（对位点、压扁拉伸、投影、关节、像素渲染可调）、文字条 `Strip`（撕边纸条或规整色块，默认用字体表的 display 字体）、逐 3 帧换相位的颗粒 `Grain`（深浅底都看得见；全屏颗粒会让码率翻几倍，体积要紧时调低 `opacity` 或只盖背景），以及世界坐标换屏幕坐标的 `toScreen`。
-- `src/fonts.ts` 注册字体，加载失败直接让渲染报错；按选定风格改其中的表。
-- `src/Captions.tsx` 是字幕，`timeline.json` 的 `captions` 为 true 时显示。
-- `src/safe-zones.json` 是横竖版安全区，排版、字幕和 `media.py` 都读它。
-- `npm run layout` 用 `src/LayoutProbe.tsx` 抽帧量文字位置，报出安全区外、互相压住和字号太小的文字；短于 0.5 秒的列在 `transient` 里，不算失败。平时渲染时它不工作。
-- 画面从 `src/Film.tsx` 的 `Scene` 写起：它已经接好兑现前 `hold` 秒的 `<Freeze>` 和 `<Soundtrack />`。`npm run typecheck` 查类型，`npm run render` 终渲到 `out/render.mp4`；之后 `npm run render:nomusic` 只重渲一条不含配乐的音轨，合到同一画面上出 `out/render-nomusic.mp4`，几秒完成。
+- 画面从 `src/Film.tsx` 的 `Scene` 写起，兑现前的冻结、字幕和声音它已经接好；镜头、零件、文字条、颗粒在 `src/stage.tsx`，动画时间在 `src/motion.ts`，字号在 `src/type.ts`，字体在 `src/fonts.ts`。
+- 时间只经 `src/timeline.ts` 从 `timeline.json` 取；声音只改 `timeline.json`，不改 `Soundtrack`。
+- 旁白用 `scripts/fish_tts.py`，素材准备和成片检查用 `scripts/media.py`，排版检查是 `npm run layout`；都在项目目录运行。
+- `npm run render:nomusic` 拿 `out/render.mp4` 的画面配一条不含配乐的音轨，先跑完 `npm run render` 再跑它。
 
-素材直接放 `public/`，不用软链接（打包时不会跟随）。第一次渲染会下载无头浏览器，约一分钟没有输出。`@remotion/*` 其他包用 `npx remotion add <包>` 安装，版本才和模板对齐；升级用 `npx remotion upgrade`。
+素材直接放 `public/`，不用软链接（打包时不会跟随）。第一次渲染会下载无头浏览器，约一分钟没有输出。`@remotion/*` 其他包用 `npx remotion add <包>` 安装，版本才和模板对齐；升级用 `npx remotion upgrade`。全屏颗粒 `Grain` 会让码率翻几倍，体积要紧时调低它的 `opacity` 或只盖背景。
 
 ## 写法
 

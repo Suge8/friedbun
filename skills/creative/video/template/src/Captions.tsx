@@ -2,6 +2,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { FONTS } from "./fonts";
 import zones from "./safe-zones.json";
 import { line, timeline } from "./timeline";
+import { textSize } from "./type";
 
 // 字幕：timeline.json 的 captions 为 true 时由 Film.tsx 叠在最上层，和画面一起冻结。取旁白原文按标点切成短句，时间按句内字数分配，句末标点不上屏；
 // 底边贴着安全区下沿（竖版约在画高 75% 处），白字加深色描边。ink、stroke 按 LOOK.md 的色板改；字幕压在浅色或花底上时传 plate（底条颜色）
@@ -28,7 +29,7 @@ export const Captions: React.FC<{ ink?: string; stroke?: string; plate?: string 
   const vertical = height > width;
   const k = width / (vertical ? 1080 : 1920);
   const z = zones[vertical ? "vertical" : "horizontal"];
-  const size = Math.round((vertical ? 64 : 72) * k);
+  const size = textSize("caption", width, height);
   return (
     <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: z.bottom * k, paddingLeft: z.left * k, paddingRight: z.right * k }}>
       <div style={{
