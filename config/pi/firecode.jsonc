@@ -86,7 +86,7 @@
 	// tools：审查者可用工具，只读不改文件；留 bash 是为了跑测试取证。
 	// 本节字段必须齐全；拼错字段名会直接报配置错误而不是静默忽略。
 	"review": {
-		"advisor": "anthropic/claude-fable-5-1/high",
+		"advisor": "anthropic/claude-opus-5-5/high",
 		"reviewers": [
 			"anthropic/claude-opus-5-5/low",
 			"openai-codex/gpt-6.1-sol/low"
