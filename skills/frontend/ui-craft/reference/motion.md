@@ -144,6 +144,7 @@
 ## 实现坑
 
 - 只声明实际变化的属性，不写 `transition: all`。
+- 阴影不做动画：`box-shadow` 每帧重画整个元素（hover 卡片最常见）；要变阴影时动 `filter: drop-shadow()`，或把阴影放在单独一层只动 opacity。
 - 可被快速重复触发的进出场用 transition：可中断重定向；keyframes 中断即从零重播。
 - Motion 的 `x`/`y`/`scale` 简写在主线程运行，页面忙时掉帧；确定性动画用 CSS 或 WAAPI，JS 动画需要硬件加速时写完整 `transform` 字符串（motion.dev/docs/performance，2026-10）。
 - 拖拽跟随直接写目标元素的 `transform`；在父容器改 CSS 变量会触发全子树样式重算。
@@ -154,9 +155,15 @@
 - One-shot 动画结束后回到静态样式；用 `fill-mode: both` 时终态与组件状态一致。
 - Hover 动效的媒体查询守卫见 `mobile.md`；语义和关键反馈同时支持 focus、键盘与 touch。
 
+## 原生应用（SwiftUI / AppKit / UIKit）
+
+- 点一下当场建整页是最常见的卡顿：去过的页面留在树上只切可见性，不按身份重建；首次打开先出第一帧必需的内容，其余下一帧再挂；首次才付的成本（面板、菜单、编辑器）在启动后空闲时预热。响应按"输入到画面第一次变化"之间主线程的全部工作计，把活挪到下一帧不算变快。
+- macOS 上逐帧改几何的过渡（滑入的面板、分栏开合动画）每帧都让 AppKit 重算整窗的鼠标跟踪区并重设光标：面板原地淡入淡出，侧栏开合一步到位。NSWindow 的 sheet 与 alert 开、关都把主线程关在约 300ms 的嵌套动画循环里，浮层与确认框放在窗口内。
+- 内容滚到透明的顶栏或底栏后面时，滚动视图本身铺到栏后、用内容边距让出初始位置：懒加载容器只保留自身框内的行，关掉裁剪画到框外的行会被回收，在栏后突然消失。沉浸式的栏只在状态栏那一条淡出，玻璃控件浮在清楚可见的内容上，不加渐变色带。
+
 ## 检查动效
 
 - 截图只验证静态对齐。动效录屏，或把时长放大 2–5 倍、用浏览器 Animation 面板逐帧看起点、终点、反向、各属性是否同步、`transform-origin` 是否对。
 - 在数据加载、滚动和连续操作同时发生时复测，用 Performance 面板确认没有每帧全页 layout/paint、图层爆增或主线程长任务；交互响应看 INP（≤ 200ms 为好）与 Long Task。
-- Apple 平台用 Instruments：Animation Hitches 把每个掉帧拆成 App 提交、渲染服务、GPU 三段，先看卡在哪段再改（hitch 时长比 < 5ms/s 为好）；卡在 App 段时用 Time Profiler 看主线程栈。命令行是 `xcrun xctrace record --template 'Animation Hitches'`。第一次与第二次分开测，首次构建视图的成本只在第一次出现。
+- Apple 平台用 Instruments：Animation Hitches 把每个掉帧拆成 App 提交、渲染服务、GPU 三段，先看卡在哪段再改（hitch 时长比 < 5ms/s 为好）；卡在 App 段时用 Time Profiler 看主线程栈。命令行是 `xcrun xctrace record --template 'Animation Hitches'`。第一次与第二次分开测，首次构建视图的成本只在第一次出现。掉帧在前台、真机上测：AppKit 动画只在前台跑，后台与模拟器的数字偏乐观。
 - 覆盖快速重复操作、中途反向、低性能设备和 reduced-motion；手势在真机上测。
