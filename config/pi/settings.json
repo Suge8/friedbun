@@ -21,7 +21,12 @@
   },
   "compaction": {
     "enabled": true,
-    "reserveTokens": 36000
+    "modelOverrides": {
+      "anthropic/claude-opus-5-5": { "reserveTokens": 450000 },
+      "anthropic/claude-sonnet-5-5": { "reserveTokens": 450000 },
+      "anthropic/claude-fable-5-1": { "reserveTokens": 450000 },
+      "anthropic/claude-haiku-5-5": { "reserveTokens": 450000 }
+    }
   },
   "terminal": {
     "showTerminalProgress": true
