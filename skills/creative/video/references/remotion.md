@@ -23,6 +23,6 @@
 - 画面里的时间都经 `useTime()` 或 `useCurrentFrame()` 在 `Scene` 里面取，`Film.tsx` 的 `<Freeze>` 才冻得住；在外面算好再传进去的值不会停。解冻时时间直接跳到兑现拍：漂移、循环和镜头动作在冻结前落定（关键帧停在兑现拍开始前 `hold` 秒），兑现时再接着动，否则兑现那一帧会跳。
 - SVG 描线动画（`pathLength` 加虚线偏移）不要同时用 `vector-effect="non-scaling-stroke"`，否则只画出一部分。
 - 急速动作的运动模糊用 `<HtmlInCanvasMotionBlur>`，只包住那 1–3 个动作。
-- 关键静帧和单帧：`npx remotion still Main out/board-hook.png --frame=<帧号>`。只看某几秒：`npx remotion render Main out/frames --frames=0,30,90 --image-format=png`。全片渲染一般半分钟到几分钟，看机器忙闲，改完直接全尺寸渲染。
+- 看画面：几个时刻的静帧用一条命令一起渲，`npx remotion render Main out/keys --frames=0,30,90 --image-format=png`。每条 `still` 都要重新打包、开一次浏览器，只在单张或要换 `--props` 时用 `npx remotion still Main out/board-hook.png --frame=<帧号>`。只看某几秒的动态写成区间：`npx remotion render Main out/part.mp4 --frames=60-120`。全片渲染一般半分钟到几分钟，看机器忙闲，改完直接全尺寸渲染。
 - 预览 `npm run studio` 是常驻进程，会打印 URL；已启动就直接用那个 URL。
 - 许可：个人、不超过 3 人的营利组织、非营利组织免费；更大的组织需要 Company License，agent 写代码也按席位计。用户属于这种情况时告诉他。
