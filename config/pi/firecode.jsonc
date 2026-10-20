@@ -97,7 +97,7 @@
 	// 本节字段必须齐全；拼错字段名会直接报配置错误而不是静默忽略。
 	"review": {
 		"advisor": "anthropic/claude-opus-5-5/high",
-		"reviewers": ["openai-codex/gpt-6.1-sol/low"],
+		"reviewers": ["openai-codex/gpt-6-astra/low"],
 		"maxRounds": 5,
 		"advisorAfterFailures": 2,
 		"timeoutMinutes": 40,
