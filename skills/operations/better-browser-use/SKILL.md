@@ -12,7 +12,7 @@ allowed-tools: Bash(bbu:*), Bash(agent-browser:*)
 agent-browser skills get core
 ```
 
-全部命令与参数加 `--full`；专项（系统性 QA 的 `dogfood`、Electron 等）见 `agent-browser skills list`，用 `skills get <名>` 读。读时把示例里的 `agent-browser` 换成 `bbu [--login] [--as <名字>]`；会话、登录态、浏览器与连接由 bbu 代管，文档里的 `--session`、`AGENT_BROWSER_SESSION`、`session id`、`--restore`、`--profile`、`--cdp`、`--auto-connect` 都不用。所有浏览器操作经 `bbu`，不接管用户的日常浏览器。
+全部命令与参数加 `--full`；专项（系统性 QA 的 `dogfood`、Electron 等）见 `agent-browser skills list`，用 `skills get <名>` 读。读时把示例里的 `agent-browser` 换成 `bbu [--login] [--as <名字>]`；会话、登录态、浏览器与连接由 bbu 代管，文档里的 `--session`、`AGENT_BROWSER_SESSION`、`session id`、`--restore`、`--profile`、`--cdp`、`--auto-connect` 都不用。浏览器操作都经 `bbu`，不接管用户的日常浏览器；只有用户明确让你用他已登录的浏览器（Apple ID 这类导入 cookie 也登不上的站点）时，改用 `better-computer-use` 操作他的浏览器窗口。
 
 ## 车道
 
