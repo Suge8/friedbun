@@ -27,8 +27,8 @@ step is one of them, the run hands back to you with it listed in "blocked".
 
 Output: one JSON object. status "done" (exit 0) only when the run finished and every --expect
 was met; otherwise status "handoff" (exit 1) with reason: handoff, low_confidence,
-decision_timeout, decider_error, action_failed, unexpected_screen, step_limit, expect_failed,
-observe_failed. steps is the trajectory; screen (+ url, or the bcu state id) is
+decision_timeout, decider_error, action_failed, no_effect (the same action left the screen
+unchanged), unexpected_screen, step_limit, expect_failed, observe_failed. steps is the trajectory; screen (+ url, or the bcu state id) is
 where to take over. Usage and configuration errors exit 2.
 
 Configuration: ~/.config/uilane.json plus keychain keys. uilane is on whenever a decider is

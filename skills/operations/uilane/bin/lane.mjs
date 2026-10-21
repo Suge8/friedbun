@@ -55,6 +55,7 @@ export async function runLane({ surface, decide, goal, data, expect, maxSteps })
   const history = [];
   let stop;
   let blocked = [];
+  let last;
   const t0 = performance.now();
   const ms = (t) => Math.round(performance.now() - t);
   for (;;) {
@@ -74,6 +75,8 @@ export async function runLane({ surface, decide, goal, data, expect, maxSteps })
     const decideMs = ms(td);
     if (d.stop) { stop = { reason: d.stop, detail: d.detail }; break; }
     const opt = options.find((o) => o.id === d.choice);
+    // 同一动作做完界面一字未变，决策器又选它：再按也不会变，交回而不是耗到步数上限。
+    if (last?.desc === opt.desc && last.screen === obs.screen) { stop = { reason: 'no_effect', detail: opt.desc }; break; }
     if (opt.id !== 'reobserve' && (d.confidence < MIN_CONFIDENCE || d.none > MAX_NONE_PROBABILITY)) {
       stop = { reason: 'low_confidence', detail: `${d.by} picked ${q(opt.desc)} with confidence ${d.confidence}, none ${d.none}` };
       break;
@@ -88,6 +91,7 @@ export async function runLane({ surface, decide, goal, data, expect, maxSteps })
     steps.push(step);
     if (opt.id === 'done' || opt.id === 'handoff') { stop = { reason: opt.id }; break; }
     if (opt.id === 'reobserve') { history.push('reobserve'); continue; }
+    last = { desc: opt.desc, screen: obs.screen };
     const ta = performance.now();
     const a = await surface.act(opt, obs).catch((e) => ({ ok: false, error: e.message }));
     step.ms.act = ms(ta);
