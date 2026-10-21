@@ -45,6 +45,9 @@ agent-browser skills get core
 
 - `errors` 文本模式只打印 `✗`、不带内容，用 `errors --json`；其中 `line`/`column` 从 0 计，行号以 `text` 里的堆栈为准。
 - 同一会话内的命令串行发，不并行。
+- 按屏推进：`snapshot -i` 看一屏，把这一屏能确定的动作用 `batch --bail` 一次发完，再看下一屏；脚本里读结果加 `--json`。
+- `find` 命中多个元素时不报错，直接操作第一个；同名元素多（每行都有「编辑」）时先 `snapshot -i` 再用 ref。`find` 的动作只有 click、fill、check、hover、text。
+- `snapshot -c` 会丢掉非交互的文字（确认码、正文），读文字用 `snapshot` 或 `get text`。
 
 ## 收尾与边界
 
