@@ -28,7 +28,7 @@ bcu wait-for --app CuePad --text 设置 --timeout 20000
 - `search-ui`、`act-ui`、`wait-for` 用选择器（`--app`/`--pid`/`--window-title`/`--root`）代替 `--state` 时，先新鲜观察再执行，结果带新 `stateId`。新观察里没有你见过的 ref，所以这时只能用 `find` 定位，加上跟在带目标步骤后面的无目标打字；要用 ref、坐标、拖拽或 `--scope`，先 `observe-ui` 再带 `--state`。
 - `@e` ref 属于生成它的 `stateId`；`act-ui` 返回新 `stateId` 和相对上一状态的变化，下一步用它。`stale_state` 时重新观察。
 - 结果行 `worked via ax · value 0→1`：`worked` 有证据，`·` 后是证据。`unverified` 是已投递但读不到证据（菜单命令、快捷键、自绘窗口常见），多半已生效，照常继续，不要重做；后续步骤依赖它时加 `--expect-text/--expect-role/--expect-value`（可配 `--scope @eN`、`--expect-gone`），满足即记为 `worked`。
-- 只有被证明无效或后置条件未满足才以 `action_failed` 失败。`action_timeout` 只说明条件没出现，动作可能已生效：先观察再决定是否重试。
+- 只有被证明无效或后置条件未满足才以 `action_failed` 失败，例如复选框、开关按了值没变。按已选中的单选、标签页、分段不投递，结果是 `worked … · already selected`，不用先判断它是否已选中。`action_timeout` 只说明条件没出现，动作可能已生效：先观察再决定是否重试。
 - 投递由 bcu 自己从后台升级到前台，你只给目标和动作。按屏推进：看一屏，把这一屏能确定的动作放进同一个数组，做完再观察下一屏；没看过的界面不猜控件类型（分段控件常被猜成弹出菜单）。等界面或应用变化用 `--expect-*` 或 `wait-for`，不用 sleep。脚本里读结果加 `--json` 解析，不从文本里抠 `stateId`。
 
 ## 结果里的根
