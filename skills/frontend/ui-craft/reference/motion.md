@@ -42,7 +42,7 @@
 - Enter 与 exit 走同一空间路径；exit 时长约为 enter 的 70–80%，距离更短。高频重复或退场没有空间信息时直接移除。
 - 动画从当前呈现值继续，可中断、可反向、不排队。异步状态由事件、Promise、`transitionend` 或 observer 驱动。
 - 入场不从 `scale(0)` 起：起点 `scale(0.9–0.97)` 加 `opacity: 0`。
-- 位移、缩放和进出场动 transform/opacity；状态反馈可以过渡颜色。布局或材质属性只在语义需要且目标设备验证流畅时动。`clip-path` 是第四个可放心动画的属性。
+- 除 transform/opacity 外，状态反馈可以过渡颜色，`clip-path` 也可放心动画；布局或材质属性只在语义需要且目标设备验证流畅时动。
 - `translate` 的百分比相对元素自身尺寸：抽屉、toast 用 `translateY(100%)` 隐藏，不写死像素。
 - 刻意的阶段慢、系统响应快：长按确认按住 2s linear，松开 200ms 缓出回弹。
 - `prefers-reduced-motion: reduce` 下位移、旋转、缩放、布局重排和 stagger 直接呈现终态；保留短 opacity/color 反馈和静态布局所需的 transform。全局兜底把时长设成 `0.01ms` 而非 `none`，`animationend`/`transitionend` 仍会触发，等事件的 JS 不会挂住。
@@ -145,7 +145,6 @@
 
 - 只声明实际变化的属性，不写 `transition: all`。
 - 阴影不做动画：`box-shadow` 每帧重画整个元素（hover 卡片最常见）；要变阴影时动 `filter: drop-shadow()`，或把阴影放在单独一层只动 opacity。
-- 可被快速重复触发的进出场用 transition：可中断重定向；keyframes 中断即从零重播。
 - Motion 的 `x`/`y`/`scale` 简写在主线程运行，页面忙时掉帧；确定性动画用 CSS 或 WAAPI，JS 动画需要硬件加速时写完整 `transform` 字符串（motion.dev/docs/performance，2026-10）。
 - 拖拽跟随直接写目标元素的 `transform`；在父容器改 CSS 变量会触发全子树样式重算。
 - `will-change` 只在测量证明有收益时用，动画后释放。
