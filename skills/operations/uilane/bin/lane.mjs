@@ -38,14 +38,16 @@ function candidates(elements, data) {
 }
 
 // 结果核对只看界面的新鲜观察，与决策器无关：text: 可见，gone: 不可见，url: 地址包含。
+// 文字两侧都去掉数字间的千分位分隔符再比：调用方写 6848，计算器、表格显示 6,848 或 6 848。
 export function parseExpect(spec) {
   const m = spec.match(/^(text|gone|url):(.+)$/s);
   if (!m) throw new Error(`--expect must be text:<s>, gone:<s> or url:<s>, got ${q(spec)}`);
   return { kind: m[1], value: m[2] };
 }
+const ungroup = (s) => s.replace(/(?<=\d)[,\u00a0\u202f '](?=\d{3}(?!\d))/g, '');
 function met({ kind, value }, obs) {
   if (kind === 'url') return (obs.url ?? '').includes(value);
-  return obs.screen.includes(value) === (kind === 'text');
+  return ungroup(obs.screen).includes(ungroup(value)) === (kind === 'text');
 }
 
 export async function runLane({ surface, decide, goal, data, expect, maxSteps }) {
