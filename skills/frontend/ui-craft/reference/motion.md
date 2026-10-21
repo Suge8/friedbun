@@ -162,7 +162,7 @@
 
 ## 检查动效
 
-- 截图只验证静态对齐。动效录屏，或把时长放大 2–5 倍、用浏览器 Animation 面板逐帧看起点、终点、反向、各属性是否同步、`transform-origin` 是否对。
-- 在数据加载、滚动和连续操作同时发生时复测，用 Performance 面板确认没有每帧全页 layout/paint、图层爆增或主线程长任务；交互响应看 INP（≤ 200ms 为好）与 Long Task。
+- 截图只验证静态对齐。Web 动效用 `bbu record` 录屏，必要时把时长放大 2–5 倍，逐帧看起点、终点、反向、各属性是否同步、`transform-origin` 是否对；reduced-motion 与暗色用 `bbu set media` 切换后再看。
+- 在数据加载、滚动和连续操作同时发生时复测，用 `bbu trace` 录性能追踪，确认没有每帧全页 layout/paint、图层爆增或主线程长任务；交互响应看 INP（≤ 200ms 为好）与 Long Task。
 - Apple 平台用 Instruments：Animation Hitches 把每个掉帧拆成 App 提交、渲染服务、GPU 三段，先看卡在哪段再改（hitch 时长比 < 5ms/s 为好）；卡在 App 段时用 Time Profiler 看主线程栈。命令行是 `xcrun xctrace record --template 'Animation Hitches'`。第一次与第二次分开测，首次构建视图的成本只在第一次出现。掉帧在前台、真机上测：AppKit 动画只在前台跑，后台与模拟器的数字偏乐观。
 - 覆盖快速重复操作、中途反向、低性能设备和 reduced-motion；手势在真机上测。
