@@ -72,7 +72,6 @@ export async function runLane({ surface, decide, goal, data, expect, maxSteps })
     const decideMs = ms(td);
     if (d.stop) { stop = { reason: d.stop, detail: d.detail }; break; }
     const opt = options.find((o) => o.id === d.choice);
-    if (!opt) { stop = { reason: 'invalid_choice', detail: d.choice }; break; }
     if (opt.id !== 'reobserve' && (d.confidence < MIN_CONFIDENCE || d.none > MAX_NONE_PROBABILITY)) {
       stop = { reason: 'low_confidence', detail: `${d.by} picked ${q(opt.desc)} with confidence ${d.confidence}, none ${d.none}` };
       break;
@@ -98,7 +97,8 @@ export async function runLane({ surface, decide, goal, data, expect, maxSteps })
   try { final = await surface.observe(); } catch (e) { final = { screen: '', error: e.message }; }
   const checks = expect.map((e) => ({ expect: `${e.kind}:${e.value}`, met: !final.error && met(e, final) }));
   const allMet = checks.every((c) => c.met);
-  const finished = stop.reason === 'done' || stop.reason === 'closed';
+  let finished = stop.reason === 'done' || stop.reason === 'closed';
+  if (finished && final.odd) [finished, stop] = [false, { reason: 'unexpected_screen', detail: final.odd }];
   if (finished && !allMet) stop = { reason: 'expect_failed', detail: `stopped on ${stop.reason}` };
   return {
     status: finished && allMet ? 'done' : 'handoff',

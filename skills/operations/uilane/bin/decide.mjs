@@ -76,11 +76,13 @@ async function flash(c, input, signal) {
   return { choice: String(JSON.parse(j.choices[0].message.content).choice), by: 'flash' };
 }
 
-// 依次起跑：前一个到 HEDGE_MS 未回或已失败就起下一个，同屏并行；先回答案者胜，其余中止。
+// 依次起跑：前一个到 HEDGE_MS 未回或已失败就起下一个，同屏并行；先回候选内编号者胜，其余中止。
+// 编号不在候选里算这一方失败，继续等另一方。
 function firstAnswer(input, entrants) {
   const ctrl = new AbortController();
   const signal = AbortSignal.any([ctrl.signal, AbortSignal.timeout(LIMIT_MS)]);
   const queue = [...entrants];
+  const ids = new Set(input.options.map((o) => o.id));
   const errors = [];
   let running = 0;
   let timer;
@@ -94,13 +96,18 @@ function firstAnswer(input, entrants) {
       clearTimeout(timer);
       const e = queue.shift();
       running++;
-      e.ask(e.c, input, signal).then(finish, (err) => {
-        running--;
-        if (!ABORTED.has(err.name)) errors.push(`${e.name}: ${err.message}`);
-        if (queue.length) return next();
-        if (running) return;
-        finish(errors.length ? { stop: 'decider_error', detail: errors.join('; ') } : { stop: 'decision_timeout', detail: `no answer within ${LIMIT_MS / 1000} s` });
-      });
+      e.ask(e.c, input, signal)
+        .then((r) => {
+          if (!ids.has(r.choice)) throw new Error(`invalid choice ${JSON.stringify(r.choice)}`);
+          finish(r);
+        })
+        .catch((err) => {
+          running--;
+          if (!ABORTED.has(err.name)) errors.push(`${e.name}: ${err.message}`);
+          if (queue.length) return next();
+          if (running) return;
+          finish(errors.length ? { stop: 'decider_error', detail: errors.join('; ') } : { stop: 'decision_timeout', detail: `no answer within ${LIMIT_MS / 1000} s` });
+        });
       if (queue.length) timer = setTimeout(next, HEDGE_MS);
     };
     next();
