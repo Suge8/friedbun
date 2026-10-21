@@ -26,7 +26,7 @@ agent-browser skills get core
 ## 跨页机械流程先交给 uilane
 
 - 当前这一页就能定下的多步，用 `batch --bail` 一次发完，最快。
-- 要跨好几页、下一页要等上一步结果出来才知道点哪的机械流程（登录后照给定数据填表、加购到结账），先交给 `uilane web --goal <终态> --expect <核对项> --data <要填的值>`（同一目录、同样的 `--login`/`--mine`/`--as`，用法见 `uilane --help`），不要自己一页一页点：它每步约 1 秒，你每页要好几秒。只有退出码 2（uilane 关着或没配）才自己做。
+- 三页以内的短流程自己一页一页点，超过三页、下一页要等上一步结果出来才知道点哪的机械流程（登录后照给定数据填表、加购到结账）才交给 `uilane web --goal <终态> --expect <核对项> --data <要填的值>`（同一目录、同样的 `--login`/`--mine`/`--as`，用法见 `uilane --help`）：一次 uilane 连核对要十几到二十几秒，每步约 1–2 秒，页数少时交出去反而慢。只有退出码 2（uilane 关着或没配）才自己做。
 
 - `status` 为 `done` 才算完成，此时 `--expect` 已在新观察上逐条核对通过。
 - `handoff`（退出码 1）时看 `reason`，从 `url` 与 `screen` 接手；`steps` 是已做的动作，不要重做；`blocked` 里是它不碰的危险动作，由你确认后自己做。
@@ -38,6 +38,18 @@ agent-browser skills get core
 
 1. `bbu import <域名>...` 后 `bbu --login reload`：从用户默认浏览器复制这些站点的 cookie。只支持 macOS 上的 Chromium 系浏览器，默认浏览器不是时加 `--from chrome|helium|edge|brave|vivaldi|chromium`。首次读某个浏览器时 macOS 弹钥匙串授权，命令会等到用户在电脑前点「始终允许」。
 2. 仍未登录，或用户说导入后日常浏览器掉线了（站点轮换续期凭证，复制出的会话互相作废）：请用户在 agent 窗口里单独登录一次（下节），这份登录与日常浏览器互不影响。
+
+用户本人的账号要输密码时，从 1Password 的 Agent 保险库取。服务账号令牌在钥匙串里，每次 bash 调用都要先导出：
+
+```bash
+export OP_SERVICE_ACCOUNT_TOKEN="$(security find-generic-password -s op-agent-token -w)"
+op item list --vault Agent                                    # 有哪些号
+op item get "<标题>" --vault Agent --fields username
+op item get "<标题>" --vault Agent --fields password --reveal  # 存进变量传给 fill，不打印
+op item get "<标题>" --vault Agent --otp                       # 条目里存了验证码时
+```
+
+标题含中文时用 `op item get`：`op read "op://…"` 只认 ASCII 名称。服务账号只读；库里缺号时请用户复制进 Agent 保险库。
 
 开发中的项目：账号密码用官方文档的 `auth save` 存进凭据库，新检出未登录时 `bbu auth login <名>`。手机验证码这类登录请用户登一次（下节），之后按检出沿用。
 
