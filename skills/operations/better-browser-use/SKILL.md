@@ -22,6 +22,14 @@ agent-browser skills get core
 - `bbu --login <cmd>`：用户本人的账号和有反爬的站点。所有 agent 共用一个 CloakBrowser，每个检出一个窗口，登录实时共享。引擎屏蔽 console/异常事件，此车道 `console`/`errors` 恒空，也不开窗口（`--headed`）。
 - `--as <名字>`（字母、数字、`_`）：同一检出里再开一个会话——默认车道下是另一个浏览器、另一份登录态（owner 与 guest 对测），`--login` 下是另一个窗口、同一份登录。同一检出里还有别的 agent 在用浏览器时，带 `--as <自己的名字>`，否则两边操作同一个页面。
 
+## 多步操作先交给 uilane
+
+要连做几步、每步都能从当前屏和已知数据定下来的操作（登录后照给定数据填表、加购到结账；同一目录、同样的 `--login`/`--as`），先交给 `uilane web --goal <终态> --expect <核对项> --data <要填的值>`（用法见 `uilane --help`），不要自己一步步点：它每步约 1 秒，你每步要好几秒。只有退出码 2（uilane 关着或没配）才自己做。
+
+- `status` 为 `done` 才算完成，此时 `--expect` 已在新观察上逐条核对通过。
+- `handoff`（退出码 1）时看 `reason`，从 `url` 与 `screen` 接手；`steps` 是已做的动作，不要重做；`blocked` 里是它不碰的危险动作，由你确认后自己做。
+- 只做一两步、要判断或要写新文字的，自己做。
+
 ## 登录
 
 `--login` 先直接打开目标页（首条命令要启动浏览器，几秒到十几秒属正常），snapshot 里有用户菜单或头像就是已登录；出现登录入口时：
@@ -46,7 +54,6 @@ agent-browser skills get core
 - `errors` 文本模式只打印 `✗`、不带内容，用 `errors --json`；其中 `line`/`column` 从 0 计，行号以 `text` 里的堆栈为准。
 - 同一会话内的命令串行发，不并行。
 - 按屏推进：`snapshot -i` 看一屏，把这一屏能确定的动作用 `batch --bail` 一次发完，再看下一屏；脚本里读结果加 `--json`。
-- 已规划好的多屏机械流程（登录后照给定数据填表、加购到结账）交给 `uilane web`（同一目录、同样的 `--login`/`--as`，用法见 `uilane --help`，没开时退出码 2，照常自己做）：`status` 为 `done` 才算完成，此时 `--expect` 已逐条核对通过；`handoff` 时按 `reason` 判断原因，从 `url` 与 `screen` 接手，`steps` 是已做的动作。
 - `find` 命中多个元素时不报错，直接操作第一个；同名元素多（每行都有「编辑」）时先 `snapshot -i` 再用 ref。`find` 的动作只有 click、fill、check、hover、text。
 - `snapshot -c` 会丢掉非交互的文字（确认码、正文），读文字用 `snapshot` 或 `get text`。
 

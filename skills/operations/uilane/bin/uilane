@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // uilane：把一段已规划好的机械界面操作交给快速决策器一步步做完，结束时把轨迹、停止原因和当前界面交回调用方。
 import { parseArgs } from 'node:util';
-import { decider, MODES } from './decide.mjs';
+import { CONFIG, decider, deciders, readConfig, writeConfig } from './decide.mjs';
 import { parseExpect, runLane } from './lane.mjs';
 import { web } from './web.mjs';
 import { app } from './app.mjs';
@@ -10,6 +10,7 @@ const HELP = `uilane — run a planned, mechanical UI sequence with a fast decid
 
   uilane web [--login] [--as NAME] --goal TEXT --expect SPEC... [--data JSON] [--max-steps N]
   uilane app (--app NAME | --pid N)  --goal TEXT --expect SPEC... [--data JSON] [--max-steps N]
+  uilane status | on | off
 
 web drives this checkout's bbu session (same --login/--as as bbu); app drives a macOS app through
 bcu in the background. Each step: observe, offer options built from the screen and --data, let the
@@ -30,15 +31,14 @@ decision_timeout, decider_error, action_failed, unexpected_screen, step_limit, e
 observe_failed. steps is the trajectory; screen (+ url, or the bcu state id) is
 where to take over. Usage and configuration errors exit 2.
 
-Environment:
-  UILANE=startlux|flash        decider; unset means uilane is off
-  UILANE_STARTLUX_URL          StartLux base URL (POST <url>/systemone)
-  UILANE_STARTLUX_KEY          or keychain service "uilane-startlux"
-  UILANE_STARTLUX_MODEL        optional; the server default otherwise
-  UILANE_FLASH_KEY             DeepSeek key, or keychain service "uilane-flash"
-  UILANE_FLASH_URL, UILANE_FLASH_MODEL   default https://api.deepseek.com, deepseek-flash
-When StartLux has not answered after 3 s and flash has a key, flash is asked about the same screen
-in parallel and the first answer wins. With no answer after 10 s the run hands back.
+Configuration: ~/.config/uilane.json plus keychain keys. uilane is on whenever a decider is
+configured; "uilane off" turns it off ({"off": true}), "uilane on" back on, "uilane status" shows it.
+  StartLux   {"startlux": {"url": "<base, POST <url>/systemone>", "model": "<optional>"}}
+             key: security add-generic-password -a uilane -s uilane-startlux -w <key>
+  Flash      key: security add-generic-password -a uilane -s uilane-flash -w <DeepSeek key>
+             optional {"flash": {"url": "...", "model": "..."}}, default https://api.deepseek.com, deepseek-flash
+StartLux is asked first. When it has not answered after 3 s, flash (if configured) is asked about
+the same screen in parallel and the first answer wins. With no answer after 10 s the run hands back.
 `;
 
 const DEFAULT_MAX_STEPS = 30;
@@ -53,8 +53,20 @@ if (!argv.length || argv.some((a) => a === '-h' || a === '--help')) {
   process.stdout.write(HELP);
   process.exit(0);
 }
-const mode = process.env.UILANE;
-if (!MODES.includes(mode)) die('off. Turn it on with UILANE=startlux or UILANE=flash (see uilane --help)');
+if (['status', 'on', 'off'].includes(argv[0])) {
+  if (argv.length > 1) die(`${argv[0]} takes no arguments`);
+  const config = readConfig();
+  if (argv[0] !== 'status') {
+    if (argv[0] === 'off') config.off = true;
+    else delete config.off;
+    writeConfig(config);
+  }
+  const on = deciders(config).map((d) => d.name);
+  process.stdout.write(config.off ? 'off\n' : on.length ? `on: ${on.join(', then ')}\n` : `off: no decider configured (see uilane --help)\n`);
+  process.exit(0);
+}
+const entrants = deciders();
+if (!entrants.length) die(readConfig().off ? 'off (uilane on to turn it back on)' : `off: no decider configured in ${CONFIG} and the keychain (see uilane --help)`);
 
 let opts;
 try {
@@ -96,7 +108,7 @@ try {
   expect = v.expect.map(parseExpect);
   if (kind === 'app' && expect.some((e) => e.kind === 'url')) throw new Error('url: expectations are for uilane web');
   surface = kind === 'web' ? web({ login: v.login, as: v.as }) : app({ app: v.app, pid: v.pid && Number(v.pid) });
-  decide = decider(mode);
+  decide = decider(entrants);
 } catch (e) {
   die(e.message);
 }
