@@ -1,30 +1,123 @@
 #!/usr/bin/env node
-// bbu 直接对共享浏览器（--login）做的两件事，agent-browser 没有对应命令：
-//   window <ws>              在默认存储空间开一个新窗口，打印 targetId（为什么见 bbu）。
+// bbu 在窗口车道（--login、--mine）直接做的事，agent-browser 没有对应命令：
+//   window <ws> [targetId]   targetId 的标签还在就打印它，否则在默认存储空间后台开一个新窗口、打印其 targetId
+//                            （为什么要新窗口见 bbu）。
+//   approve <pid> <命令>...  运行命令；它连接浏览器 pid 时弹出的「允许远程调试」对话框由 bcu 在后台按下允许。
 //   import <ws> [--from <浏览器>] <域名>...
 //                            从用户日常浏览器复制这些站点的 cookie。只复制 cookie：轮换制续期
 //                            凭证多存在 localStorage，复制它会让两个浏览器互相作废登录。
-import { execFileSync } from 'node:child_process';
+import { execFile, execFileSync, spawn } from 'node:child_process';
 import { createDecipheriv, pbkdf2Sync } from 'node:crypto';
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync, backup } from 'node:sqlite';
+import { promisify } from 'node:util';
 
 const fail = (message) => { console.error('bbu: ' + message); process.exit(1); };
+const run = promisify(execFile);
 
-function cdp(ws, method, params) {
+function connect(ws) {
   return new Promise((resolve, reject) => {
     const socket = new WebSocket(ws);
-    socket.onopen = () => socket.send(JSON.stringify({ id: 1, method, params }));
+    const pending = new Map();
+    let id = 0;
+    socket.onopen = () => resolve({
+      send: (method, params) => new Promise((ok, ko) => {
+        pending.set(++id, { ok, ko });
+        socket.send(JSON.stringify({ id, method, params }));
+      }),
+      close: () => socket.close(),
+    });
     socket.onmessage = ({ data }) => {
       const message = JSON.parse(data);
-      if (message.id !== 1) return;
-      socket.close();
-      message.error ? reject(new Error(message.error.message)) : resolve(message.result);
+      const call = pending.get(message.id);
+      if (!call) return;
+      pending.delete(message.id);
+      message.error ? call.ko(new Error(message.error.message)) : call.ok(message.result);
     };
-    socket.onerror = () => reject(new Error('cannot reach the shared browser at ' + ws));
+    socket.onerror = () => reject(new Error('cannot reach the browser at ' + ws));
   });
+}
+
+async function window(ws, target) {
+  const browser = await connect(ws);
+  try {
+    const { targetInfos } = await browser.send('Target.getTargets');
+    if (target && targetInfos.some((t) => t.targetId === target)) return target;
+    // background：否则浏览器会被激活、抢走用户的前台。
+    return (await browser.send('Target.createTarget', { url: 'about:blank', newWindow: true, background: true })).targetId;
+  } finally {
+    browser.close();
+  }
+}
+
+// 对话框在连接发起后不到 1 s 出现；这么久还没出现说明连接没走到审批，不再等。
+const PROMPT_TIMEOUT_MS = '10000';
+const bcu = async (args, options) => JSON.parse((await run('bcu', [...args, '--json'], options)).stdout);
+const frontPid = async () => {
+  const { stdout } = await run('lsappinfo', ['info', (await run('lsappinfo', ['front'])).stdout.trim()]);
+  return Number(stdout.match(/pid = (\d+)/)[1]);
+};
+// 浏览器弹对话框前必定激活自己的窗口（Chromium DevToolsConnectionDialog 构造时调 Activate()，外部拦不住）：
+// 订阅应用激活事件，浏览器一激活就把前台还给 argv[1]。
+// 就绪时打印系统双击间隔（秒）。
+const GUARD = `ObjC.import('AppKit');
+function run([browser, front]) {
+  const previous = $.NSRunningApplication.runningApplicationWithProcessIdentifier(Number(front));
+  $.NSWorkspace.sharedWorkspace.notificationCenter.addObserverForNameObjectQueueUsingBlock(
+    $.NSWorkspaceDidActivateApplicationNotification, $(), $.NSOperationQueue.mainQueue, (note) => {
+      if (note.userInfo.objectForKey($.NSWorkspaceApplicationKey).processIdentifier === Number(browser)) previous.activateWithOptions(0);
+    });
+  console.log($.NSEvent.doubleClickInterval);
+  $.NSRunLoop.currentRunLoop.run;
+}`;
+function guard(browser, front) {
+  const child = spawn('osascript', ['-l', 'JavaScript', '-e', GUARD, browser, String(front)], { stdio: ['ignore', 'ignore', 'pipe'] });
+  return new Promise((resolve, reject) => {
+    child.stderr.once('data', (line) => resolve({ interval: Number(line), stop: () => child.kill() }));
+    child.once('exit', () => reject(new Error('front-app guard exited')));
+  });
+}
+
+// Chromium 144 起每个 CDP 连接都要用户在对话框里允许。只按自己这次连接的对话框：调用方持全机锁，
+// 连接前浏览器已有对话框就拒绝，之后出现的只能是这次连接的。按钮按位置认，不按文字（界面语言各异）：
+// macOS 上 Chromium 对话框的按钮从左到右是 [附加按钮] 取消 允许，允许在最后。
+async function approve(pid, command) {
+  const [{ roots }, front] = await Promise.all([bcu(['find-roots', '--pid', pid, '--kind', 'sheet']), frontPid()]);
+  if (roots.length) fail('the browser is showing a dialog; dismiss it and retry');
+  const { interval, stop } = await guard(pid, front);
+  process.on('exit', stop);
+  const child = spawn(command[0], command.slice(1), { stdio: 'inherit' });
+  const exited = new Promise((resolve) => child.on('exit', (code) => resolve({ code: code ?? 1 })));
+  const abort = new AbortController();
+  const prompted = bcu(['wait-for', '--pid', pid, '--role', 'sheet', '--timeout', PROMPT_TIMEOUT_MS], { signal: abort.signal })
+    .then((state) => ({ state }), (error) => ({ error }));
+  const first = await Promise.race([exited, prompted]);
+  if (first.code !== undefined) {
+    abort.abort();
+    return first.code;
+  }
+  try {
+    if (first.error) throw first.error;
+    const shown = Date.now();
+    const { stateId } = first.state;
+    const sheet = (await bcu(['search-ui', '--state', stateId, '--role', 'sheet'])).matches[0].ref;
+    const dialog = await bcu(['expand-ui', '--state', stateId, '--ref', sheet]);
+    const allow = dialog.nodes.filter((node) => node.role === 'button').at(-1).ref;
+    // 对话框显示后一个双击间隔内的按键被当作误触忽略（Chromium 的 InputEventActivationProtector）。
+    await new Promise((resolve) => setTimeout(resolve, Math.max(0, interval * 1000 - (Date.now() - shown))));
+    // 连接一建立命令就会结束，不必等 bcu 确认对话框已关；bcu 先失败才说明没按成。
+    const pressed = run('bcu', ['act-ui', '--headless', '--state', dialog.stateId, JSON.stringify([{ action: 'press', ref: allow }]),
+      '--expect-role', 'sheet', '--expect-gone', '--timeout', '2000'], { signal: abort.signal });
+    const done = await Promise.race([exited, pressed.then(() => exited, (error) => ({ error }))]);
+    if (done.error) throw done.error;
+    abort.abort();
+    return done.code;
+  } catch (error) {
+    child.kill();
+    fail('could not approve remote debugging: ' + (error.stderr || error.message).trim());
+  }
 }
 
 // macOS 上 Chromium 系浏览器的数据目录（~/Library/Application Support 下）与钥匙串里的 cookie 密钥项。
@@ -94,18 +187,23 @@ function readCookies(name, domains) {
   });
 }
 
-const [command, ws, ...rest] = process.argv.slice(2);
+const [command, ...args] = process.argv.slice(2);
 try {
   if (command === 'window') {
-    console.log((await cdp(ws, 'Target.createTarget', { url: 'about:blank', newWindow: true })).targetId);
+    console.log(await window(args[0], args[1]));
+  } else if (command === 'approve') {
+    process.exit(await approve(args[0], args.slice(1)));
   } else if (command === 'import') {
+    const [ws, ...rest] = args;
     if (process.platform !== 'darwin') fail('import supports macOS only');
     const from = rest[0] === '--from' ? rest.splice(0, 2)[1] : defaultBrowser();
     const domains = rest.map((d) => d.replace(/^https?:\/\//, '').replace(/^\.|[/:].*$/g, '').toLowerCase());
     if (!domains.length) fail('usage: bbu import [--from <' + SUPPORTED + '>] <domain>...');
     const cookies = await readCookies(from, domains);
     if (!cookies.length) fail(from + ' has no cookies for ' + domains.join(' '));
-    await cdp(ws, 'Storage.setCookies', { cookies });
+    const browser = await connect(ws);
+    await browser.send('Storage.setCookies', { cookies });
+    browser.close();
     console.log('imported ' + cookies.length + ' cookies for ' + domains.join(' ') + ' from ' + from);
   } else {
     fail('unknown command ' + command);

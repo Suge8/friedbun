@@ -8,11 +8,11 @@ import { app } from './app.mjs';
 
 const HELP = `uilane — run a planned, mechanical UI sequence with a fast decider, one checked step at a time
 
-  uilane web [--login] [--as NAME] --goal TEXT --expect SPEC... [--data JSON] [--max-steps N]
+  uilane web [--login | --mine] [--as NAME] --goal TEXT --expect SPEC... [--data JSON] [--max-steps N]
   uilane app (--app NAME | --pid N)  --goal TEXT --expect SPEC... [--data JSON] [--max-steps N]
   uilane status | on | off
 
-web drives this checkout's bbu session (same --login/--as as bbu); app drives a macOS app through
+web drives this checkout's bbu session (same --login/--mine/--as as bbu); app drives a macOS app through
 bcu in the background. Each step: observe, offer options built from the screen and --data, let the
 decider pick one, do at most that one action, observe again. Web observations wait until the page
 stops changing (up to 1.5 s; a step marked "unsettled" went ahead without that). Delete, pay, send,
@@ -79,6 +79,7 @@ try {
       expect: { type: 'string', multiple: true, default: [] },
       'max-steps': { type: 'string', default: String(DEFAULT_MAX_STEPS) },
       login: { type: 'boolean' },
+      mine: { type: 'boolean' },
       as: { type: 'string' },
       app: { type: 'string' },
       pid: { type: 'string' },
@@ -94,7 +95,7 @@ if (!v.goal) die('--goal is required');
 if (!v.expect.length) die('at least one --expect is required');
 if (kind === 'app' && !v.app === !v.pid) die('app needs exactly one of --app or --pid');
 if (kind === 'web' && (v.app || v.pid)) die('--app/--pid belong to uilane app');
-if (kind === 'app' && (v.login || v.as)) die('--login/--as belong to uilane web');
+if (kind === 'app' && (v.login || v.mine || v.as)) die('--login/--mine/--as belong to uilane web');
 const maxSteps = Number(v['max-steps']);
 if (!Number.isInteger(maxSteps) || maxSteps < 1) die('--max-steps must be a positive integer');
 
@@ -107,7 +108,7 @@ try {
   if (typeof data !== 'object' || Array.isArray(data) || !data || Object.values(data).some((x) => typeof x !== 'string')) throw new Error('--data must be a JSON object of strings');
   expect = v.expect.map(parseExpect);
   if (kind === 'app' && expect.some((e) => e.kind === 'url')) throw new Error('url: expectations are for uilane web');
-  surface = kind === 'web' ? web({ login: v.login, as: v.as }) : app({ app: v.app, pid: v.pid && Number(v.pid) });
+  surface = kind === 'web' ? web({ login: v.login, mine: v.mine, as: v.as }) : app({ app: v.app, pid: v.pid && Number(v.pid) });
   decide = decider(entrants);
 } catch (e) {
   die(e.message);

@@ -61,7 +61,8 @@ bcu wait-for --app CuePad --text 设置 --timeout 20000
 - 视图折叠的部分用 `search-ui` 找（`--text`、`--role`、`--action`）、`expand-ui` 展开、`inspect-ui` 看原始字段、`read-text` 读长文本。输入框后面的 `▸ N lines, read-text @eN` 表示逐行文字折起来了，全文用 `read-text`。
 - 菜单命令：`find-roots --app X --kind menubar` 取菜单栏根，observe 后 search 到菜单项直接 press，不用先打开父菜单。
 - `find-roots` 里没标 `onscreen` 的窗口可能在别的桌面空间或全屏应用里，后台照常可用。
-- 浏览器窗口按普通窗口操作；网页里没标 `{scroll}` 的元素也能 scroll。首次观察浏览器窗口要等它建网页树，可能要几秒；结果写 `web content not exposed` 时读不到网页（窗口最小化时常见）。页面的导航、DOM、console 交给 `better-browser-use`；用户让你用他自己已登录的浏览器时留在 bcu，读不到网页就 `--image always` 看图按坐标操作。
+- 浏览器上只用 bcu 处理网页够不到的原生弹窗：文件选择、权限与钥匙串提示、打印、浏览器自己的对话框。网页本身，包括用户自己的浏览器，交给 `better-browser-use`（用户的浏览器用 `bbu --mine`）。
+- 应用里的网页内容（Electron 等）没标 `{scroll}` 的元素也能 scroll；首次观察要等它建网页树，可能要几秒；结果写 `web content not exposed` 时读不到网页（窗口最小化时常见）。
 
 ## 自绘窗口
 

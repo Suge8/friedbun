@@ -2,9 +2,10 @@
 # bbu = agent-browser + 登录态。bbu 独占 session 命名，浏览器的启动、复用、回收归 agent-browser。
 # 默认车道：每个检出一个 Chrome for Testing，登录态按检出存取（agent-browser restore）。
 # --login：全机一个 CloakBrowser + agent 专用 profile，每个检出一个窗口，登录实时共享。
-# --as <名字>：同一检出里再开一个会话；默认车道是另一份登录态，--login 是另一个窗口。
+# --mine：用户自己的浏览器（他在 chrome://inspect/#remote-debugging 打开了开关），每个检出一个窗口。
+# --as <名字>：同一检出里再开一个会话；默认车道是另一份登录态，--login、--mine 是另一个窗口。
 # import <域名>...：从用户日常浏览器复制这些站点的 cookie 进共享浏览器。
-# 文中 #编号 均为 vercel-labs/agent-browser 的 issue，修复后删掉对应绕行。
+# 文中 #编号 均为 vercel-labs/agent-browser 的 issue 或 PR，修复或合并后删掉对应绕行。
 set -euo pipefail
 
 DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
@@ -16,10 +17,11 @@ export AGENT_BROWSER_STATE_EXPIRE_DAYS="${AGENT_BROWSER_STATE_EXPIRE_DAYS:-30}"
 
 die() { echo "bbu: $*" >&2; exit 2; }
 
-login=0 as=""
+lane=dev as=""
 while :; do
   case "${1:-}" in
-    --login) login=1; shift ;;
+    --login) lane=login; shift ;;
+    --mine) lane=mine; shift ;;
     --as) as="${2:?bbu: --as needs a name}"; shift 2 ;;
     *) break ;;
   esac
@@ -37,6 +39,48 @@ mkdir -p "$BBU_HOME"
 exec 9>>"$BBU_HOME/bbu.lock"
 perl -MFcntl=:flock -e 'open my $f, ">&=9" or die "bbu: $!\n"; flock $f, LOCK_EX or die "bbu: $!\n"'
 ab_() { agent-browser "$@" 9>&-; }
+
+# 用户在 chrome://inspect/#remote-debugging 打开开关后，浏览器在 127.0.0.1 上监听，并把端口和路径写进数据目录
+# 的 DevToolsActivePort，只认这条路径（不响应 /json/*）。不用 --auto-connect：它的浏览器名单没有 Helium（#1063），
+# 且每次连接弹两次对话框、2 s 没批就删掉浏览器的 DevToolsActivePort（#1508）；两者合并后删掉这个函数，改用
+# --auto-connect 发现浏览器、get cdp-url 取地址，审批仍走 approve。
+# 从监听端口的进程反查：数据目录可在 Application Support 下任意深度，整棵树扫一遍要 1 s 以上。某进程打开的文件
+# 所在目录（或其上层）里有 DevToolsActivePort、且写的端口正是它在监听的，就是它的数据目录；退出的应用（多是
+# Electron）留下的旧文件端口常被别的浏览器复用，这样不会认错。开了多个时用最近打开开关的那个。
+mine() {
+  local support="$HOME/Library/Application Support" listening found p file port path
+  listening="$(lsof -nP -iTCP@127.0.0.1 -sTCP:LISTEN -Fpn || :)"
+  found="$({ lsof -nP -p "$(sed -n 's/^p//p' <<< "$listening" | paste -sd , -)" -Fpn 2>/dev/null || :; } |
+    LISTENING="$listening" awk -v support="$support/" '
+      BEGIN {
+        n = split(ENVIRON["LISTENING"], lines, "\n")
+        for (i = 1; i <= n; i++) {
+          if (lines[i] ~ /^p/) pid = substr(lines[i], 2)
+          else if (lines[i] ~ /^n/) { sub(/.*:/, "", lines[i]); ports[pid, lines[i]] = 1 }
+        }
+      }
+      /^p/ { pid = substr($0, 2); next }
+      /^n/ && index($0, "n" support) == 1 {
+        dir = substr($0, 2)
+        while (sub(/\/[^\/]*$/, "", dir) && length(dir) >= length(support) && !((pid, dir) in seen)) {
+          seen[pid, dir] = 1
+          file = dir "/DevToolsActivePort"
+          if ((getline port < file) > 0 && (pid, port) in ports) print pid "\t" file
+          close(file)
+        }
+      }')"
+  port_file=""
+  while IFS=$'\t' read -r p file; do
+    [ -z "$port_file" ] || [ "$file" -nt "$port_file" ] || continue
+    pid="$p" port_file="$file"
+  done <<< "$found"
+  if [ -z "$port_file" ]; then
+    echo 'bbu: no browser allows remote debugging. Open chrome://inspect/#remote-debugging in your browser and turn on "Allow remote debugging for this browser instance".' >&2
+    exit 2
+  fi
+  { read -r port; read -r path || [ -n "$path" ]; } < "$port_file"
+  url="ws://127.0.0.1:$port$path"
+}
 
 # 共享浏览器的每条命令必须带同一套启动参数：参数不同时 agent-browser 会悄悄换一个浏览器。
 shared() {
@@ -56,30 +100,42 @@ if [ "${1:-}" = import ]; then
   exec node "$DIR/cdp.mjs" import "$url" "${@:2}"
 fi
 
-if [ "$login" = 0 ]; then
+if [ "$lane" = dev ]; then
   AGENT_BROWSER_SESSION="$(ab_ session id --scope worktree --prefix bbu)${as:+_$as}"
   export AGENT_BROWSER_SESSION AGENT_BROWSER_RESTORE="$AGENT_BROWSER_SESSION"
   ab() { agent-browser "$@"; }
   ab_ session info >/dev/null
 else
-  # 每条 --login 命令都经过共享会话：它启动或复用浏览器，并把 agent 的活动计入共享浏览器的闲置计时。
-  url="$(shared get cdp-url)"
-  AGENT_BROWSER_SESSION="$(ab_ session id --scope worktree --prefix bbu-login)${as:+_$as}"
+  if [ "$lane" = login ]; then
+    # 每条 --login 命令都经过共享会话：它启动或复用浏览器，并把 agent 的活动计入共享浏览器的闲置计时。
+    url="$(shared get cdp-url)" port_file="$BBU_HOME/profile/DevToolsActivePort"
+    connect() { "$@" 9>&-; }
+  else
+    mine
+    # 用户的浏览器每个新连接都弹对话框要求允许，由 approve 代按。
+    connect() { node "$DIR/cdp.mjs" approve "$pid" "$@" 9>&-; }
+  fi
+  AGENT_BROWSER_SESSION="$(ab_ session id --scope worktree --prefix "bbu-$lane")${as:+_$as}"
   export AGENT_BROWSER_SESSION
   ab() { agent-browser --cdp "$url" --pin-tab "$@"; }
-  # 每个会话占一个独立窗口：同一窗口里的后台标签被浏览器降速，动画与截图停摆。绑定是
-  # agent-browser 记在 <socketDir>/<会话>.target 的 targetId；缺失或窗口已不在（浏览器重启过）就在
-  # 默认存储空间开新窗口（window new 每次新建隔离存储空间、登录不共享：#1624），先不带 --pin-tab
-  # 切过去再固定，否则接入时会先多开一个空标签（#1986）。
-  socket_dir="$(shared --json session info | sed -n 's/.*"socketDir":"\([^"]*\)".*/\1/p')"
-  target="$(sed -n 's/.*"targetId":"\([^"]*\)".*/\1/p' "$socket_dir/$AGENT_BROWSER_SESSION.target" 2>/dev/null || true)"
-  port="${url#ws://127.0.0.1:}"
-  if [ -n "$target" ] && curl -sf "http://127.0.0.1:${port%%/*}/json/list" | grep -q "$target"; then
-    ab_ --cdp "$url" --pin-tab session info >/dev/null
-  else
-    ab_ --cdp "$url" tab "$(node "$DIR/cdp.mjs" window "$url")" >/dev/null
+  # 每个会话占一个独立窗口：同一窗口里的后台标签被浏览器降速，动画与截图停摆；--mine 下也不碰用户的标签。
+  # 绑定是 agent-browser 记在 <socketDir>/<会话>.target 的 targetId。守护进程连着浏览器（browserLaunched）、
+  # 在浏览器这次开启远程调试之后启动、窗口也还在，就直接用；否则断开旧连接，复用或新开窗口（在默认存储
+  # 空间，window new 每次新建隔离存储空间、登录不共享：#1624），写进绑定后带 --pin-tab 重新接入，守护进程
+  # 直接挂到这个窗口。不用 tab <targetId> 切换：它把浏览器激活到前台；首次接入不预写绑定又会多开一个空标签
+  # （#1986）。没连着的守护进程收到任何命令都会去连接，--mine 下那会弹出没人按的对话框，所以先判断再发命令。
+  info="$(ab_ --json session info)"
+  socket_dir="$(sed -n 's/.*"socketDir":"\([^"]*\)".*/\1/p' <<< "$info")"
+  binding="$socket_dir/$AGENT_BROWSER_SESSION.target"
+  target="$(sed -n 's/.*"targetId":"\([^"]*\)".*/\1/p' "$binding" 2>/dev/null || true)"
+  if [[ "$info" != *'"browserLaunched":true'* ]] || [ "$port_file" -nt "$socket_dir/$AGENT_BROWSER_SESSION.pid" ] ||
+    [ -z "$target" ] || [[ "$(ab_ --cdp "$url" --pin-tab --json tab list)" != *"$target"* ]]; then
+    [[ "$info" == *'"active":true'* ]] && ab_ close >/dev/null
+    target="$(connect node "$DIR/cdp.mjs" window "$url" "$target")"
+    (umask 077; mkdir -p "$socket_dir"; echo "{\"targetId\":\"$target\",\"pinned\":true}" > "$binding")
+    connect agent-browser --cdp "$url" --pin-tab get url >/dev/null
   fi
-  # 关掉窗口里唯一的标签即关窗口；挂接会话的 close 只断开，不碰共享浏览器。
+  # 关掉窗口里唯一的标签即关窗口；挂接会话的 close 只断开，不碰浏览器。
   [ "${1:-}" = close ] && ab_ --cdp "$url" --pin-tab tab close >/dev/null
 fi
 exec 9>&-

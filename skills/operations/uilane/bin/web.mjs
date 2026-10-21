@@ -1,4 +1,4 @@
-// 网页界面：走调用方所在检出的 bbu 会话（可带 --login / --as），用完整 snapshot 观察，按 @ref 执行。
+// 网页界面：走调用方所在检出的 bbu 会话（可带 --login / --mine / --as），用完整 snapshot 观察，按 @ref 执行。
 // 用完整 snapshot 而不是 -i：-i 不含正文，决策器和结果核对都看不到"下单成功"、余额这类文字。
 import { spawnSync } from 'node:child_process';
 
@@ -46,8 +46,8 @@ function parse(snapshot) {
   return els.map(({ i, ...e }) => e);
 }
 
-export function web({ login, as }) {
-  const lane = [...(login ? ['--login'] : []), ...(as ? ['--as', as] : [])];
+export function web({ login, mine, as }) {
+  const lane = [...(login ? ['--login'] : []), ...(mine ? ['--mine'] : []), ...(as ? ['--as', as] : [])];
   const bbu = (args) => {
     const r = spawnSync('bbu', [...lane, ...args, '--json'], { encoding: 'utf8' });
     try {
