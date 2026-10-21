@@ -46,13 +46,14 @@ pi install npm:pi-firecode
 
 **完成标准**：表中每个落点都已就位；`uilane --help` 打印用法；`herdr config check` 输出 `ok`；`ls ~/.agents/skills/workflow/research/SKILL.md` 存在；新开的 zsh 里 `echo $PI_CACHE_RETENTION` 输出 `long`；`bbu --login open about:blank` 与 `bbu --login close` 裸退出码都为 0。
 
-## 步骤 3：TinyFish key（可选）
+## 步骤 3：可选 key
 
-web-search 的 `--quick` 和 `fetch` 走 TinyFish，没有 key 时其余搜索照常可用。读者在对话里已给出 key 时，写进 `~/.config/friedbun/env.zsh` 并 `chmod 600`，否则跳过：
+读者在对话里给了哪个 key 就配哪个，没给的跳过，对应功能不可用，其余照常。
 
-```zsh
-export TINYFISH_API_KEY='<tinyfish-key>'
-```
+- TinyFish：web-search 的 `--quick` 和 `fetch` 走它。写进 `~/.config/friedbun/env.zsh` 并 `chmod 600`：`export TINYFISH_API_KEY='<tinyfish-key>'`。
+- DeepSeek：uilane（网页与桌面的跨屏机械流程快车道）的决策器，存进钥匙串即开启：`security add-generic-password -a uilane -s uilane-flash -w '<deepseek-key>'`。读者另有 StartLux 时按 `uilane --help` 再配，先问 StartLux、慢了并行问 DeepSeek。
+
+**完成标准**：配了 DeepSeek 时 `uilane status` 输出以 `on:` 开头。
 
 ## 步骤 4：请读者做两件事
 
@@ -73,8 +74,8 @@ export TINYFISH_API_KEY='<tinyfish-key>'
 
 ## 步骤 6：交付
 
-告诉读者：已装好什么；SYSTEM.md 已换成作者的版本，会改变 agent 的语气和习惯，不想要就用 `~/.pi/agent/SYSTEM.md.bak` 还原（没有 `.bak` 就删掉该文件）；跳过了 TinyFish 时，以后把 key 写进 `~/.config/friedbun/env.zsh` 即可；新环境变量只在新开的 shell 里生效，已开的 Herdr 窗格要新开窗格再启动 pi。
+告诉读者：已装好什么；SYSTEM.md 已换成作者的版本，会改变 agent 的语气和习惯，不想要就用 `~/.pi/agent/SYSTEM.md.bak` 还原（没有 `.bak` 就删掉该文件）；跳过的可选 key 以后照步骤 3 补上即可；uilane 出问题时 `uilane off` 一键关闭；新环境变量只在新开的 shell 里生效，已开的 Herdr 窗格要新开窗格再启动 pi。
 
 ## 卸载
 
-按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`。
+按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、`~/.config/uilane.json` 与钥匙串里的 `uilane-flash`、`uilane-startlux`。
