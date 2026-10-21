@@ -13,8 +13,10 @@ const HELP = `uilane — run a planned, mechanical UI sequence with a fast decid
 
 web drives this checkout's bbu session (same --login/--as as bbu); app drives a macOS app through
 bcu in the background. Each step: observe, offer options built from the screen and --data, let the
-decider pick one, do at most that one action, observe again. Delete, pay, send, publish, submit for
-review, quit/kill, authorize and System Settings are never offered: the run hands back instead.
+decider pick one, do at most that one action, observe again. Web observations wait until the page
+stops changing (up to 1.5 s; a step marked "unsettled" went ahead without that). Delete, pay, send,
+publish, submit for review, quit/kill, authorize and System Settings are never offered: when the next
+step is one of them, the run hands back to you with it listed in "blocked".
 
   --goal TEXT     the end state, not a click list ("order complete with these two items")
   --data JSON     {"name": "value"} strings the run may type or choose; nothing else is typed
@@ -35,7 +37,8 @@ Environment:
   UILANE_STARTLUX_MODEL        optional; the server default otherwise
   UILANE_FLASH_KEY             DeepSeek key, or keychain service "uilane-flash"
   UILANE_FLASH_URL, UILANE_FLASH_MODEL   default https://api.deepseek.com, deepseek-flash
-A StartLux decision over 3 s is asked again of flash on the same screen when flash has a key.
+When StartLux has not answered after 3 s and flash has a key, flash is asked about the same screen
+in parallel and the first answer wins. With no answer after 10 s the run hands back.
 `;
 
 const DEFAULT_MAX_STEPS = 30;

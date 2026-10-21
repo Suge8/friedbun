@@ -1,6 +1,6 @@
 // 快车道循环：观察 → 候选 → 决策器选编号 → 执行至多一个动作 → 重新观察。
 // 界面（web/app）提供 observe() 与 act()；这里拥有候选、危险动作、交回与结果核对的全部规则。
-// observe() → { screen, elements, url?, state?, odd?, gone? }；elements 已归一为 { ref, role, name, kind, value?, … }。
+// observe() → { screen, elements, url?, state?, unsettled?, odd?, gone? }；elements 已归一为 { ref, role, name, kind, value?, … }。
 
 // 危险动作不进候选：删除、付款、发送、发布、提交审核、结束进程、授权。名字命中即拦，宁可多拦。
 const RISKY =
@@ -77,7 +77,13 @@ export async function runLane({ surface, decide, goal, data, expect, maxSteps })
       stop = { reason: 'low_confidence', detail: `${d.by} picked ${q(opt.desc)} with confidence ${d.confidence}, none ${d.none}` };
       break;
     }
-    const step = { action: opt.id in reserved ? opt.id : opt.desc, by: d.by, ...(d.confidence && { confidence: d.confidence }), ms: { observe: observeMs, decide: decideMs } };
+    const step = {
+      action: opt.id in reserved ? opt.id : opt.desc,
+      by: d.by,
+      ...(d.confidence && { confidence: d.confidence }),
+      ...(obs.unsettled && { unsettled: obs.unsettled }),
+      ms: { observe: observeMs, decide: decideMs },
+    };
     steps.push(step);
     if (opt.id === 'done' || opt.id === 'handoff') { stop = { reason: opt.id }; break; }
     if (opt.id === 'reobserve') { history.push('reobserve'); continue; }

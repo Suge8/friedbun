@@ -6,6 +6,9 @@ const TEXT = new Set(['textbox', 'searchbox', 'spinbutton']);
 const PRESS = new Set(['button', 'link', 'tab', 'menuitem', 'switch']);
 const LINE = /^(\s*)- (\w+)(?: "((?:[^"\\]|\\.)*)")?(?: \[([^\]]*)\])?(.*)$/;
 const CONTEXT_CHARS = 120;
+// 动作后连续取快照，直到与动作前不同、相邻两次相同、且动作后发起的 XHR/fetch 都已返回，才当作这一屏。
+// 只看快照不够：bank 点标签页后先变一行，模板 XHR 回来前快照原样停着，决策器据此重点标签页、往旧表单里填值。
+const SETTLE_MS = 1500;
 
 function parse(snapshot) {
   const lines = snapshot.split('\n').map((s) => {
@@ -54,18 +57,41 @@ export function web({ login, as }) {
     }
   };
   let origin;
+  let before;
+  let actedAt;
+  const read = () => {
+    const res = bbu(['batch', 'get url', 'snapshot', 'network requests --type xhr,fetch']);
+    const bad = res.find((x) => !x.success);
+    if (bad) throw new Error(`bbu ${bad.command.join(' ')}: ${bad.error}`);
+    const url = res[0].result.url;
+    const snapshot = res[1].result.snapshot;
+    const pending = actedAt !== undefined && res[2].result.requests.some((r) => r.timestamp >= actedAt && r.status === undefined);
+    return { url, snapshot, pending, screen: `URL: ${url}\n${snapshot}` };
+  };
+  const unsettledBy = (cur, prev) =>
+    (cur.screen === before && 'no change after the action') || (cur.screen !== prev?.screen && 'still changing') || (cur.pending && 'requests pending');
   return {
     async observe() {
-      const res = bbu(['batch', 'get url', 'snapshot']);
-      const bad = res.find((x) => !x.success);
-      if (bad) throw new Error(`bbu ${bad.command.join(' ')}: ${bad.error}`);
-      const url = res[0].result.url;
-      const snapshot = res[1].result.snapshot;
-      origin ??= new URL(url).origin;
-      const here = new URL(url).origin;
-      return { url, screen: `URL: ${url}\n${snapshot}`, elements: parse(snapshot), ...(here !== origin && { odd: `left ${origin} for ${here}` }) };
+      const t0 = performance.now();
+      let prev;
+      let cur = read();
+      while (unsettledBy(cur, prev) && performance.now() - t0 < SETTLE_MS) [prev, cur] = [cur, read()];
+      const unsettled = unsettledBy(cur, prev);
+      before = undefined;
+      actedAt = undefined;
+      origin ??= new URL(cur.url).origin;
+      const here = new URL(cur.url).origin;
+      return {
+        url: cur.url,
+        screen: cur.screen,
+        elements: parse(cur.snapshot),
+        ...(unsettled && { unsettled: `${unsettled} after ${SETTLE_MS} ms` }),
+        ...(here !== origin && { odd: `left ${origin} for ${here}` }),
+      };
     },
-    async act(o) {
+    async act(o, obs) {
+      before = obs.screen;
+      actedAt = Date.now();
       const ref = `@${o.ref}`;
       const args = { press: ['click', ref], fill: ['fill', ref, o.value], select: ['select', ref, o.value], check: ['check', ref], uncheck: ['uncheck', ref] }[o.op];
       const r = bbu(args);
