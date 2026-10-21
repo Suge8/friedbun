@@ -38,12 +38,13 @@ pi install npm:pi-firecode
 | `config/zsh/workstation.zsh` | `~/.config/friedbun/workstation.zsh` | 整体写入 |
 | `<repo>/skills` | `~/.agents/skills` | 软链 `ln -s`，已有目录先改名 `.bak` |
 | `~/.agents/skills/operations/better-browser-use/bin/bbu` | `~/.local/bin/bbu` | 软链 `ln -sf`，先 `mkdir -p ~/.local/bin`（workstation.zsh 把它加进 PATH） |
+| `~/.agents/skills/operations/uilane/bin/uilane` | `~/.local/bin/uilane` | 软链 `ln -sf` |
 
 - 合并：并入我们的键，冲突以我们的值为准，读者自己的键原样保留；`deviceId`、`lastChangelogVersion` 是作者本机状态，不并入。
 - skills 软链让本仓库的克隆成为 skills 的真身：装完不删，更新用 `git pull`。
 - `~/.zshrc` 末尾追加一行 `source ~/.config/friedbun/workstation.zsh`（须在 `compinit` 之后），并删掉其中已有的 autosuggestions、syntax-highlighting、starship、fastfetch 加载语句，避免重复加载。
 
-**完成标准**：表中每个落点都已就位；`herdr config check` 输出 `ok`；`ls ~/.agents/skills/workflow/research/SKILL.md` 存在；新开的 zsh 里 `echo $PI_CACHE_RETENTION` 输出 `long`；`bbu --login open about:blank` 与 `bbu --login close` 裸退出码都为 0。
+**完成标准**：表中每个落点都已就位；`uilane --help` 打印用法；`herdr config check` 输出 `ok`；`ls ~/.agents/skills/workflow/research/SKILL.md` 存在；新开的 zsh 里 `echo $PI_CACHE_RETENTION` 输出 `long`；`bbu --login open about:blank` 与 `bbu --login close` 裸退出码都为 0。
 
 ## 步骤 3：TinyFish key（可选）
 

@@ -1,0 +1,103 @@
+#!/usr/bin/env node
+// uilane：把一段已规划好的机械界面操作交给快速决策器一步步做完，结束时把轨迹、停止原因和当前界面交回调用方。
+import { parseArgs } from 'node:util';
+import { decider, MODES } from './decide.mjs';
+import { parseExpect, runLane } from './lane.mjs';
+import { web } from './web.mjs';
+import { app } from './app.mjs';
+
+const HELP = `uilane — run a planned, mechanical UI sequence with a fast decider, one checked step at a time
+
+  uilane web [--login] [--as NAME] --goal TEXT --expect SPEC... [--data JSON] [--max-steps N]
+  uilane app (--app NAME | --pid N)  --goal TEXT --expect SPEC... [--data JSON] [--max-steps N]
+
+web drives this checkout's bbu session (same --login/--as as bbu); app drives a macOS app through
+bcu in the background. Each step: observe, offer options built from the screen and --data, let the
+decider pick one, do at most that one action, observe again. Delete, pay, send, publish, submit for
+review, quit/kill, authorize and System Settings are never offered: the run hands back instead.
+
+  --goal TEXT     the end state, not a click list ("order complete with these two items")
+  --data JSON     {"name": "value"} strings the run may type or choose; nothing else is typed
+  --expect SPEC   checked on a fresh observation before exit, repeatable:
+                  text:<s> visible · gone:<s> not visible · url:<s> in the address (web)
+  --max-steps N   decisions before handing back (default 30)
+
+Output: one JSON object. status "done" (exit 0) only when the run finished and every --expect
+was met; otherwise status "handoff" (exit 1) with reason: handoff, low_confidence,
+decision_timeout, decider_error, invalid_choice, action_failed, unexpected_screen, step_limit,
+expect_failed, observe_failed. steps is the trajectory; screen (+ url, or the bcu state id) is
+where to take over. Usage and configuration errors exit 2.
+
+Environment:
+  UILANE=startlux|flash        decider; unset means uilane is off
+  UILANE_STARTLUX_URL          StartLux base URL (POST <url>/systemone)
+  UILANE_STARTLUX_KEY          or keychain service "uilane-startlux"
+  UILANE_STARTLUX_MODEL        optional; the server default otherwise
+  UILANE_FLASH_KEY             DeepSeek key, or keychain service "uilane-flash"
+  UILANE_FLASH_URL, UILANE_FLASH_MODEL   default https://api.deepseek.com, deepseek-flash
+A StartLux decision over 3 s is asked again of flash on the same screen when flash has a key.
+`;
+
+const DEFAULT_MAX_STEPS = 30;
+
+function die(msg) {
+  process.stderr.write(`uilane: ${msg}\n`);
+  process.exit(2);
+}
+
+const argv = process.argv.slice(2);
+if (!argv.length || argv.some((a) => a === '-h' || a === '--help')) {
+  process.stdout.write(HELP);
+  process.exit(0);
+}
+const mode = process.env.UILANE;
+if (!MODES.includes(mode)) die('off. Turn it on with UILANE=startlux or UILANE=flash (see uilane --help)');
+
+let opts;
+try {
+  opts = parseArgs({
+    args: argv,
+    allowPositionals: true,
+    options: {
+      goal: { type: 'string' },
+      data: { type: 'string', default: '{}' },
+      expect: { type: 'string', multiple: true, default: [] },
+      'max-steps': { type: 'string', default: String(DEFAULT_MAX_STEPS) },
+      login: { type: 'boolean' },
+      as: { type: 'string' },
+      app: { type: 'string' },
+      pid: { type: 'string' },
+    },
+  });
+} catch (e) {
+  die(e.message);
+}
+const { values: v, positionals } = opts;
+const [kind] = positionals;
+if (positionals.length !== 1 || !['web', 'app'].includes(kind)) die('first argument is web or app');
+if (!v.goal) die('--goal is required');
+if (!v.expect.length) die('at least one --expect is required');
+if (kind === 'app' && !v.app === !v.pid) die('app needs exactly one of --app or --pid');
+if (kind === 'web' && (v.app || v.pid)) die('--app/--pid belong to uilane app');
+if (kind === 'app' && (v.login || v.as)) die('--login/--as belong to uilane web');
+const maxSteps = Number(v['max-steps']);
+if (!Number.isInteger(maxSteps) || maxSteps < 1) die('--max-steps must be a positive integer');
+
+let data;
+let expect;
+let surface;
+let decide;
+try {
+  data = JSON.parse(v.data);
+  if (typeof data !== 'object' || Array.isArray(data) || !data || Object.values(data).some((x) => typeof x !== 'string')) throw new Error('--data must be a JSON object of strings');
+  expect = v.expect.map(parseExpect);
+  if (kind === 'app' && expect.some((e) => e.kind === 'url')) throw new Error('url: expectations are for uilane web');
+  surface = kind === 'web' ? web({ login: v.login, as: v.as }) : app({ app: v.app, pid: v.pid && Number(v.pid) });
+  decide = decider(mode);
+} catch (e) {
+  die(e.message);
+}
+
+const result = await runLane({ surface, decide, goal: v.goal, data, expect, maxSteps });
+process.stdout.write(`${JSON.stringify(result, null, 1)}\n`);
+process.exit(result.status === 'done' ? 0 : 1);

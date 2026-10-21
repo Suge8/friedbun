@@ -4,7 +4,7 @@
 - `workflow/`：从对齐到交付按顺序使用的命令：调研、追问、实现、复盘。起源 mattpocock/skills（MIT），已分叉。
 - `development/`：开发中用到的能力与参考：测试、原型、面向 agent 的写作、PR 描述；手动入口见下表。
 - `frontend/`：前端设计与 UI polish。
-- `operations/`：运维连接、远程操作、Herdr 终端、网页与桌面自动化（`bcu` 本体经 Homebrew 安装，这里只放用法）；多 Agent 编排由 FireCode `/master` 负责。
+- `operations/`：运维连接、远程操作、Herdr 终端、网页与桌面自动化（`bcu` 本体经 Homebrew 安装，这里只放用法；`uilane/` 是两者共用的快车道 CLI，没有 SKILL.md，用法写在两个 skill 里）；多 Agent 编排由 FireCode `/master` 负责。
 - `web-search/`：联网搜索与取正文：Anthropic、OpenAI 官方搜索聚合（凭据取自 pi 登录），TinyFish 快速结果列表与正文抓取。
 
 ## 手动 Skill

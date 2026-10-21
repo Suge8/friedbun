@@ -46,6 +46,7 @@ agent-browser skills get core
 - `errors` 文本模式只打印 `✗`、不带内容，用 `errors --json`；其中 `line`/`column` 从 0 计，行号以 `text` 里的堆栈为准。
 - 同一会话内的命令串行发，不并行。
 - 按屏推进：`snapshot -i` 看一屏，把这一屏能确定的动作用 `batch --bail` 一次发完，再看下一屏；脚本里读结果加 `--json`。
+- 已规划好的多屏机械流程（登录后照给定数据填表、加购到结账）交给 `uilane web`（同一目录、同样的 `--login`/`--as`，用法见 `uilane --help`，没开时退出码 2，照常自己做）：`status` 为 `done` 才算完成，此时 `--expect` 已逐条核对通过；`handoff` 时按 `reason` 判断原因，从 `url` 与 `screen` 接手，`steps` 是已做的动作。
 - `find` 命中多个元素时不报错，直接操作第一个；同名元素多（每行都有「编辑」）时先 `snapshot -i` 再用 ref。`find` 的动作只有 click、fill、check、hover、text。
 - `snapshot -c` 会丢掉非交互的文字（确认码、正文），读文字用 `snapshot` 或 `get text`。
 

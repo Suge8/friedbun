@@ -29,6 +29,7 @@ bcu wait-for --app CuePad --text 设置 --timeout 20000
 - `@e` ref 属于生成它的 `stateId`；`act-ui` 返回新 `stateId` 和相对上一状态的变化，下一步用它。`stale_state` 时重新观察。
 - 结果行 `worked via ax · value 0→1`：`worked` 有证据，`·` 后是证据。`unverified` 是已投递但读不到证据（菜单命令、快捷键、自绘窗口常见），多半已生效，照常继续，不要重做；后续步骤依赖它时加 `--expect-text/--expect-role/--expect-value`（可配 `--scope @eN`、`--expect-gone`），满足即记为 `worked`。
 - 只有被证明无效或后置条件未满足才以 `action_failed` 失败，例如复选框、开关按了值没变。按已选中的单选、标签页、单选分段不投递，结果是 `worked … · already selected`，不用先判断它是否已选中。`action_timeout` 只说明条件没出现，动作可能已生效：先观察再决定是否重试。
+- 已规划好的一长串机械操作（逐键计算、照给定数据填表、按固定步骤改格式）交给 `uilane app --app X`（用法见 `uilane --help`，没开时退出码 2，照常自己做）：`status` 为 `done` 才算完成，此时 `--expect` 已逐条核对通过；`handoff` 时按 `reason` 判断原因，从 `screen` 与 `state`（可直接用于 `act-ui --state`）接手，`steps` 是已做的动作。
 - 投递由 bcu 自己从后台升级到前台，你只给目标和动作。按屏推进：看一屏，把这一屏能确定的动作放进同一个数组，做完再观察下一屏；没看过的界面不猜控件类型（分段控件常被猜成弹出菜单）。等界面或应用变化用 `--expect-*` 或 `wait-for`，不用 sleep。脚本里读结果加 `--json` 解析，不从文本里抠 `stateId`。
 
 ## 结果里的根
