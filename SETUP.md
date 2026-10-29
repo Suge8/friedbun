@@ -59,14 +59,16 @@ pi install npm:pi-firecode
 
 把下面两件事一次交给读者，等读者说做完：
 
-1. 新开一个 Ghostty 窗口运行 `pi`，输入 `/login`，至少登录一家模型供应商。作者用 `anthropic`、`openai-codex`、`deepseek`、`kimi-coding`；web-search 默认搜索只用 `anthropic` 和 `openai-codex` 中已登录的那家。
+1. 新开一个 Ghostty 窗口运行 `pi`，输入 `/login`，至少登录一家模型供应商。GPT 日常会话用 `openai` 的 Sign in with ChatGPT，其他供应商按需登录。`openai-codex` 是另一条订阅入口，旧会话和当前 web-search 仍可使用；两者凭据不能互换。
 2. 在终端运行 `bcu setup`，在「系统设置 → 隐私与安全性」给 `bcu.app` 打开**辅助功能**和**屏幕录制**，回终端按回车。
 
 **完成标准**：`pi --list-models` 至少列出一个模型；`bcu doctor` 裸退出码为 0。
 
 ## 步骤 5：校正模型
 
-`pi --list-models` 的输出是唯一可选集。`settings.json` 的 `defaultProvider`、`defaultModel`、`enabledModels`（数组顺序即 shift+tab 循环顺序），以及 `firecode.jsonc` 里每个 `"provider/model/thinking"`，前两段都要出现在这份输出里。读者没有的模型，按 `firecode.jsonc` 注释描述的档次换成读者有的同档模型，思考档沿用；`master.roles` 只换模型，角色名保留（指挥官提示词按名点"哨兵"）。
+`pi --list-models` 的输出是唯一可选集。`settings.json` 的 `defaultProvider`、`defaultModel`、`enabledModels`（数组顺序即 ctrl+p 循环顺序），以及 `firecode.jsonc` 里每个 `"provider/model/thinking"`，前两段都要出现在这份输出里。读者没有的模型，按 `firecode.jsonc` 注释描述的档次换成读者有的同档模型，思考档沿用；`master.roles` 只换模型，角色名保留（指挥官提示词按名点"哨兵"）。
+
+模型窗口覆盖以当前账号允许范围为准，不能把公开 API 标称上限当订阅输入预算；换账号先核对。选定模型后发一条短请求确认账号可用，不以目录命中代替验证。已有 Codex 会话保持原 provider，不强行切换其原生压缩窗口。
 
 `watcher` 每回合结束后额外调用一次模型，作者关着，保持关闭。
 

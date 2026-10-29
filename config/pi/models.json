@@ -1,74 +1,74 @@
 {
-  "providers": {
-    "deepseek": {
-      "models": [
-        {
-          "id": "deepseek-flash",
-          "name": "DeepSeek Flash",
-          "api": "openai-responses",
-          "baseUrl": "https://api.deepseek.com",
-          "reasoning": true,
-          "input": [
-            "text",
-            "image"
-          ],
-          "contextWindow": 1000000,
-          "maxTokens": 384000,
-          "thinkingLevelMap": {
-            "off": "none",
-            "minimal": null,
-            "low": "low",
-            "medium": null,
-            "high": "high",
-            "xhigh": null,
-            "max": "max"
-          }
-        }
-      ]
-    },
-    "openai-codex": {
-      "modelOverrides": {
-        "gpt-6-astra": {
-          "contextWindow": 1050000
-        },
-        "gpt-6-luna": {
-          "contextWindow": 1050000
-        },
-        "gpt-6.1-sol": {
-          "contextWindow": 1050000
-        }
-      }
-    },
-    "anthropic": {
-      "modelOverrides": {
-        "claude-opus-5-5": {
-          "inputLimits": {
-            "images": {
-              "resize": {
-                "maxBytes": 524288
-              }
-            }
-          }
-        },
-        "claude-sonnet-5-5": {
-          "inputLimits": {
-            "images": {
-              "resize": {
-                "maxBytes": 524288
-              }
-            }
-          }
-        },
-        "claude-fable-5-1": {
-          "inputLimits": {
-            "images": {
-              "resize": {
-                "maxBytes": 524288
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+	"providers": {
+		"deepseek": {
+			"models": [
+				{
+					"id": "deepseek-flash",
+					"name": "DeepSeek Flash",
+					"api": "openai-responses",
+					"baseUrl": "https://api.deepseek.com",
+					"reasoning": true,
+					"input": ["text", "image"],
+					"contextWindow": 1000000,
+					"maxTokens": 384000,
+					"thinkingLevelMap": {
+						"off": "none",
+						"minimal": null,
+						"low": "low",
+						"medium": null,
+						"high": "high",
+						"xhigh": null,
+						"max": "max"
+					}
+				}
+			]
+		},
+		"openai": {
+			"modelOverrides": {
+				"gpt-6-astra": { "contextWindow": 872000 },
+				"gpt-6-luna": { "contextWindow": 872000 },
+				"gpt-6.1-sol": { "contextWindow": 872000 },
+				"gpt-6.1-terra": { "contextWindow": 872000 }
+			}
+		},
+		"openai-codex": {
+			"modelOverrides": {
+				"gpt-6-astra": { "contextWindow": 872000 },
+				"gpt-6-luna": { "contextWindow": 872000 },
+				"gpt-6.1-sol": { "contextWindow": 872000 },
+				"gpt-6.1-terra": { "contextWindow": 872000 }
+			}
+		},
+		"anthropic": {
+			"modelOverrides": {
+				"claude-opus-5-5": {
+					"inputLimits": {
+						"images": {
+							"resize": {
+								"maxBytes": 524288
+							}
+						}
+					}
+				},
+				"claude-sonnet-5-5": {
+					"inputLimits": {
+						"images": {
+							"resize": {
+								"maxBytes": 524288
+							}
+						}
+					}
+				},
+				"claude-fable-5-1": {
+					"inputLimits": {
+						"images": {
+							"resize": {
+								"maxBytes": 524288
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

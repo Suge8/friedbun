@@ -1,43 +1,55 @@
 {
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-5-5",
-  "defaultThinkingLevel": "high",
-  "quietStartup": true,
-  "defaultProjectTrust": "always",
-  "enabledModels": [
-    "openai-codex/gpt-6.1-sol",
-    "openai-codex/gpt-6-luna",
-    "openai-codex/gpt-6-astra",
-    "anthropic/claude-fable-5-1",
-    "anthropic/claude-sonnet-5-5",
-    "anthropic/claude-opus-5-5",
-    "deepseek/deepseek-flash"
-  ],
-  "hideThinkingBlock": true,
-  "showCacheMissNotices": true,
-  "httpIdleTimeoutMs": 900000,
-  "warnings": {
-    "anthropicExtraUsage": false
-  },
-  "compaction": {
-    "enabled": true,
-    "modelOverrides": {
-      "anthropic/claude-opus-5-5": { "reserveTokens": 450000 },
-      "anthropic/claude-sonnet-5-5": { "reserveTokens": 450000 },
-      "anthropic/claude-fable-5-1": { "reserveTokens": 450000 },
-      "anthropic/claude-haiku-5-5": { "reserveTokens": 450000 }
-    }
-  },
-  "terminal": {
-    "showTerminalProgress": true
-  },
-  "treeFilterMode": "no-tools",
-  "tuiMode": "fullscreen",
-  "fullscreenExitOutput": "transcript",
-  "defaultTools": [
-    "+codemode"
-  ],
-  "codemode": {
-    "mode": "only"
-  }
+	"defaultProvider": "openai",
+	"defaultModel": "gpt-6-astra",
+	"defaultThinkingLevel": "xhigh",
+	"quietStartup": true,
+	"defaultProjectTrust": "always",
+	"enabledModels": [
+		"openai/gpt-6.1-sol",
+		"openai/gpt-6.1-terra",
+		"openai/gpt-6-luna",
+		"openai/gpt-6-astra",
+		"anthropic/claude-fable-5-1",
+		"anthropic/claude-sonnet-5-5",
+		"anthropic/claude-opus-5-5",
+		"deepseek/deepseek-flash"
+	],
+	"showCacheMissNotices": true,
+	"httpProxy": "http://127.0.0.1:7890",
+	"httpIdleTimeoutMs": 900000,
+	"warnings": {
+		"anthropicExtraUsage": false
+	},
+	"compaction": {
+		"modelOverrides": {
+			"openai/gpt-6-astra": { "reserveTokens": 422000 },
+			"openai/gpt-6-luna": { "reserveTokens": 422000 },
+			"openai/gpt-6.1-sol": { "reserveTokens": 422000 },
+			"openai/gpt-6.1-terra": { "reserveTokens": 422000 },
+			"openai-codex/gpt-6-astra": { "reserveTokens": 422000 },
+			"openai-codex/gpt-6-luna": { "reserveTokens": 422000 },
+			"openai-codex/gpt-6.1-sol": { "reserveTokens": 422000 },
+			"openai-codex/gpt-6.1-terra": { "reserveTokens": 422000 },
+			"anthropic/claude-opus-5-5": {
+				"reserveTokens": 450000
+			},
+			"anthropic/claude-sonnet-5-5": {
+				"reserveTokens": 450000
+			},
+			"anthropic/claude-fable-5-1": {
+				"reserveTokens": 450000
+			},
+			"anthropic/claude-haiku-5-5": {
+				"reserveTokens": 450000
+			}
+		}
+	},
+	"terminal": {
+		"showTerminalProgress": true
+	},
+	"treeFilterMode": "no-tools",
+	"defaultTools": ["+codemode"],
+	"codemode": {
+		"mode": "only"
+	}
 }
