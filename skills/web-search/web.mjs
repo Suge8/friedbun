@@ -240,16 +240,20 @@ async function runEngine(engine, runtime, prompt, opts) {
 			for (const [name, value] of Object.entries(auth.headers ?? {})) value === null ? headers.delete(name) : headers.set(name, value);
 			const response = await fetch(request.url, { method: "POST", headers, body: JSON.stringify(request.body), signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) });
 			const text = await response.text();
-			if (!response.ok) return { error: httpReason(engine, response, text) };
+			if (!response.ok) {
+				errors.push(`${model.provider}：${httpReason(engine, response, text)}`);
+				continue;
+			}
 			const result = engine.parse(text);
 			const outside = referencedUrls(result).filter((url) => !matchesDomains(url, opts));
 			if (outside.length) throw new Error(`搜索引用违反域名限制：${outside.join(", ")}`);
 			return { ...result, ms: Date.now() - started };
 		} catch (error) {
-			return { error: error.name === "TimeoutError" ? `超时（${SEARCH_TIMEOUT_MS / 1000} 秒）` : error.message };
+			const reason = error.name === "TimeoutError" ? `超时（${SEARCH_TIMEOUT_MS / 1000} 秒）` : error.message;
+			errors.push(`${model.provider}：${reason}`);
 		}
 	}
-	return { error: `pi 中 ${engine.model} 没有可用登录${errors.length ? `：${errors.join("；")}` : ""}` };
+	return { error: errors.length ? `pi 中 ${engine.model} 的来源均不可用：${errors.join("；")}` : `pi 中 ${engine.model} 没有可用登录` };
 }
 
 function matchesDomains(url, opts) {
