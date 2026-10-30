@@ -13,6 +13,8 @@ description: 联网搜索与取正文：查最新事实、官方 API、报错原
 | 报错原文、找准确 URL、要快 | `node web.mjs search "query" --quick` |
 | 已知 URL 取正文 | `node web.mjs fetch <url...>` |
 
+search 经 magpie 使用已登录并启用的 Claude、Codex 订阅，不读取 Pi 或官方 CLI 的凭据；未提供的搜索模型会明确注明。网关地址与密钥覆盖见 `--help`。`--quick` 和 `fetch` 需要 `TINYFISH_API_KEY`。
+
 默认 search 返回按来源合并的证据，不给结论。每段引文标 ✓（在原料里逐字找到）或 ？（找不到），影响结论的 ？ 引文先 grep 输出末尾的原料文件或 fetch 原页核对。多个问题一次传入，比分多次调用省时省订阅用量。
 
 文档站先取 `https://<host>/llms.txt` 拿全站页面索引，再给目标页 URL 加 `.md` 后缀取 LLM 版原文——比搜索准，且不耗额度。

@@ -1,37 +1,34 @@
 #!/usr/bin/env node
-// 联网搜索入口：search 并行问各家官方搜索交证据，--quick 走 TinyFish 结果列表，fetch 取正文。
-import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+// 联网搜索入口：search 经 magpie 使用各家搜索，--quick 与 fetch 使用 TinyFish。
+import { mkdirSync, writeFileSync } from "node:fs";
+import { setGlobalProxyFromEnv } from "node:http";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { join } from "node:path";
 
 const SEARCH_TIMEOUT_MS = 90_000;
+const CATALOG_TIMEOUT_MS = 10_000;
+const MAGPIE_BASE_URL = (process.env.MAGPIE_BASE_URL || "http://127.0.0.1:3425").replace(/\/+$/, "");
+const MAGPIE_API_KEY = process.env.MAGPIE_API_KEY || "magpie";
+setGlobalProxyFromEnv({ ...process.env, NO_PROXY: [process.env.NO_PROXY, "localhost", "127.0.0.1", "::1"].filter(Boolean).join(",") });
 const QUICK_COUNT = 8;
 const FETCH_CHARS = 40000;
 const FETCH_MAX_URLS = 10;
 const MIN_QUOTE_CHARS = 12;
 const MIN_QUOTE_PART = 8;
-const PI_PACKAGE = "@earendil-works/pi-coding-agent";
 const EVIDENCE_PROMPT = `You are a web evidence extractor for another AI agent. Search the web and read primary sources (official docs, source code, specs, first-party announcements) in preference to aggregators.
 For each question, report evidence only: quote the key passages verbatim in double quotes, each followed by its source URL. Keep code and configuration snippets exactly as written.
 When no source supports an answer, say so explicitly. No conclusions beyond the quotes.`;
-// 订阅令牌的请求必须以 Claude Code 身份开头，否则接口以 429 拒绝，看起来像限流。
-const CLAUDE_CODE_IDENTITY = "You are Claude Code, Anthropic's official CLI for Claude.";
-
 const ENGINES = {
 	anthropic: {
 		label: "Anthropic",
-		provider: "anthropic",
-		model: "claude-sonnet-5",
+		model: "claude/claude-sonnet-5-5",
 		resetHeader: "anthropic-ratelimit-unified-reset",
 		request: anthropicRequest,
 		parse: anthropicParse,
 	},
 	openai: {
 		label: "OpenAI",
-		provider: "openai-codex",
-		model: "gpt-6-luna",
+		model: "codex/gpt-6-luna",
 		resetHeader: "x-codex-primary-reset-at",
 		request: openaiRequest,
 		parse: openaiParse,
@@ -40,21 +37,25 @@ const ENGINES = {
 
 const HELP = `联网搜索与取正文
 
-  web.mjs search "问题" ["问题"...]           并行问 Anthropic 与 OpenAI 官方搜索，返回带核实标记的证据（10–30 秒，占订阅用量）
-  web.mjs search "query" ["query"...] --quick  TinyFish 结果列表（约 2 秒，免费）
-  web.mjs fetch <url...>                       取正文转 Markdown，一次最多 ${FETCH_MAX_URLS} 个（免费）
+  web.mjs search "问题" ["问题"...]           经 magpie 并行问 Claude 与 Codex 搜索，返回带核实标记的证据（占订阅用量）
+  web.mjs search "query" ["query"...] --quick  TinyFish 结果列表
+  web.mjs fetch <url...>                       取正文转 Markdown，一次最多 ${FETCH_MAX_URLS} 个
 
 每个参数是一个独立的问题或查询，多词加引号。
 
 search 选项
-  --only ${Object.keys(ENGINES).join("|")}   只问一家（默认问全部，未在 pi 登录的跳过并注明）
+  --only ${Object.keys(ENGINES).join("|")}   只问一家（默认问全部，magpie 未提供的模型跳过并注明）
   --site DOMAIN     限定域名，逗号分隔或重复传入
   --not DOMAIN      排除域名；官方搜索不能与 --site 同用
   -n N              --quick 每个查询的结果条数，默认 ${QUICK_COUNT}
 
 fetch 选项
   --chars N         每页正文字符上限，默认 ${FETCH_CHARS}，0 为不截断
-  --links           一并输出页面内链接`;
+  --links           一并输出页面内链接
+
+search 只连接 magpie，不读取或刷新 Pi、Claude、Codex 的登录。
+MAGPIE_BASE_URL 覆盖网关地址（默认 http://127.0.0.1:3425）；MAGPIE_API_KEY 覆盖网关密钥（默认 magpie）。
+--quick 与 fetch 需要 TINYFISH_API_KEY。`;
 
 function fail(message) {
 	console.error(message);
@@ -82,22 +83,20 @@ function parseArgs(argv) {
 // ---- 各家官方搜索：请求与解析 ----
 // parse 统一产出 { text: 回复, known: 搜到的页面 {url,title,date}, cited: 引用网址, raw: 可供核实的原料 }。
 
-function anthropicRequest(engine, key, prompt, opts) {
-	const oauth = key.includes("sk-ant-oat");
-	const auth = oauth ? { authorization: `Bearer ${key}`, "anthropic-beta": "oauth-2025-04-20" } : { "x-api-key": key };
-	const system = [...(oauth ? [CLAUDE_CODE_IDENTITY] : []), EVIDENCE_PROMPT].map((text) => ({ type: "text", text }));
+function anthropicRequest(engine, prompt, opts) {
+	const system = [{ type: "text", text: EVIDENCE_PROMPT }];
+	const domains = opts.site.length ? `Only cite sources from these domains or their subdomains: ${opts.site.join(", ")}.` : opts.not.length ? `Do not cite these domains or their subdomains: ${opts.not.join(", ")}.` : "";
 	const tool = {
 		type: "web_search_20260318",
 		name: "web_search",
 		max_uses: 5,
-		// 动态过滤在订阅令牌下多数请求一次也搜不出来，只用直接调用。
 		allowed_callers: ["direct"],
 		...(opts.site.length ? { allowed_domains: opts.site } : {}),
 		...(opts.not.length ? { blocked_domains: opts.not } : {}),
 	};
 	return {
-		url: "https://api.anthropic.com/v1/messages",
-		headers: { "content-type": "application/json", "anthropic-version": "2023-06-01", ...auth },
+		url: `${MAGPIE_BASE_URL}/v1/messages`,
+		headers: { "anthropic-version": "2023-06-01" },
 		body: {
 			model: engine.model,
 			max_tokens: 16000,
@@ -105,7 +104,7 @@ function anthropicRequest(engine, key, prompt, opts) {
 			output_config: { effort: "medium" },
 			system,
 			tools: [tool],
-			messages: [{ role: "user", content: prompt }],
+			messages: [{ role: "user", content: [domains, prompt].filter(Boolean).join("\n\n") }],
 		},
 	};
 }
@@ -117,6 +116,7 @@ function anthropicParse(body) {
 	const results = blocks.flatMap((b) => (Array.isArray(b.content) ? b.content : []));
 	const errors = blocks.map((b) => b.content?.error_code).filter(Boolean);
 	if (!results.length && errors.length) throw new Error(`搜索失败 ${errors.join(", ")}`);
+	if (!blocks.length) throw new Error("magpie 未返回 Claude 联网搜索事件，不能把普通回答当成搜索结果");
 	const cites = content.flatMap((b) => b.citations ?? []);
 	return {
 		text: content.filter((b) => b.type === "text").map((b) => b.text).join(""),
@@ -129,11 +129,11 @@ function anthropicParse(body) {
 	};
 }
 
-function openaiRequest(engine, key, prompt, opts) {
+function openaiRequest(engine, prompt, opts) {
 	const filters = opts.site.length ? { allowed_domains: opts.site } : opts.not.length ? { blocked_domains: opts.not } : null;
 	return {
-		url: "https://chatgpt.com/backend-api/codex/responses",
-		headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+		url: `${MAGPIE_BASE_URL}/v1/responses`,
+		headers: {},
 		body: {
 			model: engine.model,
 			stream: true,
@@ -149,16 +149,20 @@ function openaiRequest(engine, key, prompt, opts) {
 
 function openaiParse(body) {
 	const items = [];
+	let completed = false;
 	for (const line of body.split("\n")) {
 		if (!line.startsWith("data: ") || line === "data: [DONE]") continue;
 		const event = JSON.parse(line.slice(6));
+		if (event.type === "response.completed") completed = true;
 		if (event.type === "response.output_item.done") items.push(event.item);
 		if (event.type === "response.failed" || event.type === "error") {
 			throw new Error(event.response?.error?.message ?? event.message ?? JSON.stringify(event).slice(0, 200));
 		}
 	}
+	if (!completed) throw new Error("magpie 的搜索响应流未完成");
 	const parts = items.filter((o) => o.type === "message").flatMap((o) => o.content);
 	const calls = items.filter((o) => o.type === "web_search_call");
+	if (!calls.length) throw new Error("magpie 未返回 OpenAI 联网搜索事件，不能把普通回答当成搜索结果");
 	const results = calls.flatMap((c) => c.results ?? []);
 	const action = (c) => `## ${c.action?.type} ${c.action?.queries?.join(" | ") ?? c.action?.url ?? ""}`;
 	return {
@@ -169,61 +173,57 @@ function openaiParse(body) {
 	};
 }
 
-// ---- 凭据与调用：登录与令牌刷新全部交给 pi ----
+// ---- 网关调用：账号、凭据与刷新只由 magpie 管理 ----
 
-function locatePi() {
-	const bin = execFileSync("which", ["pi"], { encoding: "utf8" }).trim();
-	// 开发版的 dist/ 里有一份同名 manifest 副本，以入口文件真实存在为准。
-	for (let dir = dirname(realpathSync(bin)); dir !== dirname(dir); dir = dirname(dir)) {
-		const manifest = join(dir, "package.json");
-		if (!existsSync(manifest)) continue;
-		const { name, exports } = JSON.parse(readFileSync(manifest, "utf8"));
-		const entry = name === PI_PACKAGE && join(dir, exports["."].import);
-		if (entry && existsSync(entry)) return entry;
-	}
-	throw new Error(`${bin} 不属于 ${PI_PACKAGE}`);
-}
-
-async function loadRuntime() {
-	let entry;
+async function loadCatalog() {
+	let response;
 	try {
-		entry = locatePi();
+		response = await fetch(`${MAGPIE_BASE_URL}/v1/models`, {
+			headers: { authorization: `Bearer ${MAGPIE_API_KEY}` },
+			signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS),
+		});
 	} catch (error) {
-		fail(`官方搜索需要本机安装 pi 并登录（${error.message.trim()}）；可改用 --quick`);
+		throw new Error(`无法连接 magpie 网关 ${MAGPIE_BASE_URL}：${error.message}`);
 	}
-	const { ModelRuntime, getAgentDir } = await import(pathToFileURL(entry).href);
-	const dir = getAgentDir();
-	return ModelRuntime.create({ authPath: join(dir, "auth.json"), modelsPath: join(dir, "models.json"), refreshOnCreate: false });
+	if (!response.ok) throw new Error(`magpie 模型列表请求失败：HTTP ${response.status}`);
+	const { data } = await response.json();
+	return new Set(data.map((model) => model.id));
 }
 
 function httpReason(engine, response, body) {
-	if (response.status === 401 || response.status === 403) return `登录失效，在 pi 里重新 /login ${engine.provider}`;
+	if (response.status === 401 || response.status === 403) return `magpie 中的 ${engine.label} 登录或权限不可用：${body.slice(0, 200).replace(/\s+/g, " ")}`;
 	if (response.status !== 429) return `${response.status}: ${body.slice(0, 200).replace(/\s+/g, " ")}`;
 	const reset = Number(response.headers.get(engine.resetHeader));
 	const when = reset ? `，约 ${new Date(reset * 1000).toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })} 重置` : "";
 	return `额度用完或限流${when}`;
 }
 
-async function runEngine(engine, runtime, prompt, opts) {
-	const model = runtime.getModel(engine.provider, engine.model);
-	if (!model) return { error: `pi 模型目录里没有 ${engine.provider}/${engine.model}` };
-	let auth;
-	try {
-		auth = await runtime.getAuth(model);
-	} catch (error) {
-		return { error: `登录失效（${error.message}），在 pi 里重新 /login ${engine.provider}` };
-	}
-	if (!auth) return { error: `未登录，在 pi 里 /login ${engine.provider}` };
+async function runEngine(engine, catalog, prompt, opts) {
+	if (!catalog.has(engine.model)) return { error: `magpie 未提供 ${engine.model}；请在 magpie 登录并启用该模型` };
 	const started = Date.now();
 	try {
-		const { url, headers, body } = engine.request(engine, auth.auth.apiKey, prompt, opts);
-		const response = await fetch(url, { method: "POST", headers, body: JSON.stringify(body), signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) });
+		const { url, headers, body } = engine.request(engine, prompt, opts);
+		const response = await fetch(url, {
+			method: "POST",
+			headers: { "content-type": "application/json", authorization: `Bearer ${MAGPIE_API_KEY}`, ...headers },
+			body: JSON.stringify(body),
+			signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS),
+		});
 		const text = await response.text();
 		if (!response.ok) return { error: httpReason(engine, response, text) };
-		return { ...engine.parse(text), ms: Date.now() - started };
+		const result = engine.parse(text);
+		const outside = referencedUrls(result).filter((url) => !matchesDomains(url, opts));
+		if (outside.length) throw new Error(`搜索引用违反域名限制：${outside.join(", ")}`);
+		return { ...result, ms: Date.now() - started };
 	} catch (error) {
 		return { error: error.name === "TimeoutError" ? `超时（${SEARCH_TIMEOUT_MS / 1000} 秒）` : error.message };
 	}
+}
+
+function matchesDomains(url, opts) {
+	const host = new URL(url).hostname.toLowerCase();
+	const matches = (domain) => host === domain.toLowerCase() || host.endsWith(`.${domain.toLowerCase()}`);
+	return (!opts.site.length || opts.site.some(matches)) && !opts.not.some(matches);
 }
 
 // ---- 证据核实 ----
@@ -303,7 +303,7 @@ function sourceList(done) {
 function writeRaw(queries, done, pages) {
 	const dir = join(tmpdir(), "web-search");
 	mkdirSync(dir, { recursive: true });
-	const path = join(dir, `${Date.now()}.md`);
+	const path = join(dir, `${Date.now()}-${process.pid}.md`);
 	const sections = done.map(([name, r]) => `# ${ENGINES[name].label} 原料\n\n${r.raw}\n\n## ${ENGINES[name].label} 回复原文\n\n${r.text}`);
 	writeFileSync(path, [`# 搜索：${queries.join(" ｜ ")}`, ...sections, pages.raw && `# 回查原页\n\n${pages.raw}`].filter(Boolean).join("\n\n"));
 	return path;
@@ -324,8 +324,8 @@ async function runOfficial(opts) {
 	if (opts.only && !(opts.only in ENGINES)) fail(`--only 只接受 ${Object.keys(ENGINES).join("|")}，收到 ${opts.only}`);
 	const names = opts.only ? [opts.only] : Object.keys(ENGINES);
 	const prompt = opts.args.length === 1 ? opts.args[0] : opts.args.map((q, i) => `${i + 1}. ${q}`).join("\n");
-	const runtime = await loadRuntime();
-	const outcomes = await Promise.all(names.map(async (name) => [name, await runEngine(ENGINES[name], runtime, prompt, opts)]));
+	const catalog = await loadCatalog();
+	const outcomes = await Promise.all(names.map(async (name) => [name, await runEngine(ENGINES[name], catalog, prompt, opts)]));
 	const done = outcomes.filter(([, r]) => !r.error);
 	if (done.length) return console.log(render(opts.args, outcomes, await recheckPages(done)));
 	const others = Object.keys(ENGINES).filter((name) => !names.includes(name)).map((name) => `--only ${name}`);
