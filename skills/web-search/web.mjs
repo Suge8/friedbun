@@ -1,34 +1,35 @@
 #!/usr/bin/env node
-// 联网搜索入口：search 经 magpie 使用各家搜索，--quick 与 fetch 使用 TinyFish。
-import { mkdirSync, writeFileSync } from "node:fs";
+// 联网搜索入口：search 使用 pi 模型与各家搜索，--quick 与 fetch 使用 TinyFish。
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { setGlobalProxyFromEnv } from "node:http";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const SEARCH_TIMEOUT_MS = 90_000;
-const CATALOG_TIMEOUT_MS = 10_000;
-const MAGPIE_BASE_URL = (process.env.MAGPIE_BASE_URL || "http://127.0.0.1:3425").replace(/\/+$/, "");
-const MAGPIE_API_KEY = process.env.MAGPIE_API_KEY || "magpie";
 setGlobalProxyFromEnv({ ...process.env, NO_PROXY: [process.env.NO_PROXY, "localhost", "127.0.0.1", "::1"].filter(Boolean).join(",") });
 const QUICK_COUNT = 8;
 const FETCH_CHARS = 40000;
 const FETCH_MAX_URLS = 10;
 const MIN_QUOTE_CHARS = 12;
 const MIN_QUOTE_PART = 8;
+const PI_PACKAGE = "@earendil-works/pi-coding-agent";
+const CLAUDE_CODE_IDENTITY = "You are Claude Code, Anthropic's official CLI for Claude.";
 const EVIDENCE_PROMPT = `You are a web evidence extractor for another AI agent. Search the web and read primary sources (official docs, source code, specs, first-party announcements) in preference to aggregators.
 For each question, report evidence only: quote the key passages verbatim in double quotes, each followed by its source URL. Keep code and configuration snippets exactly as written.
 When no source supports an answer, say so explicitly. No conclusions beyond the quotes.`;
 const ENGINES = {
 	anthropic: {
 		label: "Anthropic",
-		model: "claude/claude-sonnet-5-5",
+		model: "claude-haiku-5-5",
 		resetHeader: "anthropic-ratelimit-unified-reset",
 		request: anthropicRequest,
 		parse: anthropicParse,
 	},
 	openai: {
 		label: "OpenAI",
-		model: "codex/gpt-6-luna",
+		model: "gpt-6-luna",
 		resetHeader: "x-codex-primary-reset-at",
 		request: openaiRequest,
 		parse: openaiParse,
@@ -37,14 +38,14 @@ const ENGINES = {
 
 const HELP = `联网搜索与取正文
 
-  web.mjs search "问题" ["问题"...]           经 magpie 并行问 Claude 与 Codex 搜索，返回带核实标记的证据（占订阅用量）
+  web.mjs search "问题" ["问题"...]           经 pi 并行问 Claude 与 GPT 搜索，返回带核实标记的证据（占订阅用量）
   web.mjs search "query" ["query"...] --quick  TinyFish 结果列表
   web.mjs fetch <url...>                       取正文转 Markdown，一次最多 ${FETCH_MAX_URLS} 个
 
 每个参数是一个独立的问题或查询，多词加引号。
 
 search 选项
-  --only ${Object.keys(ENGINES).join("|")}   只问一家（默认问全部，magpie 未提供的模型跳过并注明）
+  --only ${Object.keys(ENGINES).join("|")}   只问一家（默认问全部，pi 未提供或未登录的模型跳过并注明）
   --site DOMAIN     限定域名，逗号分隔或重复传入
   --not DOMAIN      排除域名；官方搜索不能与 --site 同用
   -n N              --quick 每个查询的结果条数，默认 ${QUICK_COUNT}
@@ -53,8 +54,7 @@ fetch 选项
   --chars N         每页正文字符上限，默认 ${FETCH_CHARS}，0 为不截断
   --links           一并输出页面内链接
 
-search 只连接 magpie，不读取或刷新 Pi、Claude、Codex 的登录。
-MAGPIE_BASE_URL 覆盖网关地址（默认 http://127.0.0.1:3425）；MAGPIE_API_KEY 覆盖网关密钥（默认 magpie）。
+search 使用 pi 模型配置与登录。
 --quick 与 fetch 需要 TINYFISH_API_KEY。`;
 
 function fail(message) {
@@ -83,8 +83,9 @@ function parseArgs(argv) {
 // ---- 各家官方搜索：请求与解析 ----
 // parse 统一产出 { text: 回复, known: 搜到的页面 {url,title,date}, cited: 引用网址, raw: 可供核实的原料 }。
 
-function anthropicRequest(engine, prompt, opts) {
-	const system = [{ type: "text", text: EVIDENCE_PROMPT }];
+function anthropicRequest(model, auth, prompt, opts) {
+	const oauth = auth.apiKey?.includes("sk-ant-oat");
+	const system = [...(oauth ? [CLAUDE_CODE_IDENTITY] : []), EVIDENCE_PROMPT].map((text) => ({ type: "text", text }));
 	const domains = opts.site.length ? `Only cite sources from these domains or their subdomains: ${opts.site.join(", ")}.` : opts.not.length ? `Do not cite these domains or their subdomains: ${opts.not.join(", ")}.` : "";
 	const tool = {
 		type: "web_search_20260318",
@@ -95,10 +96,10 @@ function anthropicRequest(engine, prompt, opts) {
 		...(opts.not.length ? { blocked_domains: opts.not } : {}),
 	};
 	return {
-		url: `${MAGPIE_BASE_URL}/v1/messages`,
-		headers: { "anthropic-version": "2023-06-01" },
+		url: endpoint(auth.baseUrl ?? model.baseUrl, "messages", model.api === "anthropic-messages"),
+		headers: { "anthropic-version": "2023-06-01", ...(oauth ? { "anthropic-beta": "claude-code-20250219,oauth-2025-04-20", "user-agent": "claude-cli/2.1.2", "x-app": "cli" } : {}) },
 		body: {
-			model: engine.model,
+			model: model.id,
 			max_tokens: 16000,
 			thinking: { type: "adaptive" },
 			output_config: { effort: "medium" },
@@ -116,7 +117,7 @@ function anthropicParse(body) {
 	const results = blocks.flatMap((b) => (Array.isArray(b.content) ? b.content : []));
 	const errors = blocks.map((b) => b.content?.error_code).filter(Boolean);
 	if (!results.length && errors.length) throw new Error(`搜索失败 ${errors.join(", ")}`);
-	if (!blocks.length) throw new Error("magpie 未返回 Claude 联网搜索事件，不能把普通回答当成搜索结果");
+	if (!blocks.length) throw new Error("未返回 Claude 联网搜索事件，不能把普通回答当成搜索结果");
 	const cites = content.flatMap((b) => b.citations ?? []);
 	return {
 		text: content.filter((b) => b.type === "text").map((b) => b.text).join(""),
@@ -129,13 +130,13 @@ function anthropicParse(body) {
 	};
 }
 
-function openaiRequest(engine, prompt, opts) {
+function openaiRequest(model, auth, prompt, opts) {
 	const filters = opts.site.length ? { allowed_domains: opts.site } : opts.not.length ? { blocked_domains: opts.not } : null;
 	return {
-		url: `${MAGPIE_BASE_URL}/v1/responses`,
-		headers: {},
+		url: endpoint(auth.baseUrl ?? model.baseUrl, model.api === "openai-codex-responses" ? "codex/responses" : "responses"),
+		headers: model.api === "openai-codex-responses" ? codexHeaders(auth.apiKey) : {},
 		body: {
-			model: engine.model,
+			model: model.id,
 			stream: true,
 			store: false,
 			instructions: EVIDENCE_PROMPT,
@@ -159,10 +160,10 @@ function openaiParse(body) {
 			throw new Error(event.response?.error?.message ?? event.message ?? JSON.stringify(event).slice(0, 200));
 		}
 	}
-	if (!completed) throw new Error("magpie 的搜索响应流未完成");
+	if (!completed) throw new Error("搜索响应流未完成");
 	const parts = items.filter((o) => o.type === "message").flatMap((o) => o.content);
 	const calls = items.filter((o) => o.type === "web_search_call");
-	if (!calls.length) throw new Error("magpie 未返回 OpenAI 联网搜索事件，不能把普通回答当成搜索结果");
+	if (!calls.length) throw new Error("未返回 OpenAI 联网搜索事件，不能把普通回答当成搜索结果");
 	const results = calls.flatMap((c) => c.results ?? []);
 	const action = (c) => `## ${c.action?.type} ${c.action?.queries?.join(" | ") ?? c.action?.url ?? ""}`;
 	return {
@@ -173,51 +174,82 @@ function openaiParse(body) {
 	};
 }
 
-// ---- 网关调用：账号、凭据与刷新只由 magpie 管理 ----
+// ---- pi 模型与凭据 ----
 
-async function loadCatalog() {
-	let response;
-	try {
-		response = await fetch(`${MAGPIE_BASE_URL}/v1/models`, {
-			headers: { authorization: `Bearer ${MAGPIE_API_KEY}` },
-			signal: AbortSignal.timeout(CATALOG_TIMEOUT_MS),
-		});
-	} catch (error) {
-		throw new Error(`无法连接 magpie 网关 ${MAGPIE_BASE_URL}：${error.message}`);
+function locatePi() {
+	const bin = execFileSync("which", ["pi"], { encoding: "utf8" }).trim();
+	for (let dir = dirname(realpathSync(bin)); dir !== dirname(dir); dir = dirname(dir)) {
+		const manifest = join(dir, "package.json");
+		if (!existsSync(manifest)) continue;
+		const { name, exports } = JSON.parse(readFileSync(manifest, "utf8"));
+		const entry = name === PI_PACKAGE && join(dir, exports["."].import);
+		if (entry && existsSync(entry)) return entry;
 	}
-	if (!response.ok) throw new Error(`magpie 模型列表请求失败：HTTP ${response.status}`);
-	const { data } = await response.json();
-	return new Set(data.map((model) => model.id));
+	throw new Error(`${bin} 不属于 ${PI_PACKAGE}`);
+}
+
+async function loadRuntime() {
+	const { ModelRuntime, getAgentDir } = await import(pathToFileURL(locatePi()).href);
+	const dir = getAgentDir();
+	return ModelRuntime.create({ authPath: join(dir, "auth.json"), modelsPath: join(dir, "models.json"), refreshOnCreate: false });
+}
+
+function endpoint(base, path, anthropic = false) {
+	base = base.replace(/\/+$/, "");
+	if (base.endsWith(`/${path}`)) return base;
+	if (path === "codex/responses" && base.endsWith("/codex")) return `${base}/responses`;
+	if (anthropic && !base.endsWith("/v1")) base += "/v1";
+	return `${base}/${path}`;
+}
+
+function codexHeaders(token) {
+	const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString());
+	const account = payload["https://api.openai.com/auth"]?.chatgpt_account_id;
+	if (!account) throw new Error("Codex 登录缺少账号 ID");
+	return { "chatgpt-account-id": account, "openai-beta": "responses=experimental", accept: "text/event-stream" };
 }
 
 function httpReason(engine, response, body) {
-	if (response.status === 401 || response.status === 403) return `magpie 中的 ${engine.label} 登录或权限不可用：${body.slice(0, 200).replace(/\s+/g, " ")}`;
+	if (response.status === 401 || response.status === 403) return `登录或权限不可用：${body.slice(0, 200).replace(/\s+/g, " ")}`;
 	if (response.status !== 429) return `${response.status}: ${body.slice(0, 200).replace(/\s+/g, " ")}`;
 	const reset = Number(response.headers.get(engine.resetHeader));
-	const when = reset ? `，约 ${new Date(reset * 1000).toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })} 重置` : "";
+	const retry = response.headers.get("retry-after");
+	const when = reset ? `，约 ${new Date(reset * 1000).toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })} 重置` : retry ? `，Retry-After: ${retry}` : "，未提供重置时间";
 	return `额度用完或限流${when}`;
 }
 
-async function runEngine(engine, catalog, prompt, opts) {
-	if (!catalog.has(engine.model)) return { error: `magpie 未提供 ${engine.model}；请在 magpie 登录并启用该模型` };
-	const started = Date.now();
-	try {
-		const { url, headers, body } = engine.request(engine, prompt, opts);
-		const response = await fetch(url, {
-			method: "POST",
-			headers: { "content-type": "application/json", authorization: `Bearer ${MAGPIE_API_KEY}`, ...headers },
-			body: JSON.stringify(body),
-			signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS),
-		});
-		const text = await response.text();
-		if (!response.ok) return { error: httpReason(engine, response, text) };
-		const result = engine.parse(text);
-		const outside = referencedUrls(result).filter((url) => !matchesDomains(url, opts));
-		if (outside.length) throw new Error(`搜索引用违反域名限制：${outside.join(", ")}`);
-		return { ...result, ms: Date.now() - started };
-	} catch (error) {
-		return { error: error.name === "TimeoutError" ? `超时（${SEARCH_TIMEOUT_MS / 1000} 秒）` : error.message };
+async function runEngine(engine, runtime, prompt, opts) {
+	const candidates = runtime.getModels().filter((model) => model.id.split("/").at(-1) === engine.model);
+	if (!candidates.length) return { error: `pi 模型列表中没有 ${engine.model}` };
+	const errors = [];
+	for (const model of candidates) {
+		let auth;
+		try {
+			auth = (await runtime.getAuth(model))?.auth;
+		} catch (error) {
+			errors.push(`${model.provider}：${error.message}`);
+			continue;
+		}
+		if (!auth || (!auth.apiKey && !auth.headers)) continue;
+		const started = Date.now();
+		try {
+			const request = engine.request(model, auth, prompt, opts);
+			const oauth = auth.apiKey?.includes("sk-ant-oat");
+			const keyHeader = auth.apiKey ? (model.api === "anthropic-messages" && !oauth ? { "x-api-key": auth.apiKey } : { authorization: `Bearer ${auth.apiKey}` }) : {};
+			const headers = new Headers({ "content-type": "application/json", ...keyHeader, ...request.headers });
+			for (const [name, value] of Object.entries(auth.headers ?? {})) value === null ? headers.delete(name) : headers.set(name, value);
+			const response = await fetch(request.url, { method: "POST", headers, body: JSON.stringify(request.body), signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) });
+			const text = await response.text();
+			if (!response.ok) return { error: httpReason(engine, response, text) };
+			const result = engine.parse(text);
+			const outside = referencedUrls(result).filter((url) => !matchesDomains(url, opts));
+			if (outside.length) throw new Error(`搜索引用违反域名限制：${outside.join(", ")}`);
+			return { ...result, ms: Date.now() - started };
+		} catch (error) {
+			return { error: error.name === "TimeoutError" ? `超时（${SEARCH_TIMEOUT_MS / 1000} 秒）` : error.message };
+		}
 	}
+	return { error: `pi 中 ${engine.model} 没有可用登录${errors.length ? `：${errors.join("；")}` : ""}` };
 }
 
 function matchesDomains(url, opts) {
@@ -324,8 +356,8 @@ async function runOfficial(opts) {
 	if (opts.only && !(opts.only in ENGINES)) fail(`--only 只接受 ${Object.keys(ENGINES).join("|")}，收到 ${opts.only}`);
 	const names = opts.only ? [opts.only] : Object.keys(ENGINES);
 	const prompt = opts.args.length === 1 ? opts.args[0] : opts.args.map((q, i) => `${i + 1}. ${q}`).join("\n");
-	const catalog = await loadCatalog();
-	const outcomes = await Promise.all(names.map(async (name) => [name, await runEngine(ENGINES[name], catalog, prompt, opts)]));
+	const runtime = await loadRuntime();
+	const outcomes = await Promise.all(names.map(async (name) => [name, await runEngine(ENGINES[name], runtime, prompt, opts)]));
 	const done = outcomes.filter(([, r]) => !r.error);
 	if (done.length) return console.log(render(opts.args, outcomes, await recheckPages(done)));
 	const others = Object.keys(ENGINES).filter((name) => !names.includes(name)).map((name) => `--only ${name}`);
