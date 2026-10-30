@@ -17,6 +17,7 @@
 	"showCacheMissNotices": true,
 	"httpProxy": "http://127.0.0.1:7890",
 	"httpIdleTimeoutMs": 900000,
+	"shellCommandPrefix": "if [ -f ~/.config/friedbun/env.zsh ]; then . ~/.config/friedbun/env.zsh || exit; fi",
 	"warnings": {
 		"anthropicExtraUsage": false
 	},

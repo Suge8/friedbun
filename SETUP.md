@@ -2,7 +2,7 @@
 
 你是读者的 coding agent。`config/` 下是作者机器上真实在用的文件，不是模板：把它们落到系统标准位置，装上作者用的包。全程自己做完，只在步骤 4 请读者做两件只能本人做的事。
 
-环境要求：Apple Silicon、macOS 14+、Homebrew、Node 22.13+。`<repo>` 指本仓库根目录的绝对路径。改动读者已有的文件前，原地复制一份加 `.bak` 后缀。
+环境要求：Apple Silicon、macOS 14+、Homebrew、Node 26+。`<repo>` 指本仓库根目录的绝对路径。改动读者已有的文件前，原地复制一份加 `.bak` 后缀。
 
 ## 步骤 1：安装
 
@@ -16,6 +16,7 @@ brew install --cask ghostty font-maple-mono-nf-cn suge8/tap/bcu
 pi install npm:pi-firecode
 ```
 
+- 按[官方说明](https://usemagpie.ai/docs/start)安装 magpie。
 - agent-browser 只用 npm 装：Homebrew 版不带 bbu 把页面交给读者时用的控制台网页；`--allow-scripts` 让安装脚本把命令直链到原生程序，省掉每次约 100ms 的 Node 包装。
 - 不运行 `cloakbrowser login`：Pro 许可证运行中要一直连 cloakbrowser.dev 校验，网络不稳时浏览器会被关掉。`cloakbrowser install` 下载有 10 分钟硬超时，中断时用 `curl -C -` 从 GitHub Releases 续传同名包，解压到 `~/.cloakbrowser/chromium-<版本>/`。
 - 不装 herdr 官方的 pi 集成（`herdr integration install pi` 或设置面板里的 install）：侧边栏的 pi 状态由 FireCode 上报，两者并存时 FireCode 的上报会被丢弃。
@@ -50,7 +51,7 @@ pi install npm:pi-firecode
 
 读者在对话里给了哪个 key 就配哪个，没给的跳过，对应功能不可用，其余照常。
 
-- TinyFish：web-search 的 `--quick` 和 `fetch` 走它。写进 `~/.config/friedbun/env.zsh` 并 `chmod 600`：`export TINYFISH_API_KEY='<tinyfish-key>'`。
+- TinyFish：web-search 的 `--quick` 和 `fetch` 走它。写进 `~/.config/friedbun/env.zsh` 并 `chmod 600`：`export TINYFISH_API_KEY='<tinyfish-key>'`。文件只用 Bash/Zsh 通用的 `export` 赋值；Pi Shell 工具会加载它，不依赖图形应用继承终端环境。
 - DeepSeek：uilane（网页与桌面的跨屏机械流程快车道）的决策器，存进钥匙串即开启：`security add-generic-password -a uilane -s uilane-flash -w '<deepseek-key>'`。读者另有 StartLux 时按 `uilane --help` 再配，先问 StartLux、慢了并行问 DeepSeek。
 
 **完成标准**：配了 DeepSeek 时 `uilane status` 输出以 `on:` 开头。
@@ -59,16 +60,16 @@ pi install npm:pi-firecode
 
 把下面两件事一次交给读者，等读者说做完：
 
-1. 新开一个 Ghostty 窗口运行 `pi`，输入 `/login`，至少登录一家模型供应商。GPT 日常会话用 `openai` 的 Sign in with ChatGPT，其他供应商按需登录。`openai-codex` 是另一条订阅入口，旧会话和当前 web-search 仍可使用；两者凭据不能互换。
+1. 在 magpie 完成所需订阅账号的授权：Claude、ChatGPT（Codex）等。只用 API 时由 agent 将 key 录入 magpie，无需额外登录。Pi 的模型账号由 magpie 管理，不重复在 Pi `/login`。
 2. 在终端运行 `bcu setup`，在「系统设置 → 隐私与安全性」给 `bcu.app` 打开**辅助功能**和**屏幕录制**，回终端按回车。
 
 **完成标准**：`pi --list-models` 至少列出一个模型；`bcu doctor` 裸退出码为 0。
 
 ## 步骤 5：校正模型
 
-`pi --list-models` 的输出是唯一可选集。`settings.json` 的 `defaultProvider`、`defaultModel`、`enabledModels`（数组顺序即 ctrl+p 循环顺序），以及 `firecode.jsonc` 里每个 `"provider/model/thinking"`，前两段都要出现在这份输出里。读者没有的模型，按 `firecode.jsonc` 注释描述的档次换成读者有的同档模型，思考档沿用；`master.roles` 只换模型，角色名保留（指挥官提示词按名点"哨兵"）。
+用 `magpie models pi` 选型号，`magpie pi <provider/model>` 写入默认模型，再以 `pi --list-models magpie` 核对。`firecode.jsonc` 的模型原子去掉最后的思考档后，完整引用应在 Pi 目录中；magpie 型号本身含斜杠，不能只取前两段。缺少的模型按配置注释换成可用的同档模型，思考档沿用；`master.roles` 保留角色名（指挥官提示词按名点"哨兵"）。
 
-模型窗口覆盖以当前账号允许范围为准，不能把公开 API 标称上限当订阅输入预算；换账号先核对。选定模型后发一条短请求确认账号可用，不以目录命中代替验证。已有 Codex 会话保持原 provider，不强行切换其原生压缩窗口。
+模型窗口覆盖以当前账号允许范围为准，不能把公开 API 标称上限当订阅输入预算；换账号先核对。选定模型后发一条短请求确认账号可用，不以目录命中代替验证。已有会话不强切模型；切到新的 magpie 会话后再清 Pi 旧登录，保留 magpie 仍读取的官方客户端凭据。
 
 `watcher` 每回合结束后额外调用一次模型，作者关着，保持关闭。
 
@@ -76,7 +77,7 @@ pi install npm:pi-firecode
 
 ## 步骤 6：交付
 
-告诉读者：已装好什么；SYSTEM.md 已换成作者的版本，会改变 agent 的语气和习惯，不想要就用 `~/.pi/agent/SYSTEM.md.bak` 还原（没有 `.bak` 就删掉该文件）；跳过的可选 key 以后照步骤 3 补上即可；uilane 出问题时 `uilane off` 一键关闭；新环境变量只在新开的 shell 里生效，已开的 Herdr 窗格要新开窗格再启动 pi。
+告诉读者：已装好什么；SYSTEM.md 已换成作者的版本，会改变 agent 的语气和习惯，不想要就用 `~/.pi/agent/SYSTEM.md.bak` 还原（没有 `.bak` 就删掉该文件）；跳过的可选 key 以后照步骤 3 补上即可；uilane 出问题时 `uilane off` 一键关闭；Pi 配置变更后重启 Pi；之后修改私有环境文件，后续 Shell 工具调用会直接读取，已有终端仍需重新加载环境。
 
 ## 卸载
 
