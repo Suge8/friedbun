@@ -9,7 +9,7 @@
 
 ## 手动 Skill
 
-以下 Skill 关闭了自动触发，只在用户点名或本表指引时使用；其余 Skill 按 description 自动路由。
+以下 Skill 关闭了自动触发，只在用户点名或其他 Skill 指向时使用；其余 Skill 按 description 自动路由。
 
 | 需求 | Skill |
 |---|---|
