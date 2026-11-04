@@ -73,8 +73,8 @@
 	// 本节字段必须齐全；拼错字段名会直接报配置错误而不是静默忽略。
 	"review": {
 		"advisor": ["claude-opus-5-5/high", "gpt-6-astra/high"],
-		"reviewers": [["gpt-6.1-terra/low", "claude-sonnet-5-5/low"]],
-		"maxRounds": 5,
+		"reviewers": [["gpt-6.1-terra/low", "claude-opus-5-5/low"]],
+		"maxRounds": 3,
 		"advisorAfterFailures": 2,
 		"timeoutMinutes": 60,
 		"tools": ["read", "grep", "find", "ls", "bash"]
