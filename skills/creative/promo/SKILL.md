@@ -1,7 +1,7 @@
 ---
 name: promo
 disable-model-invocation: true
-description: 制作项目宣传物料：Hero/OG/社媒图、商店截图、README 配图和演示 GIF/视频。根据项目现状产出到 design/promo/；应用 UI 用 ui-craft，单独 Logo 用 gpt-image。
+description: 制作项目宣传物料：Hero/OG/社媒图、商店截图、README 配图和演示 GIF/视频。根据项目现状产出到 design/promo/；应用 UI 用 ui-craft。
 ---
 
 # Promo（物料工坊）

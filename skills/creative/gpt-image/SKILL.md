@@ -5,7 +5,7 @@ description: 通过 gptimage 模型生成优美 AI 图片、海报、插图或 L
 
 # GPT Image
 
-用户要设计 Logo 或系列 Logo 提案板时，先读 [Logo 指南](reference/logo.md)。脚本读 `~/.codex/auth.json`；不读取、不打印 token。
+设计 Logo 时先按宣传物料的 [Logo 流程](../promo/VISUAL.md)（链 A）走。脚本读 `~/.codex/auth.json`；不读取、不打印 token。
 
 ```bash
 python3 scripts/gpt_image.py "IMAGE_PROMPT" --out "/absolute/path/output.png"
