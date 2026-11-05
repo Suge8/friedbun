@@ -1,6 +1,6 @@
 ---
 name: web-search
-description: 联网搜索与取正文：查最新事实、官方 API、报错原文，或把已知 URL 转成正文
+description: 查单个最新事实（版本、价格限额、官方 API）、报错原文，或把已知 URL 转成正文时使用；多方案对比、要出带来源结论的调研用 research。
 ---
 
 # Web search

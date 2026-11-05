@@ -1,6 +1,6 @@
 ---
 name: research
-description: 针对高可信度的一手来源调查问题。当用户希望研究主题、探索方案、收集文档或 API 事实时使用。
+description: 调研、对比多个方案、查清某个机制并要带一手来源的结论时使用；只查单个事实或取 URL 正文用 web-search。
 ---
 
 按 [fan-out](../../development/fan-out/SKILL.md) 扇出：默认中档；用户说仔细、查清楚，或结论直接影响决策时用高档。
