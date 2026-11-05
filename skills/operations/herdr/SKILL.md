@@ -1,6 +1,7 @@
 ---
 name: herdr
-description: "控制 Herdr 终端复用器。只有用户明确提到 Herdr，或明确要求使用 Herdr 查看或控制 pane、tab、workspace、命令或 agent 时才使用。不能仅因任务适合后台终端、委派或并行工作就使用。需要在受管 pane 内运行（HERDR_ENV=1）。"
+description: 用 Herdr 查看或控制 pane、tab、workspace 及其中的命令与 agent；需在受管 pane 内运行（HERDR_ENV=1）。
+disable-model-invocation: true
 ---
 
 # Herdr

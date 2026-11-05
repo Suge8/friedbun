@@ -25,5 +25,6 @@
 | 想法或计划压力测试 | `grilling` |
 | 把话题讲成 HTML 图解 | `eli5` |
 | 复盘会话，提出改进 agent 环境的候选 | `retro` |
+| 用 Herdr 查看或控制 pane、tab、workspace 与其中的 agent | `herdr` |
 
 
