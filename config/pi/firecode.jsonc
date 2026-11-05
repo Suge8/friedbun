@@ -23,6 +23,8 @@
 	// /fire-master 角色表：角色名自定；每个角色写 model（原子或数组）+ use 适用场景。Master 只按 use 选角色，
 	// 质量要求明显不同时临时调强度；一个候选都没登录的角色不会出现在角色表里。
 	"master": {
+		// 在跑子代理的进展行：小模型按新输出写一句“在做什么”，满 30 秒出第一句、之后有新输出最多每 2 分钟一次；false 关闭。
+		"progress": ["gpt-6-luna/low", "claude-haiku-5-5/low"],
 		"roles": {
 			"工程师": {
 				"model": ["claude-opus-5-5/medium", "gpt-6-astra/medium"],
