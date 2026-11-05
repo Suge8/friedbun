@@ -15,13 +15,13 @@
     "reserveTokens": 50000,
     "modelOverrides": {
       "magpie/claude/claude-opus-5-5": {
-        "reserveTokens": 450000
+        "reserveTokens": 650000
       },
       "magpie/claude/claude-sonnet-5-5": {
-        "reserveTokens": 450000
+        "reserveTokens": 650000
       },
       "magpie/claude/claude-haiku-5-5": {
-        "reserveTokens": 450000
+        "reserveTokens": 650000
       },
       "magpie/deepseek/deepseek-flash": {
         "reserveTokens": 498576
