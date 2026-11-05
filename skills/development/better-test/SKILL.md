@@ -1,6 +1,6 @@
 ---
 name: better-test
-description: 写、删、审计测试时使用：什么测试值得留、端到端测试写法、DELETE/REWRITE/KEEP 判决。
+description: 写、改、删、审计测试时使用：什么测试值得留、端到端测试写法、DELETE/REWRITE/KEEP 判决。
 ---
 
 # Better Test
