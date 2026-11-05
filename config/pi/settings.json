@@ -36,7 +36,7 @@
     "+codemode"
   ],
   "codemode": {
-    "mode": "only"
+    "mode": "on"
   },
   "hideThinkingBlock": false
 }
