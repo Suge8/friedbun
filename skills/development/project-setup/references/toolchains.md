@@ -31,6 +31,7 @@
 - Rust 沿用项目现有 clippy 参数，不擅自加 `--all-features` 或 `-D warnings`。
 - Vue / Svelte / Astro 保留 `vue-tsc`、`svelte-check`、`astro check`：Biome 对它们的支持仍是实验性的，Oxlint 只 lint script 区域。
 - Formatter 只保证规范化输出；lint、typecheck、compile 和行为测试覆盖不同失败模式，互不冒充。
+- 注释相关只开项目已用工具里机器能判定的规则：屏蔽 lint 须指名规则并写理由，多余的屏蔽要报，注释掉的代码要报。Oxlint 用 `typescript/ban-ts-comment` 与 `--report-unused-disable-directives`；ESLint 用 `@eslint-community/eslint-comments` 与 `@typescript-eslint/ban-ts-comment`；Ruff 用 `PGH004`、`RUF100`、`ERA001`；Clippy 用 `allow_attributes_without_reason`；SwiftLint 用 `blanket_disable_command`、`superfluous_disable_command`。注释该不该写靠判断，不开全面禁注释的规则。
 
 ## 建链的最小形状
 
