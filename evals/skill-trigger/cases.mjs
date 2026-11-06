@@ -235,7 +235,7 @@ export const CASES = {
       "magpie 各模型的 ttft 和输出速度对比一下，只看 10 月 30 号以后的",
     ],
     neg: [
-      ["AGENTS.md 里关于提交的那条规则 agent 老是忽略，帮我把措辞改得更不容易被漏看", "manual:retro"],
+      ["AGENTS.md 里关于提交的那条规则 agent 老是忽略，帮我把措辞改得更不容易被漏看", "manual:writing-for-agents"],
       ["把 src/queue.ts 里 lease 函数的 p99 延迟反复调到 20ms 以内，每次改一处、测一次", "hillclimb"],
       ["调研 SQLite 的 WAL 模式和 Litestream 备份各自的取舍，要一手来源", "research"],
       ["现在 Claude Opus 的 API 每百万 token 价格是多少？", "web-search"],
