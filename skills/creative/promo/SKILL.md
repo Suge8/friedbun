@@ -6,7 +6,7 @@ description: 制作项目宣传物料：Hero/OG/社媒图、商店截图、READM
 
 # Promo（物料工坊）
 
-编排者，自己不生成：Logo 和 AI 图归 gpt-image，文案归 copywriting，截图归 better-browser-use 与系统工具。本 skill 管：项目是什么 → 缺什么物料 → 按对的工具链生产 → 成套落盘。
+编排者，自己不生成：Logo 和 AI 图归 gpt-image，文案归 writing-for-humans，截图归 better-browser-use 与系统工具。本 skill 管：项目是什么 → 缺什么物料 → 按对的工具链生产 → 成套落盘。
 
 ## Step 0 — 建立语境
 
@@ -20,11 +20,11 @@ description: 制作项目宣传物料：Hero/OG/社媒图、商店截图、READM
 
 | 物料                        | 用在哪                              | 分支                          |
 | --------------------------- | ----------------------------------- | ----------------------------- |
-| Logo / 3D 资产系列          | 应用内、README、社媒头像            | [VISUAL.md](./VISUAL.md) 链 A |
+| Logo / App 图标 / 3D 资产   | 应用内、启动器与商店、README、头像  | [VISUAL.md](./VISUAL.md) 链 A |
 | AI 宣传底图（hero/OG/社媒） | 官网首屏、GitHub social、推文卡片   | [VISUAL.md](./VISUAL.md) 链 B |
 | 产品截图（美化合成）        | README hero、商店图库、Product Hunt | [SHOTS.md](./SHOTS.md)        |
 | 演示 GIF / 视频             | README、社媒、商店                  | [MOTION.md](./MOTION.md)      |
-| 配套文案（标题/口号）       | 叠加在图上、社媒帖                  | copywriting                   |
+| 配套文案（标题/口号）       | 叠加在图上、社媒帖                  | writing-for-humans            |
 
 ## Step 2 — 生产
 

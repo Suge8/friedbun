@@ -29,7 +29,7 @@ description: 项目体检：新项目开工、半途补缺、开源前检查或�
 
 ## 3. 补齐
 
-用户确认后再写：AGENTS.md、WORDS.md 与工单约定内容全部来自盘点到的事实，不编造；README 按项目事实起草，营销文案用 copywriting；CHANGELOG 归 ship。
+用户确认后再写：AGENTS.md、WORDS.md 与工单约定内容全部来自盘点到的事实，不编造；README 与营销文案按项目事实起草，用 writing-for-humans；CHANGELOG 归 ship。
 
 ## 工单约定
 

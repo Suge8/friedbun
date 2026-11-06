@@ -25,7 +25,9 @@
 4. **拟人化/立体化**：以选定稿为基准生成 3D 化提示词——soft matte material, subtle studio lighting, gentle depth, friendly character（要拟人时），保持原图形的辨识结构不走形
 5. **资产系列**：确认单体满意后，批量出场景变体（不同角度/姿态/情绪），每张都基于同一描述骨架只换变量，保证系列一致性
 
-产物：`design/promo/visual/logo-*.png`、`asset-*.png`。
+要做 App 图标时，第 3 步之后的定稿走下文「App 图标」一节；第 4、5 步只在还要配套 3D 资产时做。
+
+产物：`design/promo/visual/logo-*.png`、`asset-*.png`；图标见「App 图标」。
 
 ### 提案板模板
 
@@ -61,9 +63,7 @@
 
 ### IP 吉祥物模板
 
-改编自 [ip-as-logo-skill](https://github.com/s1dashu/ip-as-logo-skill)（MIT）。
-
-1. **提三个方向**，每个一行：`主体 — 与产品的关联 — 标志性轮廓`。用户没指定主体时，三个方向是三个不同主体，默认用常见动物，非动物主体要有直接的产品理由；项目已有吉祥物时其中一个方向用它。用户指定了主体时，三个方向是同一主体的三种处理（轮廓、第二色的位置、标志特征、性格）。
+1. **提三个方向**，每个一行：`主体 — 与产品的关联 — 标志性轮廓`。用户没指定主体时，三个方向是三个不同主体，默认用常见动物，非动物主体要有直接的产品理由；项目已有吉祥物时其中一个方向用它。某个主体放到三类不相干的产品上也说得通，就换成和产品职责更贴的主体。用户指定了主体时，三个方向是同一主体的三种处理（轮廓、第二色的位置、标志特征、性格）。
 2. **出 6 张**：用户同意后，每个方向 2 张，标 A1 A2 B1 B2 C1 C2；用户只选一个方向就出这个方向的 6 张，标 A1–A6。每张单独生成方图，不拼成网格；同时最多跑 3 张。完成标准：每张都已出图并标号。
 3. **原样交付**：每张只生成一次，全部交给用户，附标号、方向和所用颜色；不自行筛掉、重生成或后期修。用户要换再出。
 
@@ -80,6 +80,20 @@ Style: make simplification, cuteness, and lovable baby-like appeal the strongest
 Finish: show only the character on the full-canvas background, with clean surfaces and normal square outer corners.
 Constraints: Use no text or watermark. Add no borders, frames, cards, or presentation masks. Include one character only, with no extra subjects or scenery. Use no fragile lines, sharp tips, unnecessary outlines, tiny details, or decorative marks. Add no photorealistic material, dramatic bevel, glossy hotspot, deep occlusion, extrusion, strong three-dimensional rendering, or external cast shadow. Keep the background solid and uniform, with no texture, vignette, or lighting variation.
 ```
+
+### App 图标
+
+用于启动器和商店图标，在用户选定的单体上做。
+
+1. **验收**：把定稿缩成 1024、180、60、32 px，再出一张灰度图和一张纯黑剪影，分别放在浅色和深色底上看。32 px 只要求剪影、表情和一个标志特征认得出；60 px 已经糊成一团的装饰删掉。命中任一项即否决：要靠文字才看得懂、32 px 轮廓含糊、不止一个主体、表情或标志特征被裁掉、像某个已有品牌或角色。改稿用 `--ref`，每轮只改最弱的一处，外加至多一处打磨，防止形象走样。完成标准：每个尺寸和灰度、剪影图都看过，否决项一项不中。
+2. **分层交付**：前景用 `--ref` 加 `--transparent` 从定稿去掉背景，背景记成纯色值或两色渐变。不烘焙圆角或圆形遮罩，遮罩由系统加。从角落探出的吉祥物，脸和标志特征要落在下面的安全区内。
+   - iOS / iPadOS / macOS：两层导入 Icon Composer，画布 1024×1024（watchOS 1088×1088），在里面检查默认、深色、透明（clear）、染色（tinted）几种外观。
+   - Android 自适应图标：前景、背景层各 108×108 dp，主体不超出中央 66×66 dp；另出一张单色层（monochrome）供主题图标用。
+   - Google Play 商品页：512×512、32 位 PNG、不超过 1024 KB。
+
+   完成标准：目标平台的每一项都已导出并在对应预览里看过。
+
+产物：`design/promo/visual/icon-fg-1024x1024.png`（透明前景）、`icon-flat-1024x1024.png`（合成预览）、`icon-play-512x512.png`，背景色值写在交付清单里。
 
 ## 链 B — AI 宣传底图（hero / OG / 社媒）
 
