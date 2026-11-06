@@ -29,4 +29,4 @@
 
 ## 触发评测
 
-改任何自动触发 Skill 的 `description` 或 `~/.pi/agent/SYSTEM.md` 后，跑 `node evals/skill-trigger/run.mjs --only <技能> --near --repeat 3 && node evals/skill-trigger/analyze.mjs`（全量去掉 `--only <技能> --near`）。单个技能约 $1.5，全量约 $10；同一用例重复 3 次，一半以上错算稳定错；做法与基线见 `evals/skill-trigger/README.md`。
+改任何自动触发 Skill 的 `description` 或 `~/.pi/agent/SYSTEM.md` 后，跑 `node evals/skill-trigger/run.mjs --only <技能> --near --repeat 3 && node evals/skill-trigger/analyze.mjs`（全量去掉 `--only <技能> --near`）。花费、判定规则见 `evals/skill-trigger/README.md`。

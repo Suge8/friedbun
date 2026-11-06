@@ -19,12 +19,14 @@
 ## 命令
 
 ```
-node evals/skill-trigger/run.mjs --only <技能> --near --repeat 3 --out ~/.cache/skill-trigger/<标签>   # 单个技能连邻近技能
-node evals/skill-trigger/run.mjs --repeat 3 --out ~/.cache/skill-trigger/full                         # 全量
-node evals/skill-trigger/analyze.mjs --results ~/.cache/skill-trigger/<标签>                           # 漏/误、稳定/偶发、混淆对、费用
+node evals/skill-trigger/run.mjs --only <技能> --near --repeat 3   # 单个技能连邻近技能
+node evals/skill-trigger/run.mjs --repeat 3                                                           # 全量
+node evals/skill-trigger/analyze.mjs                                                                  # 漏/误、稳定/偶发、混淆对、费用
 node evals/skill-trigger/run.mjs --desc overrides.json ...   # {"技能":"新 description"}，在副本里试改稿，不动 skills/
 node evals/skill-trigger/cmp.mjs <旧结果目录> <新结果目录>     # 两轮对比
 ```
+
+每轮前用 `--out <目录>`（run）和 `--results <目录>`（analyze）指到新目录，避免和上一轮结果混在一起。
 
 花费（Opus 约为 terra 的 9 倍）：单个技能不带邻近约 $0.5，带 `--near` 约 $1.5；全量 17 个技能约 $10。
 
