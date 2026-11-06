@@ -40,23 +40,9 @@ export const CASES = {
     ],
     neg: [
       ["把全部测试跑一遍，告诉我哪些挂了", null],
-      ["做工单 #42：重试达上限后进入 dead-letter，验收标准在 docs/issues/42.md", "implement"],
+      ["做工单 #42：重试达上限后进入 dead-letter，验收标准在 docs/issues/42.md", null],
       ["把 queue.ts 里 lease 超时那块重构一下，行为保持不变", null],
       ["测一下 /enqueue 在 1000 并发下的 p99 延迟，给我个数", null],
-    ],
-  },
-  "invariant-check": {
-    pos: [
-      "审一下 src/queue.ts 的租约恢复逻辑：进程崩在 ack 之前或之后，会不会丢任务或者重复投递？",
-      "发布脚本迁移到一半被 kill 了会不会卡死？把每一步每种故障系统地过一遍",
-      "这个重试调度器每次 review 都有人报新的中断点，能不能一次穷举干净",
-      "sweep 定时叫醒在重启之后必须保证所有租约都能被回收，帮我验证这条性质",
-    ],
-    neg: [
-      ["看下 src/server.ts 的路由有没有明显的 bug", null],
-      ["给 enqueue 加个 payload 非空校验", null],
-      ["重试间隔改成指数退避，帮我实现，延迟从 1s 起翻倍", "implement"],
-      ["给租约过期回收那段补测试，覆盖 sweep 的边界", "better-test"],
     ],
   },
   pr: {
@@ -84,7 +70,7 @@ export const CASES = {
       ["按 docs/design.md 把任务详情页正式做出来，要上线的", "ui-craft"],
       ["看板的卡片间距和字体都太丑了，帮我打磨一下", "ui-craft"],
       ["把重试状态机画成状态图，放进 docs/design.md", null],
-      ["给 Queue 正式加上 dead-letter 状态，转移规则看 docs/design.md，做完提交", "implement"],
+      ["给 Queue 正式加上 dead-letter 状态，转移规则看 docs/design.md，做完提交", null],
     ],
   },
   "write-swift": {
@@ -210,21 +196,7 @@ export const CASES = {
       ["跑一下 bench，告诉我现在的吞吐数字", null],
       ["这个 lease 函数很慢，找出瓶颈修一下", null],
       ["对比 BullMQ 和 pg-boss 的吞吐，查官方给的 benchmark", "research"],
-      ["做工单 #51：enqueue 响应控制在 50ms 内，验收标准在 docs/issues/51.md", "implement"],
-    ],
-  },
-  implement: {
-    pos: [
-      "做工单 #42：重试达上限后进入 dead-letter，验收标准在 docs/issues/42.md",
-      "实现 docs/issues/57.md，ack 幂等",
-      "GET /jobs 加分页，limit 和 cursor，做完提交",
-      "租约超时改成可配置，默认保持 30 秒，做完带路径提交",
-    ],
-    neg: [
-      ["给 queue 的重试上限补几个测试", "better-test"],
-      ["讲讲 queue.ts 的租约机制是怎么工作的", null],
-      ["README 里 recieve 拼错了，改一下", null],
-      ["我想给 relay 加多租户，先别写代码，把方案追问清楚", "manual:grilling"],
+      ["做工单 #51：enqueue 响应控制在 50ms 内，验收标准在 docs/issues/51.md", null],
     ],
   },
   "session-data": {

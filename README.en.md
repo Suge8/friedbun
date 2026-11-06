@@ -2,7 +2,7 @@
 
 <p align="center"><a href="README.md">中文</a> · <b>English</b></p>
 
-29 skills, multi-agent orchestration with FireCode, and an agent that takes over your whole Mac. One message sets it all up.
+28 skills, multi-agent orchestration with FireCode, and an agent that takes over your whole Mac. One message sets it all up.
 
 Just the skills (the skills CLI installs them into Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot and 70+ other agents):
 
@@ -20,7 +20,7 @@ Clone https://github.com/Suge8/friedbun and set up this Mac by following its SET
 
 ### Your agent works the way good engineers do
 
-29 skills show it the proven way to do things: check primary sources before answering, keep the code minimal and the architecture clean, make promo images, drive a browser, and more.
+28 skills show it the proven way to do things: check primary sources before answering, keep the code minimal and the architecture clean, make promo images, drive a browser, and more.
 
 <p align="center"><img alt="The FriedBun mascot handing out four skills: check sources first, clean minimal code, make promo images, drive the browser" src="assets/skills-en.jpg" width="100%"></p>
 

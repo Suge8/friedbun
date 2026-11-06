@@ -6,7 +6,7 @@
 - `skills/` 经软链是 `~/.agents/skills`；装、更新、归档 skill 与上游补丁的规则在维护者本机的 `~/.agents/docs/skills-management.md`。
 - `skills/cuepad/` 由 CuePad 写入，升级时整文件覆盖，不手改。
 - `skills/operations/uilane/` 是 better-browser-use 与 better-computer-use 共用的快车道 CLI，没有 SKILL.md，用法写在那两个 skill 里。
-- `skills/workflow/` 下的 research、grilling、implement、retro 起源于 mattpocock/skills（MIT），已分叉、不同步上游；这条出处须保留。
+- `skills/workflow/` 下的 research、grilling、retro 起源于 mattpocock/skills（MIT），已分叉、不同步上游；这条出处须保留。
 - 带 `disable-model-invocation: true` 的是手动 skill，只在用户点名或其他 skill 指向时使用。
 
 ## 触发评测
