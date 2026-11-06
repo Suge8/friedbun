@@ -225,13 +225,14 @@ def run_session(system_text: str, case: dict, model: str, thinking: str, rep: in
     return {**trace, "cached": False}
 
 
-def ask(prompt: str, model: str, thinking: str = "low", kind: str = "ask") -> tuple[str, float]:
-    """无工具、无技能、无项目上下文的单次文本调用，返回 (回复, 成本)。"""
+def ask(prompt: str, model: str, thinking: str = "low", kind: str = "ask", system: str | None = None) -> tuple[str, float]:
+    """无工具、无技能、无项目上下文的单次文本调用，返回 (回复, 成本)。system 给定时替换 pi 默认系统提示。"""
     root = Path(tempfile.mkdtemp(prefix="spe-")).resolve()
     try:
         (root / "fixture").mkdir()
         (root / "prompt.md").write_text(prompt)
-        raw = spawn(["--no-skills", "-nc", "--no-tools", "--model", f"magpie/{model}", "--thinking", thinking,
+        sys_args = ["--system-prompt", system] if system else []
+        raw = spawn(["--no-skills", "-nc", "--no-tools", "--model", f"magpie/{model}", "--thinking", thinking, *sys_args,
                      "--", f"@{root / 'prompt.md'}", "按文件中的要求作答。"], root, root / "fixture")
         s = summarize(raw)
         spend(kind, s["cost"])

@@ -30,6 +30,22 @@ uv run sp.py demo                                 # 合成 trace 演示各判定
 
 新增 fixture：在 `fixtures/` 下建目录，用例里写目录名。
 
+## 回复易懂度（clarity）
+
+用真实“没看懂/什么意思/人话/太长”的反馈样本比 [回复] 节：同一段会话上下文，分别以基线和候选 SYSTEM.md 重生成被抱怨的那条回复，Opus 盲评配对。
+
+```
+uv run sp.py clarity --prepare                     # 从 --data 样本切 dev 60 / test 40，抽上下文
+uv run sp.py clarity --cand <SYSTEM.md> --split dev --limit 5   # 先测单价
+uv run sp.py clarity --cand <SYSTEM.md> --split dev            # 默认每条每版 2 次
+```
+
+1. 样本是分类后的 jsonl（`session`、`msg_id`、`类型` 等字段），默认读 `/tmp/reply-clarity/classified-*.jsonl`。含用户原话，切片与生成结果只写 `~/.cache/system-prompt/clarity/`，不进仓库。
+2. 切片：按会话分 dev/test（同会话同 split），按首要类型分层，优先每会话一条；test 不用于改规则。
+3. 上下文：沿父链取被抱怨回复之前的内容，工具调用与结果压成短摘要，被抱怨回复所在回合最多 8k 字、总共 12k 字，脱敏密钥、邮箱、手机号与家目录。
+4. 生成：Sonnet 无工具，系统提示是整份 SYSTEM.md，要求事实只来自上下文。判分：Opus 拿上下文、读者画像和左右随机的两条回复，判哪条更易懂，并分别判漏关键事实、编造、过长；不给样本的卡点。原被抱怨回复做锚点，基线与候选各自和它比，默认只比第 1 次生成（`--anchor-reps`）。
+5. 每条约 $0.45（4 次 Sonnet 生成 + 4 次 Opus 判分，判分占七成），dev+test 约 $45；`--max-cost` 配合 `SPE_LEDGER` 设花费上限。
+
 ## 已知结论（2026-11）
 
 - GEPA 自动改写（分节与整份）在 test 上没有可复现的提升，Opus 上分节拼合版反而退步，未采用。

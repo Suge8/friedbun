@@ -4,6 +4,7 @@
   uv run sp.py baseline [--cases cases] [--n 3]          当前 SYSTEM.md 在用例集上跑 N 次出分数表
   uv run sp.py optimize [--budget 60] [--sections 协作,回复]   GEPA 优化所选节（只用这些节的 train/val 用例；test 不参与）
   uv run sp.py compare --cand <best.json|SYSTEM.md> [--n 3]    基线 vs 候选配对比较
+  uv run sp.py clarity --prepare | --split dev [--limit 5]   真实“没看懂”样本上重生成回复，盲评基线 vs 候选易懂度
   uv run sp.py demo                                       用合成 trace 演示各判定项判对错
 """
 import argparse
@@ -19,6 +20,7 @@ from datetime import datetime
 from pathlib import Path
 
 import checks
+import clarity
 import pirun
 import prompt
 
@@ -355,6 +357,12 @@ def cmd_demo(a) -> None:
     sys.exit(bool(wrong))
 
 
+def cmd_clarity(a) -> None:
+    base = prompt.load_base(Path(a.system))
+    cand = Path(a.cand).read_text() if a.cand else base
+    clarity.cmd(a, base, cand, save)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -384,6 +392,24 @@ def main() -> None:
             p.add_argument("--seed", help="起点候选：{节: 正文} 的 json，或含 [节名] 的 md；默认用原节")
             p.add_argument("--out", help="运行目录；默认 ~/.cache/system-prompt/optimize/<时间>")
             p.add_argument("--max-cost", type=float, help="共享账本（环境变量 SPE_LEDGER）合计超过此美元数就停止")
+    p = sub.add_parser("clarity", help="回复易懂度：真实样本重生成 + 盲评配对")
+    p.set_defaults(fn=cmd_clarity)
+    p.add_argument("--prepare", action="store_true", help="从样本切 dev/test 并抽上下文，写到 ~/.cache/system-prompt/clarity/cases.json")
+    p.add_argument("--data", default="/tmp/reply-clarity/classified-*.jsonl", help="分类后的样本 jsonl（glob）")
+    p.add_argument("--dev", type=int, default=60)
+    p.add_argument("--test", type=int, default=40)
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--split", default="dev", choices=("dev", "test"))
+    p.add_argument("--ids", help="只跑这些样本 id，逗号分隔")
+    p.add_argument("--limit", type=int, help="只跑前 N 条（测单价用）")
+    p.add_argument("--reps", type=int, default=2, help="每条每版生成次数")
+    p.add_argument("--anchor-reps", type=int, default=1, help="前几次生成再各自和原被抱怨回复比（锚点）")
+    p.add_argument("--max-cost", type=float, help="共享账本（环境变量 SPE_LEDGER）合计超过此美元数就停止")
+    p.add_argument("--system", default=str(SYSTEM_MD), help="基线 SYSTEM.md")
+    p.add_argument("--cand", help="候选 SYSTEM.md")
+    p.add_argument("--model", default=DEFAULT_MODEL, help="生成回复的模型")
+    p.add_argument("--judge-model", default="claude/claude-opus-5-5")
+    p.add_argument("--conc", type=int, default=6, help="并发样本数")
     a = ap.parse_args()
     a.fn(a)
 
