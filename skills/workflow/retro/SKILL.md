@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 1. 读 [writing-for-agents](../../development/writing-for-agents/SKILL.md)；改动落点（AGENTS.md、skill、项目 docs）和写法都按它。
 
-2. 读会话一手记录。Pi 会话按工作目录存于 `~/.pi/agent/sessions/<目录路径编码>/*.jsonl`，用户未指定则取当前会话。完成标准：每个工具调用与其结果都已过目，而不是只看对话摘要。
+2. 读会话一手记录。Pi 会话按工作目录存于 `~/.pi/agent/sessions/<目录路径编码>/*.jsonl`，用户未指定则取当前会话。完成标准：每个工具调用与其结果都已过目，而不是只看对话摘要。查会话与用量的统计先用 [session-data](../session-data/SKILL.md)，不现写脚本扫原始文件。
 
 3. 按下列类别逐类核对，找候选。每个候选附会话中的证据（发生了什么、耗了多少轮）。
 
