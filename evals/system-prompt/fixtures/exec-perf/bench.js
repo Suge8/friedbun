@@ -1,0 +1,11 @@
+import { start, stats } from "./anim.js";
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const el = { phase: 0, active: false };
+const a = start(el);
+await sleep(1000);
+console.log("idle wakeups/s:", stats.ticks);
+const p0 = el.phase, t0 = stats.ticks;
+a.setActive(true);
+await sleep(300);
+console.log("active ticks:", stats.ticks - t0, "phase moved:", el.phase !== p0);
+a.stop();

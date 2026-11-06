@@ -1,0 +1,5 @@
+commit abc123 checked out to /tmp/clean
+npm ci -> installed 770 packages
+run 1: 22 passed
+run 2: 22 passed
+run 3: 22 passed

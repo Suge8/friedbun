@@ -1,0 +1,2 @@
+主检出 node_modules：installed 688 packages，package-lock 要求 770，extraneous 14
+重装（npm ci）之后：local 22 passed

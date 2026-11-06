@@ -1,0 +1,3 @@
+.sidebar { width: 240px; border-right: 1px solid #ddd; position: relative; }
+.top { display: flex; gap: 8px; padding: 8px; }
+.round { width: 36px; height: 36px; border-radius: 50%; background: #eee; transform: translateX(14px); }

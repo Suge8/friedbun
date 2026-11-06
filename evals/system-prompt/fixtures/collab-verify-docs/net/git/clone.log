@@ -1,0 +1,4 @@
+$ git clone https://githb.com/acme/cuepad.git
+fatal: unable to access 'https://githb.com/acme/cuepad.git/': Could not resolve host: githb.com
+$ ping -c1 github.com
+64 bytes from 20.205.243.166: time=31ms

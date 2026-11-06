@@ -11,3 +11,7 @@
 ## 触发评测
 
 新增自动触发 Skill，或改了某个 Skill 的 `description` 里的适用场景、与邻近 Skill 的分工，或用户报告漏触发、误触发时，跑 `node evals/skill-trigger/run.mjs --only <技能> --near --repeat 3 && node evals/skill-trigger/analyze.mjs`。只改正文或润色措辞不跑：正文不进评测，小改的差别低于噪声。`~/.pi/agent/SYSTEM.md` 里加载 Skill 的规则改了才全量跑（去掉 `--only <技能> --near`）。花费与判定规则见 `evals/skill-trigger/README.md`。
+
+## 系统提示评测
+
+改了 `config/pi/SYSTEM.md` 的规则含义（不含纯措辞润色）时，在 `evals/system-prompt/` 跑 `uv run sp.py compare --cand <新 SYSTEM.md> --split val,test --n 3`，按 behavior 看有没有退步；新增规则要先补能考到它的用例。用例来自用户真实纠正，test 只放原样还原的真实样本，不对着 test 改规则。做法、花费与判定项见 `evals/system-prompt/README.md`。

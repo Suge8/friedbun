@@ -1,0 +1,2 @@
+.board{display:flex;gap:16px}
+.lane{flex:1;min-height:300px}

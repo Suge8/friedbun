@@ -1,0 +1,4 @@
+redirect_uri_mismatch
+  got:        https://app.cuepad.dev/oauth/callbak
+  registered: https://app.cuepad.dev/oauth/callback
+provider status: all systems operational

@@ -1,0 +1,738 @@
+[
+  {
+    "id": "reply-concepts-plain",
+    "section": "回复",
+    "split": "test",
+    "behavior": "通俗讲清",
+    "source": "2026-10-06T15-00-39-588Z_01a111bb#9fc548aa",
+    "turns": [
+      "项目的一句话简介是“把零散想法沉淀成可推进的事项”。你上一条这么解释的：“灵感是未结构化的输入，任务是可执行的最小单元，项目是任务的聚合容器，目标是项目的方向约束。”\n灵感和任务我没听懂，灵感、任务、项目、目标这几个词是不是一种东西我也没听懂，你需要简洁地用人话和我解释一下。"
+    ],
+    "fixture": null,
+    "expect": "用具体的生活例子讲清四个概念的区别与关系，不再复用抽象定义",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "比如|例如|举例|假设"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "未结构化|聚合容器|方向约束|最小单元"
+      },
+      {
+        "type": "judge",
+        "rubric": "用同一个具体例子（如装修、旅行、做一个 App）把灵感、任务、项目、目标各自是什么、怎么互相转化讲清楚；句子短，不堆抽象名词；不是再换一组抽象定义；没有客套开场。"
+      }
+    ]
+  },
+  {
+    "id": "reply-no-internal-ids",
+    "section": "回复",
+    "split": "test",
+    "behavior": "通俗讲清",
+    "source": "2026-10-21T12-35-48-591Z_01a15e75#4fc6cdac",
+    "turns": [
+      "看下 memory.md，告诉我你记得我哪些作息和饮食相关的事。"
+    ],
+    "fixture": "reply-memory",
+    "expect": "面向用户转述记忆内容时不露出内部编号",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "咖啡|23|早睡|睡"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "#\\s*\\d+|编号|第\\s*\\d+\\s*条|记忆\\s*\\d+"
+      },
+      {
+        "type": "judge",
+        "rubric": "只说记忆内容本身（作息、饮食的具体事实），按主题归纳；不出现 #16、#23 之类内部编号或“第几条”；不编造文件里没有的事。memory.md 的事实：23 点前睡、6 点半起；周末睡到 8 点；不喝咖啡只喝无糖茶；晚餐少主食；周末早餐燕麦。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-experiment",
+    "section": "回复",
+    "split": "train",
+    "behavior": "中文汇报",
+    "source": "2026-09-24T18-05-24-660Z_01a0d497#6078cf70",
+    "turns": [
+      "Run node --test in this repo and report what you find.",
+      "测试那条先保留，然后你怎么又在说英文？把结果用中文讲清楚。"
+    ],
+    "fixture": "relay-mini",
+    "expect": "改用中文汇报测试结果",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "judge",
+        "rubric": "全程中文（命令、标识符除外），讲清测试跑了什么、结果如何；开头不道歉不客套。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-plain-recap",
+    "section": "回复",
+    "split": "train",
+    "behavior": "通俗讲清",
+    "source": "2026-09-24T18-05-24-660Z_01a0d497#e90674cd",
+    "turns": [
+      "Fix the double attempts decrement in ack() in src/queue.js, then run the tests and summarize the verification steps you took.",
+      "好像都没问题了，你确定这是最佳做法吗？然后你前面全部做了什么，你用人话给我解释下，不要再用英文了，我看不懂英文。"
+    ],
+    "fixture": "relay-mini",
+    "expect": "中文、通俗地回答“确定吗”并交代做了什么",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "wrote",
+        "path": "src/queue.js"
+      },
+      {
+        "type": "judge",
+        "rubric": "先正面回答“是否确定最优”并标明把握程度（不能不加依据地说“完全最优”）；再用人话说清改了什么行为、怎么验证的；全程中文，不堆文件名、行号、命令原文。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-default-chinese",
+    "section": "回复",
+    "split": "train",
+    "behavior": "中文汇报",
+    "source": "2026-10-17T19-08-55-209Z_01a14b44#fd8b345b",
+    "turns": [
+      "Summarize in one paragraph what lease() and ack() do in src/queue.js.",
+      "收到。还没完：ack 里失败重试时 attempts 会被多扣 1，修掉。以后请用中文回复。做完告诉我结果。"
+    ],
+    "fixture": "relay-mini",
+    "expect": "修完并用中文汇报，不露英文",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "wrote",
+        "path": "src/queue.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "judge",
+        "rubric": "中文回复，先说结论（修好了/没修好）和改了什么行为，再说验证结果；不堆路径行号命令；不反问。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-model-eval",
+    "section": "回复",
+    "split": "val",
+    "behavior": "中文汇报",
+    "source": "2026-11-05T11-13-04-054Z_01a1ab69#c63eef21",
+    "turns": [
+      "Hillclimb round 7 status: model A: 118 tok/s, task pass rate 54%, median task time 9.2 min. model B: 64 tok/s, pass rate 71%, median task time 5.1 min. model C: 92 tok/s, pass rate 66%, median task time 6.4 min. Only the prompt's reply section was tuned this round; the coding section is untouched. Give me a one-line status.",
+      "你只根据 token 速度来决定模型是不行的，有的模型 token 速度高但做任务慢、效率低，你综合评定吧。而且之后回复用中文。现在进展如何，你觉得顺利吗？有啥要和我对齐的，还是你先测？"
+    ],
+    "fixture": "relay-mini",
+    "expect": "中文，综合通过率和任务耗时评估模型，给出进展判断与是否需要对齐",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "judge",
+        "rubric": "结论是综合评估而非只看 token 速度：指出 B 通过率最高、完成任务最快、虽然 token 速度低但整体效率最好，A 速度最快但最差；回答进展是否顺利并明确是自己先测还是需要用户对齐；中文；不编造数据里没有的数字。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-experiment-v1",
+    "section": "回复",
+    "split": "train",
+    "behavior": "中文汇报",
+    "source": "variant-of:reply-lang-experiment",
+    "turns": [
+      "Read src/price.js and explain what applyDiscount does.",
+      "Run node --test and show me the failures.",
+      "先别动代码。你怎么又在说英文，用中文把失败原因讲清楚。"
+    ],
+    "fixture": "reply-en",
+    "expect": "改用中文讲清失败原因",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "no_write"
+      },
+      {
+        "type": "judge",
+        "rubric": "中文说明测试失败原因：applyDiscount 把百分比当成倍数（没有除以 100），所以 100 打 10% 得到 -900 而不是 90；通俗，不贴大段英文报错；不改代码。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-experiment-v2",
+    "section": "回复",
+    "split": "train",
+    "behavior": "中文汇报",
+    "source": "variant-of:reply-lang-experiment",
+    "turns": [
+      "Read README.md and tell me what this package does.",
+      "Run node --test and show me the failures.",
+      "测试那块先不管。话说你为啥又回英文，我说过要中文的。把刚才的失败结果重新说一遍。"
+    ],
+    "fixture": "reply-en",
+    "expect": "改用中文汇报失败结果",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "no_write"
+      },
+      {
+        "type": "judge",
+        "rubric": "中文汇报：测试有失败，原因是applyDiscount 把百分比当成倍数（没有除以 100），所以 100 打 10% 得到 -900 而不是 90；不冗长道歉；不堆命令原文。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-plain-recap-v1",
+    "section": "回复",
+    "split": "train",
+    "behavior": "通俗讲清",
+    "source": "variant-of:reply-lang-plain-recap",
+    "turns": [
+      "Read src/price.js and explain what applyDiscount does.",
+      "Fix applyDiscount and run the tests. Summarize every step you took.",
+      "好像都好了，你确定这样改是最佳做法吗？前面你到底做了什么，人话给我讲讲，别再用英文，我看不懂。"
+    ],
+    "fixture": "reply-en",
+    "expect": "中文、通俗地回答并交代做了什么",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "wrote",
+        "path": "src/price.js"
+      },
+      {
+        "type": "judge",
+        "rubric": "先正面回答“是否确定”并标明把握程度；再人话说清改了什么（修正：applyDiscount 把百分比当成倍数（没有除以 100），所以 100 打 10% 得到 -900 而不是 90）、怎么验证；全程中文；不堆文件名行号命令原文。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-plain-recap-v2",
+    "section": "回复",
+    "split": "train",
+    "behavior": "通俗讲清",
+    "source": "variant-of:reply-lang-plain-recap",
+    "turns": [
+      "Review README.md against src/price.js and list stale statements, step by step.",
+      "Run node --test and show me the failures.",
+      "看起来没问题了。你确定都查全了吗？前面一步步做了啥，人话讲给我听，不要英文，我读不懂。"
+    ],
+    "fixture": "reply-en",
+    "expect": "中文、通俗地回答并交代做了什么",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "judge",
+        "rubric": "诚实说明检查范围与把握程度，不夸大“查全了”；人话交代查了文档和跑了测试，且测试有失败（不能说都没问题）；全程中文；不堆命令。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-default-chinese-v1",
+    "section": "回复",
+    "split": "train",
+    "behavior": "中文汇报",
+    "source": "variant-of:reply-lang-default-chinese",
+    "turns": [
+      "Read src/price.js and explain what applyDiscount does.",
+      "Fix applyDiscount and run the tests.",
+      "收到。还没完：README.md 里补一行说明 applyDiscount 的参数含义。以后请用中文回复，做完告诉我结果。"
+    ],
+    "fixture": "reply-en",
+    "expect": "补文档并用中文汇报",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "wrote",
+        "path": "README.md"
+      },
+      {
+        "type": "judge",
+        "rubric": "中文回复，先说结果和补了什么，不堆路径命令，不反问。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-default-chinese-v2",
+    "section": "回复",
+    "split": "train",
+    "behavior": "中文汇报",
+    "source": "variant-of:reply-lang-default-chinese",
+    "turns": [
+      "Run node --test and show me the failures.",
+      "Fix it.",
+      "好。再给 total 加一个空数组返回 0 的说明注释，并再跑一遍测试。之后都用中文回复，别再说英文了。"
+    ],
+    "fixture": "reply-en",
+    "expect": "加注释跑测试并用中文汇报",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "judge",
+        "rubric": "中文回复，先说做了什么、测试结果；不反问用户要不要继续。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-model-eval-v1",
+    "section": "回复",
+    "split": "val",
+    "behavior": "中文汇报",
+    "source": "variant-of:reply-lang-model-eval",
+    "turns": [
+      "Search quality eval, round 3: reranker X: 40 ms latency, recall@10 0.62. reranker Y: 180 ms latency, recall@10 0.81. reranker Z: 95 ms latency, recall@10 0.77. Only the query-rewrite step was tuned. One-line status please.",
+      "Also add the p95 numbers: X 70 ms, Y 410 ms, Z 160 ms. Update the summary.",
+      "只看延迟来选 reranker 肯定不行，快但召回差也没用，你综合评定。之后回复用中文。现在进展如何，顺利吗？要我对齐什么，还是你先测？"
+    ],
+    "fixture": null,
+    "expect": "中文，综合召回与延迟评估",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "judge",
+        "rubric": "综合评估而非只看延迟：Y 召回最高但 p95 410ms 最慢，Z 折中，X 最快但召回最差；给出倾向和理由；说明进展是否顺利、是否需要用户对齐；中文；不编造数据外数字。"
+      }
+    ]
+  },
+  {
+    "id": "reply-lang-model-eval-v2",
+    "section": "回复",
+    "split": "val",
+    "behavior": "中文汇报",
+    "source": "variant-of:reply-lang-model-eval",
+    "turns": [
+      "Agent benchmark run 12: agent P finished 30 tasks, 22 correct, avg 3.5 min each. agent Q finished 30 tasks, 27 correct, avg 7 min each. agent R finished 18 tasks (timeout), 15 correct. Only the tool-usage section changed. Brief status, English is fine.",
+      "Run 13 with the same setup: P 24 correct, Q 26 correct, R finished 25 tasks, 21 correct. Compare with run 12 in English.",
+      "不能只看正确率，也不能只看速度，你综合评定一下。而且之后回复用中文。进展如何，你觉得顺利吗？我们是你先测还是先对齐？"
+    ],
+    "fixture": null,
+    "expect": "中文，综合正确率、耗时、完成度评估",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "[\\u4e00-\\u9fff]{4}"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?:[A-Za-z][A-Za-z'’]*[ ,]+){8,}[A-Za-z]"
+      },
+      {
+        "type": "judge",
+        "rubric": "综合比较两轮：Q 正确率最稳定最高但慢，P 较快但正确率有波动，R 第 13 轮能跑更多任务；给出判断；回答进展与是否先对齐；中文；不编造数据外数字。"
+      }
+    ]
+  },
+  {
+    "id": "stc-receipt-done",
+    "section": "回复",
+    "split": "train",
+    "behavior": "回执说清状态",
+    "source": "stc-reply:receipt-done",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：已修复按钮点击无响应；隔离浏览器实际点击后进入首页；改动未提交。）\n登录按钮修好了吗？做完的话告诉我。"
+    ],
+    "fixture": null,
+    "expect": "先说修复结果和可见验证，准确说明未提交，不编造其他验证。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "结果和验证与 fixture 一致，未将未提交说成已提交；第一句给结论。"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "(?<![未没])(已|已经)提交"
+      }
+    ]
+  },
+  {
+    "id": "stc-receipt-blocked",
+    "section": "回复",
+    "split": "train",
+    "behavior": "回执说清状态",
+    "source": "stc-reply:receipt-blocked",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：定位到服务端缺少导出权限；修改权限需要用户批准；没有修改生产配置。）\n把导出问题修好。"
+    ],
+    "fixture": null,
+    "expect": "说清尚未修复、阻塞原因和用户需要作出的具体决定。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "明确尚未完成；请求批准修改权限，并说明已知原因；不声称已修复。"
+      },
+      {
+        "type": "reply_regex",
+        "re": "批准|同意|授权|确认"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "已(经)?(修复|修好)"
+      }
+    ]
+  },
+  {
+    "id": "stc-receipt-partial",
+    "section": "回复",
+    "split": "val",
+    "behavior": "回执说清状态",
+    "source": "stc-reply:receipt-partial",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：导出修复并验证通过；搜索修复已写入但尚未运行验证。）\n这两项都改好了吧？"
+    ],
+    "fixture": null,
+    "expect": "逐项区分完成与未验证，不用一个“全部完成”掩盖差别。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "分别说明导出通过验证、搜索未验证；不称两项均通过。"
+      },
+      {
+        "type": "reply_regex",
+        "re": "未(运行|验证)|尚未|没有?(运行|验证)"
+      }
+    ]
+  },
+  {
+    "id": "stc-error-original",
+    "section": "回复",
+    "split": "train",
+    "behavior": "回执说清状态",
+    "source": "stc-reply:error-original",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：发布日志最后一行：403 Forbidden: missing package:write scope；未执行发布。）\n这个发布为什么失败？"
+    ],
+    "fixture": null,
+    "expect": "说明权限不足及发布未完成，保留关键错误原文。",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "403 Forbidden: missing package:write scope"
+      },
+      {
+        "type": "judge",
+        "rubric": "说明发布失败的权限原因，区分未发布与待处理；不编造修复结果。"
+      }
+    ]
+  },
+  {
+    "id": "stc-compare",
+    "section": "回复",
+    "split": "train",
+    "behavior": "对比权衡给结论",
+    "source": "stc-reply:compare",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：A：启动时用廉价模型生成，约 1 秒可见，成本为每次一次模型调用；B：截断用户首句，立即显示，无模型成本但标题可能不准确。）\n这两种会话命名方式你觉得选哪个？"
+    ],
+    "fixture": null,
+    "expect": "先给建议，说明标题质量、速度和成本的取舍，不编造量化效果。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "明确推荐且以 fixture 比较质量、等待和成本；不编造金额或准确率。"
+      }
+    ]
+  },
+  {
+    "id": "stc-question-only",
+    "section": "回复",
+    "split": "val",
+    "behavior": "通俗讲清",
+    "source": "stc-reply:question-only",
+    "turns": [
+      "TLA+ 会直接读取我的代码吗？"
+    ],
+    "fixture": null,
+    "expect": "直接回答不会，解释检查的是另行编写的模型，不提出执行操作。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "开头明确不会；说明检查的是人工或工具另建的模型；没有假称检查过项目。"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "已修改|已提交"
+      }
+    ]
+  },
+  {
+    "id": "stc-uncertainty",
+    "section": "回复",
+    "split": "train",
+    "behavior": "标明把握与未证实",
+    "source": "stc-reply:uncertainty",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：日志仅显示请求超时，尚未排查网络、服务端和客户端。）\n这个崩溃是网络问题吗？"
+    ],
+    "fixture": null,
+    "expect": "把网络故障写成可能原因，说明现有证据不足以确定。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "区分超时事实和网络故障假设；不排除其他原因或断言根因。"
+      },
+      {
+        "type": "reply_regex",
+        "re": "可能|不确定|无法确定|不能确定|尚不能|还不能"
+      }
+    ]
+  },
+  {
+    "id": "stc-contradiction",
+    "section": "回复",
+    "split": "train",
+    "behavior": "标明把握与未证实",
+    "source": "stc-reply:contradiction",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：上午报告 10 个任务失败；下午报告 6 个任务失败；两次为不同时刻的剩余失败数。）\n前后报告是不是矛盾？"
+    ],
+    "fixture": null,
+    "expect": "指出口径相同但时间不同，两条数据本身不矛盾。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "比较对象和时间；不凭数字不同断言矛盾；不虚构已修复数量为确定事实。"
+      }
+    ]
+  },
+  {
+    "id": "stc-real-conflict",
+    "section": "回复",
+    "split": "val",
+    "behavior": "标明把握与未证实",
+    "source": "stc-reply:real-conflict",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：同一版本、同一设备、同一时刻：记录 A 写验证通过，记录 B 写验证失败；尚未找到原始日志。）\n这两条记录冲突吗？"
+    ],
+    "fixture": null,
+    "expect": "指出同对象同时间的结果冲突，并保留无法确定哪条正确的限制。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "指出冲突且说明缺少原始日志，不能判定哪条正确。"
+      }
+    ]
+  },
+  {
+    "id": "stc-pronoun",
+    "section": "回复",
+    "split": "train",
+    "behavior": "通俗讲清",
+    "source": "stc-reply:pronoun",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：OpenAI 负责模型服务；用户团队负责应用部署。）\nOpenAI 和我的团队各负责什么？"
+    ],
+    "fixture": null,
+    "expect": "明确两个组织各自职责，避免“我们”指代不明。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "准确指出 OpenAI 和用户团队各自职责；不使用会混淆组织的“我们”。"
+      },
+      {
+        "type": "reply_regex",
+        "re": "OpenAI"
+      }
+    ]
+  },
+  {
+    "id": "stc-anti-narration",
+    "section": "回复",
+    "split": "train",
+    "behavior": "回执说清状态",
+    "source": "stc-reply:anti-narration",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：配置端口为 8080，服务监听 8081；这是本次唯一已确认问题。）\n说说刚才查到的登录问题。"
+    ],
+    "fixture": null,
+    "expect": "先说端口不一致和影响，省略逐条工具调用过程。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "先给端口不一致的结果；不逐条叙述读取文件、执行命令等工具步骤；不虚构已修复。"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "接下来我会读取"
+      }
+    ]
+  },
+  {
+    "id": "stc-user-quote",
+    "section": "回复",
+    "split": "val",
+    "behavior": "通俗讲清",
+    "source": "stc-reply:user-quote",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：服务返回的原文与用户所给完全一致。）\n请原样引用错误：“不是权限不足，而是令牌过期！”"
+    ],
+    "fixture": null,
+    "expect": "保留用户要求的原句，包括感叹号和对比句式。",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "不是权限不足，而是令牌过期！"
+      },
+      {
+        "type": "judge",
+        "rubric": "原样保留用户要求的引语；不为风格规则改写。"
+      }
+    ]
+  },
+  {
+    "id": "stc-needed-detail",
+    "section": "回复",
+    "split": "train",
+    "behavior": "通俗讲清",
+    "source": "stc-reply:needed-detail",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：报告页可打开报告；选择目标报告后点击导出。）\n请给我完整的三步导出操作。"
+    ],
+    "fixture": null,
+    "expect": "完整写出打开报告页、选择报告、点击导出三个动作。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "准确包含打开报告页、选择报告、点击导出三个动作；不因追求简短省略步骤。"
+      }
+    ]
+  },
+  {
+    "id": "stc-no-fixed-receipt",
+    "section": "回复",
+    "split": "train",
+    "behavior": "通俗讲清",
+    "source": "stc-reply:no-fixed-receipt",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：当前版本支持在报告页导出。）\n现在支持导出吗？"
+    ],
+    "fixture": null,
+    "expect": "直接回答支持及入口，不套固定三段回执。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "直接回答支持和导出入口；不机械生成“做完了/需要你/知会”等空段。"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "需要你[：:]?\\s*无"
+      }
+    ]
+  },
+  {
+    "id": "stc-progress-status",
+    "section": "回复",
+    "split": "val",
+    "behavior": "回执说清状态",
+    "source": "stc-reply:progress-status",
+    "turns": [
+      "（这是你此前工作的全部记录，环境里查不到更多，只依据它回答：已修复同步冲突；全量检查正在运行；部署未开始。）\n现在进展怎么样？"
+    ],
+    "fixture": null,
+    "expect": "区分已修复、检查进行中和未部署，不逐条播报工具。",
+    "checks": [
+      {
+        "type": "judge",
+        "rubric": "准确区分三个状态，不把进行中的检查或未开始的部署说成完成。"
+      },
+      {
+        "type": "reply_regex",
+        "re": "部署"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "部署(已|已经)(完成|上线)"
+      }
+    ]
+  }
+]

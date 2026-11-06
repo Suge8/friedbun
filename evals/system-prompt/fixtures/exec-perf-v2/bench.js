@@ -1,0 +1,14 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { watch, stats } from "./watcher.js";
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), "w-"));
+let got = 0;
+const w = watch(dir, () => got++);
+await sleep(1000);
+console.log("idle scans/s:", stats.scans);
+fs.writeFileSync(path.join(dir, "a.txt"), "x");
+await sleep(500);
+console.log("notified within 500ms:", got);
+w.stop();

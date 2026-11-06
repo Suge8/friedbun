@@ -1,0 +1,5 @@
+model,code_mode,tool_fail_rate,n
+gpt-6.1,on,0.04,120
+gpt-6.1,on,0.05,118
+claude-opus-5,off,0.09,121
+claude-opus-5,off,0.08,119

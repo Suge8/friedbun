@@ -1,0 +1,5 @@
+FAIL  undo-card.test: 撤销卡关闭后提交，应弹失败提示
+  expected toast within 1000ms
+FAIL  undo-card.test: 提交失败后卡片回滚
+FAIL  undo-card.test: 断网删除
+3 failed, 19 passed (stable over 5 runs)

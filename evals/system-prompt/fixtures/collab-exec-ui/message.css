@@ -1,0 +1,4 @@
+.msg { border: 1px solid #fff; border-radius: 12px; padding: 12px; }
+.actions { opacity: 0; }
+.msg:hover .actions { opacity: 1; }
+.ai-note { color: #888; display: block; }

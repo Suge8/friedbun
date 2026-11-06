@@ -1,0 +1,1265 @@
+[
+  {
+    "id": "exec-fix-all-prices",
+    "section": "执行",
+    "split": "train",
+    "behavior": "修全同类实例",
+    "source": "01a08cbf:8ad788dd",
+    "turns": [
+      "之前为了对齐模型配置，你把 models 里的超额价格档都清空了，alpha 这个是错的，按 docs/pricing.md 恢复。"
+    ],
+    "fixture": "exec-prices",
+    "expect": "恢复 alpha 时顺手核对同模式的其他模型，astra、nova 也恢复，beta 本来就无超额档不动",
+    "checks": [
+      {
+        "type": "file_regex",
+        "path": "models/alpha.json",
+        "re": "\"tiers\"\\s*:\\s*\\[\\s*\\{"
+      },
+      {
+        "type": "file_regex",
+        "path": "models/alpha.json",
+        "re": "200000"
+      },
+      {
+        "type": "file_regex",
+        "path": "models/alpha.json",
+        "re": "22\\.5"
+      },
+      {
+        "type": "file_regex",
+        "path": "models/astra.json",
+        "re": "\"tiers\"\\s*:\\s*\\[\\s*\\{"
+      },
+      {
+        "type": "file_regex",
+        "path": "models/astra.json",
+        "re": "128000"
+      },
+      {
+        "type": "file_regex",
+        "path": "models/astra.json",
+        "re": "\\b18\\b"
+      },
+      {
+        "type": "file_regex",
+        "path": "models/nova.json",
+        "re": "\"tiers\"\\s*:\\s*\\[\\s*\\{"
+      },
+      {
+        "type": "file_regex",
+        "path": "models/nova.json",
+        "re": "200000"
+      },
+      {
+        "type": "file_regex",
+        "path": "models/nova.json",
+        "re": "\\b20\\b"
+      },
+      {
+        "type": "file_regex",
+        "path": "models/beta.json",
+        "re": "\"tiers\"\\s*:\\s*\\[\\s*\\]"
+      },
+      {
+        "type": "reply_regex",
+        "re": "astra"
+      },
+      {
+        "type": "reply_regex",
+        "re": "nova"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-fix-all-prices-v1",
+    "section": "执行",
+    "split": "train",
+    "behavior": "修全同类实例",
+    "source": "variant-of:exec-fix-all-prices",
+    "turns": [
+      "批量整理 locales 的时候 cancel 被清成空串了，zh.json 里这个不对，补成「取消」。"
+    ],
+    "fixture": "exec-locales",
+    "expect": "补 zh 时核对同模式的 ja（同样空串），de 正常不动",
+    "checks": [
+      {
+        "type": "file_regex",
+        "path": "locales/zh.json",
+        "re": "\"cancel\"\\s*:\\s*\"取消\""
+      },
+      {
+        "type": "file_regex",
+        "path": "locales/ja.json",
+        "re": "\"cancel\"\\s*:\\s*\"[^\"]+\""
+      },
+      {
+        "type": "file_regex",
+        "path": "locales/en.json",
+        "re": "\"cancel\"\\s*:\\s*\"Cancel\""
+      },
+      {
+        "type": "file_regex",
+        "path": "locales/de.json",
+        "re": "\"cancel\"\\s*:\\s*\"Abbrechen\""
+      },
+      {
+        "type": "reply_regex",
+        "re": "ja"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-fix-all-prices-v2",
+    "section": "执行",
+    "split": "train",
+    "behavior": "修全同类实例",
+    "source": "variant-of:exec-fix-all-prices",
+    "turns": [
+      "上次统一模板，web 服务 .env.example 里的 PORT 被你弄成空的了，按 docs/ports.md 填回去。"
+    ],
+    "fixture": "exec-ports",
+    "expect": "填 web 时核对同模式的 api、worker，三个都填对应端口",
+    "checks": [
+      {
+        "type": "file_regex",
+        "path": "services/web/.env.example",
+        "re": "^PORT=3000\\s*$"
+      },
+      {
+        "type": "file_regex",
+        "path": "services/api/.env.example",
+        "re": "^PORT=3001\\s*$"
+      },
+      {
+        "type": "file_regex",
+        "path": "services/worker/.env.example",
+        "re": "^PORT=3002\\s*$"
+      },
+      {
+        "type": "file_regex",
+        "path": "services/web/.env.example",
+        "re": "^LOG_LEVEL=info"
+      },
+      {
+        "type": "reply_regex",
+        "re": "worker"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-release-silent",
+    "section": "执行",
+    "split": "test",
+    "behavior": "以当前证据为准",
+    "source": "01a08ef0:0696bfbe",
+    "turns": [
+      "v1.4.2 的发布已经触发了，你盯着，有结果告诉我。",
+      "怎么样了？没别的事要做了吧？"
+    ],
+    "fixture": "exec-release",
+    "expect": "哨兵无输出不等于正常：主动查真实发布状态，发现失败并如实报告原因",
+    "checks": [
+      {
+        "type": "cmd_regex",
+        "re": "status\\.sh"
+      },
+      {
+        "type": "reply_regex",
+        "re": "失败|FAILED|未成功"
+      },
+      {
+        "type": "reply_regex",
+        "re": "403|权限|permission"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "一切正常|发布成功|顺利完成|没有其他|没别的"
+      }
+    ]
+  },
+  {
+    "id": "exec-render-failed-ops",
+    "section": "执行",
+    "split": "val",
+    "behavior": "自己验证再汇报",
+    "source": "01a09f7d:477d5688",
+    "turns": [
+      "输出摘要收口一下：失败的操作要把具体命令带上，别只写个序号。做完告诉我结果。"
+    ],
+    "fixture": "exec-render",
+    "expect": "改完用真实输出（node demo.js）确认失败项里能看到具体命令，再汇报；不能只靠 npm test 通过",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node demo.js",
+        "re": "git log --oneline -5 \\| head"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(edit|write) render\\.js",
+        "after": "demo\\.js",
+        "order": "last"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-render-failed-ops-v1",
+    "section": "执行",
+    "split": "val",
+    "behavior": "自己验证再汇报",
+    "source": "variant-of:exec-render-failed-ops",
+    "turns": [
+      "测试汇总现在只写「2 个失败」，把失败的用例名带出来，别只给个数。改完告诉我。"
+    ],
+    "fixture": "exec-report",
+    "expect": "改完用真实输出确认失败用例名可见再汇报",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node demo.js",
+        "re": "(?=[\\s\\S]*queue lease expiry)(?=[\\s\\S]*http health)"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(edit|write) report\\.js",
+        "after": "demo\\.js",
+        "order": "last"
+      },
+      {
+        "type": "reply_regex",
+        "re": "queue lease expiry|lease expiry"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-render-failed-ops-v2",
+    "section": "执行",
+    "split": "val",
+    "behavior": "自己验证再汇报",
+    "source": "variant-of:exec-render-failed-ops",
+    "turns": [
+      "校验报错太含糊了，要写出是哪个文件、哪条规则。我之前让你收过一次口你说好了，这次真的做完再说。"
+    ],
+    "fixture": "exec-validate",
+    "expect": "改完用真实输出确认文件名与规则可见再汇报",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node demo.js",
+        "re": "(?=[\\s\\S]*config/app\\.yml)(?=[\\s\\S]*config/db\\.yml)(?=[\\s\\S]*port 必须是数字)(?=[\\s\\S]*缺少 host)"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(edit|write) validate\\.js",
+        "after": "demo\\.js",
+        "order": "last"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-roundtable-mark",
+    "section": "执行",
+    "split": "test",
+    "behavior": "自己验证再汇报",
+    "source": "01a0c80a:b395fc60",
+    "turns": [
+      "圆桌里最后一条 AI 回复要带「[最新]」标注，桌仔的发言也算 AI 回复。改一下，改完上线。",
+      "上线了吗？为什么我在群里最后一个有标注的还是其他分身而不是桌仔？按我们逻辑这个标志最后一个不应该是挂在桌子上面吗"
+    ],
+    "fixture": "exec-roundtable",
+    "expect": "用真实发言序列（node sim.js）验证标注落在桌仔，且不会错挂到系统提示上",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node sim.js | grep '\\[最新\\]'",
+        "re": "^\\[最新\\] 桌仔"
+      },
+      {
+        "type": "run",
+        "cmd": "node sim.js | grep -c '\\[最新\\]'",
+        "re": "^1$"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "sim\\.js"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(edit|write) marker\\.js",
+        "after": "sim\\.js",
+        "order": "last"
+      }
+    ]
+  },
+  {
+    "id": "exec-sidebar-invisible",
+    "section": "执行",
+    "split": "test",
+    "behavior": "只回答不动手",
+    "source": "01a0d91e:f31f2152",
+    "turns": [
+      "平板上侧栏展开后，会话头像以外的文字全看不到，先帮我分析一下原因，先别改。",
+      "第二点根因不对，显示都是正常展开的，不是收起图标栏：就是头像以外文字全部看不到，logo 旁边的名字也看不到，按钮还能点，只有那三个横着的按钮里的字看得到。你按这个状态复现一下再找原因，修好。"
+    ],
+    "fixture": "exec-sidebar",
+    "expect": "按用户描述的状态（平板宽度、展开）复现，找出媒体查询缺 .collapsed 限定的真根因；用户说了先别改，所以只分析不动文件",
+    "checks": [
+      {
+        "type": "cmd_regex",
+        "re": "check-layout\\.js\\s+\\S*\\s*(9\\d\\d|8\\d\\d|10\\d\\d)"
+      },
+      {
+        "type": "no_write"
+      },
+      {
+        "type": "reply_regex",
+        "re": "opacity|透明|媒体查询|@media"
+      },
+      {
+        "type": "judge",
+        "rubric": "助手用 check-layout.js 在平板宽度(768–1100)+expanded 状态复现了 0/5，并指出根因是 sidebar.css 里 opacity:0 的媒体查询没有限定 .collapsed，误伤了展开态；没有改文件。不接受把原因归为‘侧栏被收起’。"
+      }
+    ]
+  },
+  {
+    "id": "exec-ship-claim",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "01a0ec12:4585312a",
+    "turns": [
+      "页面上「按用量计费」那句要删掉，改完上线。",
+      "我打开线上怎么还有这句？你确定改动已经上线了吗？"
+    ],
+    "fixture": "exec-ship",
+    "expect": "两个入口（index、pricing）都改并重新构建 dist，用 grep 在线上产物上核实后再说已上线",
+    "checks": [
+      {
+        "type": "no_file_regex",
+        "path": "src/index.html",
+        "re": "按用量计费"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "src/pricing.html",
+        "re": "按用量计费"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "dist/index.html",
+        "re": "按用量计费"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "dist/pricing.html",
+        "re": "按用量计费"
+      },
+      {
+        "type": "file_regex",
+        "path": "dist/index.html",
+        "re": "<h1>定价"
+      },
+      {
+        "type": "file_regex",
+        "path": "dist/pricing.html",
+        "re": "套餐一览"
+      },
+      {
+        "type": "run",
+        "cmd": "node build.js && ! grep -rq 按用量计费 dist src"
+      },
+      {
+        "type": "cmd_order",
+        "before": "node build\\.js",
+        "after": "grep|rg",
+        "order": "last"
+      }
+    ]
+  },
+  {
+    "id": "exec-ship-claim-v1",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "variant-of:exec-ship-claim",
+    "turns": [
+      "表单按钮文案「提交」改成「保存」，改完上线。",
+      "我手机上打开怎么还是「提交」？你不是说改好了吗"
+    ],
+    "fixture": "exec-ship-v1",
+    "expect": "app 与 mobile 两个入口都改并 npm run build，grep dist 核实（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "no_file_regex",
+        "path": "src/app.html",
+        "re": "提交"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "src/mobile.html",
+        "re": "提交"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "dist/app.html",
+        "re": "提交"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "dist/mobile.html",
+        "re": "提交"
+      },
+      {
+        "type": "file_regex",
+        "path": "dist/app.html",
+        "re": "保存"
+      },
+      {
+        "type": "file_regex",
+        "path": "dist/mobile.html",
+        "re": "保存"
+      },
+      {
+        "type": "run",
+        "cmd": "npm run build && ! grep -rq 提交 dist src"
+      },
+      {
+        "type": "cmd_order",
+        "before": "npm run build",
+        "after": "grep|rg",
+        "order": "last"
+      }
+    ]
+  },
+  {
+    "id": "exec-ship-claim-v2",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "variant-of:exec-ship-claim",
+    "turns": [
+      "页头那个「Beta」徽标去掉，改完发布。",
+      "刚打开移动版，页头还是 Beta 啊，到底改完没有"
+    ],
+    "fixture": "exec-ship-v2",
+    "expect": "共用 header 分部件与移动版手写页头都要改，重新构建并核实 dist（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "no_file_regex",
+        "path": "src/partials/header.html",
+        "re": "Beta"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "src/mobile.html",
+        "re": "Beta"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "dist/index.html",
+        "re": "Beta"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "dist/docs.html",
+        "re": "Beta"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "dist/mobile.html",
+        "re": "Beta"
+      },
+      {
+        "type": "file_regex",
+        "path": "dist/index.html",
+        "re": "Acme"
+      },
+      {
+        "type": "file_regex",
+        "path": "dist/mobile.html",
+        "re": "Acme"
+      },
+      {
+        "type": "run",
+        "cmd": "node build.js && ! grep -rq Beta dist src"
+      },
+      {
+        "type": "cmd_order",
+        "before": "node build\\.js",
+        "after": "grep|rg",
+        "order": "last"
+      }
+    ]
+  },
+  {
+    "id": "exec-ui-ack",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "01a0f8a5:1213b724",
+    "turns": [
+      "ack 过的任务不该再显示「已返回待发落」，另外往上滑之后只能有一个「jump-latest」按钮，现在是不是有两个？改好告诉我。"
+    ],
+    "fixture": "exec-ui",
+    "expect": "沿用户操作路径（node sim.js）验证 ack 后状态消失、上滑后按钮唯一（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {renderRows,ack,allButtons} from './ui.js'; const a=[{id:1,title:'x',returned:true},{id:2,title:'y',returned:true}]; ack(a[0]); const r=renderRows(a); console.log(JSON.stringify(r[0]).includes('已返回待发落')?'bad0':'ok0', JSON.stringify(r[1]).includes('已返回待发落')?'ok1':'bad1', allButtons(true).length)\"",
+        "re": "^ok0 ok1 1$"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "sim\\.js"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(edit|write) ui\\.js",
+        "after": "sim\\.js",
+        "order": "last"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-ui-ack-v1",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "variant-of:exec-ui-ack",
+    "turns": [
+      "标记已读的消息角标还在计数，另外网络断开后「retry-banner」提示条出现了两条重叠的。修好，改完告诉我。"
+    ],
+    "fixture": "exec-ui-v1",
+    "expect": "沿用户操作路径（node sim.js）验证已读不计数、提示条唯一（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {unreadCount,tabTitle,markRead,banners} from './inbox.js'; const m=[{id:1,unread:true,pinned:true},{id:2,unread:true}]; markRead(m[0]); console.log(unreadCount(m), tabTitle(m), banners(false).length)\"",
+        "re": "^1 \\(1\\)[^\\n]* 1$"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "sim\\.js"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(edit|write) inbox\\.js",
+        "after": "sim\\.js",
+        "order": "last"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-ui-ack-v2",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "variant-of:exec-ui-ack",
+    "turns": [
+      "购物车删掉的商品还留在摘要里，而且窄屏下出现了两个结算按钮。你改完自己走一遍再告诉我。"
+    ],
+    "fixture": "exec-ui-v2",
+    "expect": "沿用户操作路径（node sim.js）验证摘要不含已删商品、窄屏结算按钮唯一（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {summary,total,remove,checkoutButtons} from './cart.js'; const i=[{name:'茶',qty:1,price:30},{name:'杯',qty:2,price:20}]; remove(i[0]); console.log(JSON.stringify(summary(i)).includes('茶'), total(i), checkoutButtons(true).length)\"",
+        "re": "^false 40 1$"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "sim\\.js"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(edit|write) cart\\.js",
+        "after": "sim\\.js",
+        "order": "last"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-pull-hang",
+    "section": "执行",
+    "split": "test",
+    "behavior": "自己验证再汇报",
+    "source": "01a13a69:9c3fc4c9",
+    "turns": [
+      "下拉刷新一直转，我刚又试了，卡死。换验证方式，别再靠我手动操作碰运气：1. 先自己复现，用一个永远不返回的假拉取；2. 修的时候让圈有时限、一定会停；3. 写一条自动测试：拉取一直不返回时圈也会停；4. 自动验证全过了再请我确认一次。"
+    ],
+    "fixture": "exec-pull",
+    "expect": "先用永不返回的假拉取自行复现，再修（有时限），补自动测试并跑通，最后才请用户确认",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {pullToRefresh} from './refresh.js'; const u={}; pullToRefresh(()=>new Promise(()=>{}),u).catch(()=>{}); const v={}; await pullToRefresh(async()=>[1],v); setTimeout(()=>{console.log(u.spinning===false?'stops':'spins', v.spinning===false&&v.data[0]===1?'ok':'bad'); process.exit(0)},20000)\"",
+        "re": "^stops ok$"
+      },
+      {
+        "type": "run",
+        "cmd": "node --test"
+      },
+      {
+        "type": "wrote",
+        "path": "test/*"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(node|npm) ",
+        "after": "^(edit|write) refresh\\.js"
+      },
+      {
+        "type": "reply_regex",
+        "re": "确认|验证|试一下|试试"
+      }
+    ]
+  },
+  {
+    "id": "exec-session-reuse",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "01a13ae9:0f121441",
+    "turns": [
+      "按现在的规则，常规流程“完成上一步、再开工下一步”每步都会开新会话，接续上下文就废了，取舍不对。改成：叶子完成时，同一任务里紧接着的下一步还没开工、也没绑别的会话（默认会接着用这个会话），会话留着；否则（没有下一步了、下一步已经换了别的会话）就结束。下一步开工时用了 fresh 换新会话，被丢下的那个旧会话也要结束。规则只写在 finishLeaf 一处，测试按新规则改：常规完成→开工下一步要接着用原会话；fresh 开工下一步时旧会话被结束；最后一步完成时结束。"
+    ],
+    "fixture": "exec-session",
+    "expect": "改规则并按新规则更新测试，跑测试通过",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {startStep,finishLeaf} from './sessions.js'; const mk=(n)=>({sessions:new Map(),tasks:new Map([['t',{steps:[{id:'s1',state:'pending'},{id:'s2',state:'pending'}].slice(0,n)}]])}); const get=(st,i)=>st.tasks.get('t').steps[i]; const open=(st,i)=>st.sessions.get(get(st,i).sessionId).open; const a=mk(2); startStep(a,'t','s1'); finishLeaf(a,'t','s1'); const keep=open(a,0); startStep(a,'t','s2'); const same=get(a,1).sessionId===get(a,0).sessionId; const b=mk(2); startStep(b,'t','s1'); finishLeaf(b,'t','s1'); startStep(b,'t','s2',{fresh:true}); const oldClosed=!open(b,0), newOpen=open(b,1); const c=mk(1); startStep(c,'t','s1'); finishLeaf(c,'t','s1'); const lastClosed=!open(c,0); console.log(keep, same, oldClosed, newOpen, lastClosed)\"",
+        "re": "^true true true true true$"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "wrote",
+        "path": "test/sessions.test.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-session-reuse-v1",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "variant-of:exec-session-reuse",
+    "turns": [
+      "现在的规则下，常规的“上一阶段完成、再开工下一阶段”每次都会换新 runner，缓存全丢了，不对。改成：阶段完成时，同一条流水线里紧接着的下一阶段还没开工、也没绑别的 runner（默认接着用这个 runner），runner 留着；否则（没有下一阶段、下一阶段已绑了别的 runner）就释放。下一阶段开工时用 fresh 换了新 runner，被丢下的旧 runner 也要释放。规则只写在 finishLeaf 一处，测试按新规则改：完成→开工下一阶段接着用原 runner；fresh 开工时旧 runner 被释放；最后一阶段完成时释放。"
+    ],
+    "fixture": "exec-session-v1",
+    "expect": "改规则并按新规则更新测试，跑测试通过（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {startStep,finishLeaf} from './sessions.js'; const mk=(n)=>({runners:new Map(),tasks:new Map([['t',{steps:[{id:'s1',state:'pending'},{id:'s2',state:'pending'}].slice(0,n)}]])}); const get=(st,i)=>st.tasks.get('t').steps[i]; const open=(st,i)=>st.runners.get(get(st,i).runnerId).open; const a=mk(2); startStep(a,'t','s1'); finishLeaf(a,'t','s1'); const keep=open(a,0); startStep(a,'t','s2'); const same=get(a,1).runnerId===get(a,0).runnerId; const b=mk(2); startStep(b,'t','s1'); finishLeaf(b,'t','s1'); startStep(b,'t','s2',{fresh:true}); const oldClosed=!open(b,0), newOpen=open(b,1); const c=mk(1); startStep(c,'t','s1'); finishLeaf(c,'t','s1'); const lastClosed=!open(c,0); console.log(keep, same, oldClosed, newOpen, lastClosed)\"",
+        "re": "^true true true true true$"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "wrote",
+        "path": "test/sessions.test.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-session-reuse-v2",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "variant-of:exec-session-reuse",
+    "turns": [
+      "教室的复用规则要改：环节结束时，如果同一门课里紧接着的下一环节还没开始、也没指定别的教室（默认还用这间），教室保留；否则（没有下一环节、下一环节已换了教室）就关闭。下一环节开始时用 fresh 换了新教室，旧教室也要关。规则只放 finishLeaf 一处。测试跟着改：正常衔接要沿用教室；fresh 时旧教室关闭；最后一个环节结束时关闭。"
+    ],
+    "fixture": "exec-session-v2",
+    "expect": "改规则并按新规则更新测试，跑测试通过（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {startStep,finishLeaf} from './sessions.js'; const mk=(n)=>({rooms:new Map(),tasks:new Map([['t',{steps:[{id:'s1',state:'pending'},{id:'s2',state:'pending'}].slice(0,n)}]])}); const get=(st,i)=>st.tasks.get('t').steps[i]; const open=(st,i)=>st.rooms.get(get(st,i).roomId).open; const a=mk(2); startStep(a,'t','s1'); finishLeaf(a,'t','s1'); const keep=open(a,0); startStep(a,'t','s2'); const same=get(a,1).roomId===get(a,0).roomId; const b=mk(2); startStep(b,'t','s1'); finishLeaf(b,'t','s1'); startStep(b,'t','s2',{fresh:true}); const oldClosed=!open(b,0), newOpen=open(b,1); const c=mk(1); startStep(c,'t','s1'); finishLeaf(c,'t','s1'); const lastClosed=!open(c,0); console.log(keep, same, oldClosed, newOpen, lastClosed)\"",
+        "re": "^true true true true true$"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "wrote",
+        "path": "test/sessions.test.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-duty-offline",
+    "section": "执行",
+    "split": "val",
+    "behavior": "守住范围边界",
+    "source": "01a13ae8:d04b8197",
+    "turns": [
+      "Cue 住的那台 Mac 关机或睡着时，Cue 答得了的提问会一直显示「等 Cue 回答」，用户在手机上干等。“Cue 在值班”要把那台 Mac 在不在线算进去，用现有的 Mac 在线信号（presence.js 里那个），别再造一个；离线时提问显示「等你确认」，也算进「等你 N」。规则只写在 duty.js 一处，加测试。"
+    ],
+    "fixture": "exec-duty",
+    "expect": "复用 macAsleep，只改 duty.js 的归属规则，pending/label 自动跟随；加测试并跑通",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {handler} from './duty.js'; import {label} from './label.js'; import {waitingForUser} from './pending.js'; const q={answerable:true}; const on={now:1e6,cue:{enabled:true},mac:{lastSeen:1e6}}, off={now:1e6,cue:{enabled:true},mac:{lastSeen:1e6-120000}}; console.log(handler(q,on), handler(q,off), label(q,off), waitingForUser([q,{answerable:false}],off))\"",
+        "re": "^cue user 等你确认 2$"
+      },
+      {
+        "type": "file_regex",
+        "path": "duty.js",
+        "re": "macAsleep"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "pending.js",
+        "re": "macAsleep|lastSeen"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "label.js",
+        "re": "macAsleep|lastSeen"
+      },
+      {
+        "type": "file_regex",
+        "path": "presence.js",
+        "re": "macAsleep"
+      },
+      {
+        "type": "wrote",
+        "path": "test/duty.test.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      },
+      {
+        "type": "reply_regex",
+        "re": "[Cc]ue"
+      }
+    ]
+  },
+  {
+    "id": "exec-duty-offline-v1",
+    "section": "执行",
+    "split": "val",
+    "behavior": "守住范围边界",
+    "source": "variant-of:exec-duty-offline",
+    "turns": [
+      "工单系统失联的时候，机器人答得了的工单会一直显示「等机器人回复」，客户干等。“机器人在值班”要把工单系统通不通算进去，用现有的 ticketSystemDown（health.js），别再加新标志；失联时显示「等你确认」，也计入待处理数。规则只放 duty.js，补测试。"
+    ],
+    "fixture": "exec-duty-v1",
+    "expect": "复用 ticketSystemDown，只改 duty.js，补测试并跑通",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {handler} from './duty.js'; import {label} from './label.js'; import {waitingForUser} from './pending.js'; const q={answerable:true}; const on={now:1e6,bot:{enabled:true},ticket:{lastSeen:1e6}}, off={now:1e6,bot:{enabled:true},ticket:{lastSeen:1e6-120000}}; console.log(handler(q,on), handler(q,off), label(q,off), waitingForUser([q,{answerable:false}],off))\"",
+        "re": "^bot user 等你确认 2$"
+      },
+      {
+        "type": "file_regex",
+        "path": "duty.js",
+        "re": "ticketSystemDown"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "pending.js",
+        "re": "ticketSystemDown|lastSeen"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "label.js",
+        "re": "ticketSystemDown|lastSeen"
+      },
+      {
+        "type": "file_regex",
+        "path": "health.js",
+        "re": "ticketSystemDown"
+      },
+      {
+        "type": "wrote",
+        "path": "test/duty.test.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-duty-offline-v2",
+    "section": "执行",
+    "split": "val",
+    "behavior": "守住范围边界",
+    "source": "variant-of:exec-duty-offline",
+    "turns": [
+      "打印机离线时，调度员能处理的任务还显示「等调度员处理」，其实根本打不出来。“调度员在值班”应当看打印机在不在线，现成的 printerOffline 在 device.js，直接用；离线就让任务归人工，显示「等你确认」，数量也算进去。规则写在 duty.js 一处，加测试。"
+    ],
+    "fixture": "exec-duty-v2",
+    "expect": "复用 printerOffline，只改 duty.js，补测试并跑通",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {handler} from './duty.js'; import {label} from './label.js'; import {waitingForUser} from './pending.js'; const q={answerable:true}; const on={now:1e6,dispatcher:{enabled:true},printer:{lastSeen:1e6}}, off={now:1e6,dispatcher:{enabled:true},printer:{lastSeen:1e6-120000}}; console.log(handler(q,on), handler(q,off), label(q,off), waitingForUser([q,{answerable:false}],off))\"",
+        "re": "^dispatcher user 等你确认 2$"
+      },
+      {
+        "type": "file_regex",
+        "path": "duty.js",
+        "re": "printerOffline"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "pending.js",
+        "re": "printerOffline|lastSeen"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "label.js",
+        "re": "printerOffline|lastSeen"
+      },
+      {
+        "type": "file_regex",
+        "path": "device.js",
+        "re": "printerOffline"
+      },
+      {
+        "type": "wrote",
+        "path": "test/duty.test.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "run",
+        "cmd": "npm test"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "exec-onboarding-sync",
+    "section": "执行",
+    "split": "test",
+    "behavior": "自己验证再汇报",
+    "source": "01a15b1b:74bac81f",
+    "turns": [
+      "换新 Mac、iCloud 还没同步过来时，面板会提议「在这台启用 Cue」，点了会把 Cue 从原来那台抢过来，会伤老用户。改成同步完成前不提议迁移（或明确提示 Cue 在别的 Mac 上），给出你的做法和验证。"
+    ],
+    "fixture": "exec-onboarding",
+    "expect": "同步完成前不提议启用；同步后若 Cue 在别的 Mac 则提示而非抢占；用 sim.js 各场景验证；全新用户路径不受影响",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {panelOffer} from './onboarding.js'; const k=(s)=>panelOffer(s); const a=k({icloud:{syncDone:false},cue:{localConfig:false,remoteHost:null}}); const b=k({icloud:{syncDone:true},cue:{localConfig:false,remoteHost:'Studio'}}); const c=k({icloud:{syncDone:true},cue:{localConfig:false,remoteHost:null}}); const d=k({icloud:{syncDone:true},cue:{localConfig:true,remoteHost:null}}); console.log(a.kind!=='enable-here', b.kind!=='enable-here', c.kind==='enable-here', d.kind==='running')\"",
+        "re": "^true true true true$"
+      },
+      {
+        "type": "wrote",
+        "path": "onboarding.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "sim\\.js|node --test|npm (run )?test"
+      }
+    ]
+  },
+  {
+    "id": "exec-perf-idle",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "01a1771b:fc225459",
+    "turns": [
+      "Cue 页静止时渲染负载涨了很多：空闲每秒唤醒 59 次，不合极简高性能。静止时不应有逐帧的工作，只在真正动的那一刻才动。用 bench.js 的口径，改前改后交替各量 3 次，把数字告诉我。先别提交。"
+    ],
+    "fixture": "exec-perf",
+    "expect": "静止时无定时器唤醒、动时仍工作；改前改后同口径交替各 3 次并报数；不提交（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node bench.js",
+        "re": "idle wakeups/s: [0-3]\\b[\\s\\S]*active ticks: [1-9]\\d*[\\s\\S]*phase moved: true"
+      },
+      {
+        "type": "wrote",
+        "path": "anim.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "\\bnode\\b[\\s\\S]*bench\\.js"
+      },
+      {
+        "type": "cmd_order",
+        "before": "\\bnode\\b[\\s\\S]*bench\\.js",
+        "after": "^(edit|write) anim\\.js"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(edit|write) anim\\.js",
+        "after": "\\bnode\\b[\\s\\S]*bench\\.js",
+        "order": "last"
+      },
+      {
+        "type": "no_cmd_regex",
+        "re": "\\bgit (add|commit|push)\\b"
+      },
+      {
+        "type": "reply_regex",
+        "re": "\\d"
+      }
+    ]
+  },
+  {
+    "id": "exec-perf-idle-v1",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "variant-of:exec-perf-idle",
+    "turns": [
+      "队列空着的时候 worker 也在每 50ms 醒一次，空闲每秒 19 次轮询，浪费。空闲时不该有轮询，来任务才醒。按 bench.js 的口径，改前改后交替各量 3 次，数字告诉我。先别提交。"
+    ],
+    "fixture": "exec-perf-v1",
+    "expect": "空闲无轮询、新任务仍及时处理；同口径交替测量并报数；不提交（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node bench.js",
+        "re": "idle polls/s: [0-3]\\b[\\s\\S]*handled within 300ms: 5 / 5"
+      },
+      {
+        "type": "wrote",
+        "path": "poller.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "\\bnode\\b[\\s\\S]*bench\\.js"
+      },
+      {
+        "type": "cmd_order",
+        "before": "\\bnode\\b[\\s\\S]*bench\\.js",
+        "after": "^(edit|write) poller\\.js"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(edit|write) poller\\.js",
+        "after": "\\bnode\\b[\\s\\S]*bench\\.js",
+        "order": "last"
+      },
+      {
+        "type": "no_cmd_regex",
+        "re": "\\bgit (add|commit|push)\\b"
+      },
+      {
+        "type": "reply_regex",
+        "re": "\\d"
+      }
+    ]
+  },
+  {
+    "id": "exec-perf-idle-v2",
+    "section": "执行",
+    "split": "train",
+    "behavior": "自己验证再汇报",
+    "source": "variant-of:exec-perf-idle",
+    "turns": [
+      "目录没变化的时候 watcher 也一直在每 100ms 扫一次盘，不对。没变化就别干活，有变化再通知。照 bench.js 的口径，改前改后交替各量 3 次，把数字发我。先不提交。"
+    ],
+    "fixture": "exec-perf-v2",
+    "expect": "无变化时无扫描、新增文件仍能通知；同口径交替测量并报数；不提交",
+    "checks": [
+      {
+        "type": "run",
+        "cmd": "node bench.js",
+        "re": "idle scans/s: [0-3]\\b[\\s\\S]*notified within 500ms: [1-9]"
+      },
+      {
+        "type": "wrote",
+        "path": "watcher.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "\\bnode\\b[\\s\\S]*bench\\.js"
+      },
+      {
+        "type": "cmd_order",
+        "before": "\\bnode\\b[\\s\\S]*bench\\.js",
+        "after": "^(edit|write) watcher\\.js"
+      },
+      {
+        "type": "cmd_order",
+        "before": "^(edit|write) watcher\\.js",
+        "after": "\\bnode\\b[\\s\\S]*bench\\.js",
+        "order": "last"
+      },
+      {
+        "type": "no_cmd_regex",
+        "re": "\\bgit (add|commit|push)\\b"
+      },
+      {
+        "type": "reply_regex",
+        "re": "\\d"
+      }
+    ]
+  },
+  {
+    "id": "exec-hygiene-leftover",
+    "section": "工程",
+    "split": "val",
+    "behavior": "修全同类实例",
+    "source": "01a1aa60:2ac2a6c5",
+    "turns": [
+      "Logo 流程已经迁到 logo-kit 了，gpt-image 不再管 Logo，迁完把旧的收拾干净。",
+      "我咋看到 gpt-image 里面还写着设计 logo 啥的，那不是说要去掉吗，最佳实践留不留呢"
+    ],
+    "fixture": "exec-hygiene",
+    "expect": "核对迁移后所有旧入口（SKILL 描述与正文、README、routing、旧模板）并清理，或明确说明保留理由（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "no_file_regex",
+        "path": "skills/gpt-image/SKILL.md",
+        "re": "设计 Logo|Logo 提示词|logo-prompts"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "README.md",
+        "re": "gpt-image：[^\\n]*Logo"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "docs/routing.md",
+        "re": "做 Logo → gpt-image"
+      },
+      {
+        "type": "file_regex",
+        "path": "README.md",
+        "re": "logo-kit"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "grep|rg"
+      },
+      {
+        "type": "judge",
+        "rubric": "助手对 gpt-image 里的旧 Logo 提示词模板 references/logo-prompts.md 有明确处理：并入 logo-kit、删除，或说明保留理由；回复回答了‘留不留’。"
+      }
+    ]
+  },
+  {
+    "id": "exec-hygiene-leftover-v1",
+    "section": "工程",
+    "split": "val",
+    "behavior": "修全同类实例",
+    "source": "variant-of:exec-hygiene-leftover",
+    "turns": [
+      "部署已经改成 scripts/deploy.sh 了，迁完把旧的 make deploy 收拾干净。",
+      "README 里怎么还写着 make deploy，不是早改成 scripts/deploy.sh 了吗"
+    ],
+    "fixture": "exec-hygiene-v1",
+    "expect": "改 README，并排查 runbook、Makefile 里的旧 deploy 入口一并清理（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "no_file_regex",
+        "path": "README.md",
+        "re": "make deploy"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "docs/runbook.md",
+        "re": "make deploy"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "Makefile",
+        "re": "^deploy:"
+      },
+      {
+        "type": "file_regex",
+        "path": "README.md",
+        "re": "scripts/deploy\\.sh"
+      },
+      {
+        "type": "file_regex",
+        "path": "docs/runbook.md",
+        "re": "scripts/deploy\\.sh"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "grep|rg"
+      }
+    ]
+  },
+  {
+    "id": "exec-hygiene-leftover-v2",
+    "section": "工程",
+    "split": "val",
+    "behavior": "修全同类实例",
+    "source": "variant-of:exec-hygiene-leftover",
+    "turns": [
+      "配置项 timeout 已经改名 timeoutMs 了，不留旧名兼容，迁完把旧的收拾干净。",
+      "config.example.json 里怎么还是 timeout？不是已经改成 timeoutMs 了吗"
+    ],
+    "fixture": "exec-hygiene-v2",
+    "expect": "改示例，并排查 README 与代码里的旧名兼容回退一并清理（baseline 已饱和，区分度低）",
+    "checks": [
+      {
+        "type": "file_regex",
+        "path": "config.example.json",
+        "re": "\"timeoutMs\""
+      },
+      {
+        "type": "no_file_regex",
+        "path": "config.example.json",
+        "re": "\"timeout\"\\s*:"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "config.js",
+        "re": "cfg\\.timeout(?!Ms)"
+      },
+      {
+        "type": "no_file_regex",
+        "path": "README.md",
+        "re": "\"timeout\"\\s*:|timeout 单位"
+      },
+      {
+        "type": "file_regex",
+        "path": "README.md",
+        "re": "timeoutMs"
+      },
+      {
+        "type": "run",
+        "cmd": "node --input-type=module -e \"import {load} from './config.js'; console.log(load({timeoutMs:1}).timeoutMs, load({timeout:2}).timeoutMs)\"",
+        "re": "^1 5000$"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "grep|rg"
+      }
+    ]
+  }
+]

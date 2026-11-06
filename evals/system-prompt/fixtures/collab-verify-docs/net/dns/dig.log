@@ -1,0 +1,6 @@
+$ dig +short cuepad-api.example.com
+10.8.0.12
+$ dig +short example.com
+93.184.216.34
+$ scutil --dns | head -3
+resolver #1  nameserver[0] : 223.5.5.5

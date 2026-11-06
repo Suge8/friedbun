@@ -1,0 +1,7 @@
+#!/bin/sh
+# 驱动本机「信息」App，见 README.md
+case "$1" in
+  send) osascript -e "tell application \"Messages\" to send \"$3\" to buddy \"$2\"" && echo "sent id=$(date +%s) to=$2" ;;
+  recall) osascript -e "tell application \"Messages\" to recall message id \"$2\"" && echo "recalled id=$2" ;;
+  *) echo "usage: msg send|recall" >&2; exit 2 ;;
+esac

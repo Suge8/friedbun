@@ -1,0 +1,1 @@
+{"name":"price-calc","type":"module","scripts":{"test":"node --test"}}

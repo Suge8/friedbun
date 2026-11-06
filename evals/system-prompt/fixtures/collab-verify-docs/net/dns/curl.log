@@ -1,0 +1,2 @@
+$ curl -I https://cuepad-api.exmaple.com/health
+curl: (6) Could not resolve host: cuepad-api.exmaple.com

@@ -1,0 +1,2 @@
+.deck .hand{display:flex;justify-content:center}
+.deck .c{width:70px;height:100px;margin-left:-20px;transform:rotate(calc((var(--i,0) - 2) * 6deg)) translateY(calc(var(--i,0) * 2px));transform-origin:50% 120%}  /* 下弧 */

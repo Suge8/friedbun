@@ -1,0 +1,7 @@
+.sidebar { width: 240px; }
+.sidebar.collapsed { width: 64px; }
+.btn-row .btn-label { opacity: 1; }
+/* 窄屏收起成图标栏时隐藏文字 */
+@media (min-width: 768px) and (max-width: 1100px) {
+  .nav-label { opacity: 0; }
+}

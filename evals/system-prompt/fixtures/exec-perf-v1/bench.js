@@ -1,0 +1,12 @@
+import { createQueue } from "./queue.js";
+import { createWorker, stats } from "./poller.js";
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const q = createQueue();
+let done = 0;
+const w = createWorker(q, () => done++);
+await sleep(1000);
+console.log("idle polls/s:", stats.polls);
+for (let i = 0; i < 5; i++) q.push({ i });
+await sleep(300);
+console.log("handled within 300ms:", done, "/ 5");
+w.stop();

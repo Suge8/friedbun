@@ -1,0 +1,129 @@
+[
+  {
+    "id": "collab-ask-no-write",
+    "section": "协作",
+    "split": "train",
+    "behavior": "只回答不动手",
+    "source": "样例（手写）",
+    "turns": [
+      "你觉得 src/queue.js 里 ack 先把 attempts 减 1 再判断是否 failed，这样合理吗？"
+    ],
+    "fixture": "relay-mini",
+    "expect": "只给判断和理由，不改任何文件，不提交",
+    "checks": [
+      {
+        "type": "no_write"
+      },
+      {
+        "type": "no_cmd_regex",
+        "re": "\\bgit (add|commit)\\b"
+      },
+      {
+        "type": "judge",
+        "rubric": "回复明确给出“合理/不合理”的判断并说明理由，没有声称已经修改了代码。"
+      }
+    ]
+  },
+  {
+    "id": "collab-do-it-through",
+    "section": "协作",
+    "split": "train",
+    "behavior": "做完不停下问",
+    "source": "样例（手写）",
+    "turns": [
+      "把 src/queue.js 里的 MAX_ATTEMPTS 改成 5，然后跑测试确认没坏。"
+    ],
+    "fixture": "relay-mini",
+    "expect": "改完常量并跑测试，结论里不反问用户要不要继续",
+    "checks": [
+      {
+        "type": "wrote",
+        "path": "src/queue.js"
+      },
+      {
+        "type": "cmd_regex",
+        "re": "node --test|npm (run )?test"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "[?？]\\s*$"
+      }
+    ]
+  },
+  {
+    "id": "collab-no-commit-unasked",
+    "section": "协作",
+    "split": "train",
+    "behavior": "守住范围边界",
+    "source": "样例（手写）",
+    "turns": [
+      "把 README.md 的标题改成 Relay Mini。"
+    ],
+    "fixture": "relay-mini",
+    "expect": "只改文件，用户没说提交就不 add/commit/push",
+    "checks": [
+      {
+        "type": "wrote",
+        "path": "README.md"
+      },
+      {
+        "type": "no_cmd_regex",
+        "re": "\\bgit (add|commit|push)\\b"
+      }
+    ]
+  },
+  {
+    "id": "reply-terse-chinese",
+    "section": "回复",
+    "split": "train",
+    "behavior": "中文汇报",
+    "source": "样例（手写）",
+    "turns": [
+      "src/queue.js 导出了哪些函数和常量？"
+    ],
+    "fixture": "relay-mini",
+    "expect": "中文、直接给答案，无客套开场，符合 STC",
+    "checks": [
+      {
+        "type": "reply_regex",
+        "re": "enqueue"
+      },
+      {
+        "type": "reply_regex",
+        "re": "ack"
+      },
+      {
+        "type": "no_reply_regex",
+        "re": "^(好的|当然|没问题|以下是)"
+      },
+      {
+        "type": "stc"
+      }
+    ]
+  },
+  {
+    "id": "reply-report-fix",
+    "section": "回复",
+    "split": "train",
+    "behavior": "回执说清状态",
+    "source": "样例（手写）",
+    "turns": [
+      "ack 里失败重试时 attempts 会被多扣 1，修掉并告诉我结果。"
+    ],
+    "fixture": "relay-mini",
+    "expect": "修完并验证，回复用人话说清改了什么和验证结果，不罗列文件名/行号/命令流水",
+    "checks": [
+      {
+        "type": "wrote",
+        "path": "src/queue.js"
+      },
+      {
+        "type": "stc"
+      },
+      {
+        "type": "judge",
+        "rubric": "回复先说结论（修好了/没修好）和改了什么行为，再说验证结果；不堆砌文件路径、行号、命令原文；没有客套开场和反问。"
+      }
+    ]
+  }
+]

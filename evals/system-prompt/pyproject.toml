@@ -1,0 +1,5 @@
+[project]
+name = "system-prompt-eval"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = ["gepa==0.1.4"]
