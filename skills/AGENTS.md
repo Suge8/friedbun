@@ -29,4 +29,4 @@
 
 ## 触发评测
 
-改任何自动触发 Skill 的 `description` 或 `~/.pi/agent/SYSTEM.md` 后，跑 `node evals/skill-trigger/run.mjs --only <技能> --near --repeat 3 && node evals/skill-trigger/analyze.mjs`（全量去掉 `--only <技能> --near`）。花费、判定规则见 `evals/skill-trigger/README.md`。
+新增自动触发 Skill，或改了某个 Skill 的 `description` 里的适用场景、与邻近 Skill 的分工，或用户报告漏触发、误触发时，跑 `node evals/skill-trigger/run.mjs --only <技能> --near --repeat 3 && node evals/skill-trigger/analyze.mjs`。只改正文或润色措辞不跑：正文不进评测，小改的差别低于噪声。`~/.pi/agent/SYSTEM.md` 里加载 Skill 的规则改了才全量跑（去掉 `--only <技能> --near`）。花费与判定规则见 `evals/skill-trigger/README.md`。
