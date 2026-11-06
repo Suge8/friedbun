@@ -3,7 +3,7 @@
 	"language": "zh",
 
 	// 功能开关，默认全开；要关哪个就写 false，比如 "features": { "header": false }。
-	// 可选：header（启动横幅）/ statusbar（输入框边框状态）/ tools（工具行渲染）/ presets（预设切换）
+	// 可选：header（启动横幅）/ statusbar（输入框边框状态）/ tools（工具行渲染）
 	// / stats（/tokens 统计）/ claudeSub（Claude 订阅适配：归因与令牌换发 401 自愈）
 	// / claudeFiles（发给 Claude 的图片走 Files API，每张只上传一次，不再每轮随历史重传）
 	// / openaiNative（下方 openai 请求层）/ review（/fire-review）/ master（/fire-master）
@@ -51,19 +51,6 @@
 				"use": "CI、部署、长测试等待"
 			}
 		}
-	},
-
-	// 预设：一键切换模型原子+工具+附加指令的组合，按 key 或 /preset 名字切。
-	// 字段都可选：model（原子）/ tools / instructions / key；没写 key 只能 /preset。
-	"presets": {
-		"sonnet": {
-			"model": "magpie/claude/claude-sonnet-5-5/high",
-			"key": "alt+1"
-		},
-		"opus": { "model": "magpie/claude/claude-opus-5-5/high", "key": "alt+2" },
-		"astra": { "model": "magpie/codex/gpt-6-astra/medium", "key": "alt+4" },
-		"sol": { "model": "magpie/codex/gpt-6.1-sol/medium", "key": "alt+5" },
-		"ds": { "model": "magpie/deepseek/deepseek-flash/high", "key": "alt+6" }
 	},
 
 	// /fire-review 对抗性审查：几个审查模型并行挑毛病，全部说过才算过；
