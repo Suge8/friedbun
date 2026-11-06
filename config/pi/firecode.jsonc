@@ -6,7 +6,7 @@
 	// 可选：header（启动横幅）/ statusbar（输入框边框状态）/ tools（工具行渲染）/ presets（预设切换）
 	// / stats（/tokens 统计）/ claudeSub（Claude 订阅适配：归因与令牌换发 401 自愈）
 	// / claudeFiles（发给 Claude 的图片走 Files API，每张只上传一次，不再每轮随历史重传）
-	// / openaiNative（下方 openai 请求层）/ review（/fire-review）/ master（/fire-master）/ watcher（/fire-watch）
+	// / openaiNative（下方 openai 请求层）/ review（/fire-review）/ master（/fire-master）
 
 	// 快捷键：加速档默认 ctrl+shift+s，要换就写 "keys": { "fast": "..." }（启动时绑定，改完需重启 pi）。
 	// 改会话名用宿主的 app.session.rename 键位（默认 ctrl+r，在 keybindings.json 改），输入框里直接按。
@@ -80,13 +80,5 @@
 		"advisorAfterFailures": 2,
 		"timeoutMinutes": 60,
 		"tools": ["read", "grep", "find", "ls", "bash"]
-	},
-
-	// /fire-watch 观察员：每个回合结束后用便宜模型评估增量，盯跑偏/过度工程/漏收口；
-	// 模型支持内置供应商与 models.json；扩展运行时注册的供应商在独立观察会话里不可见。
-	"watcher": {
-		"enabled": false,
-		"model": ["gpt-6.1-terra/medium", "claude-haiku-5-5/medium"],
-		"context": "minimal"
 	}
 }
