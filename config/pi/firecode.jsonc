@@ -17,14 +17,19 @@
 		}
 	},
 
+	// 后台小模型：子代理进展行、全部压缩摘要（主会话与子代理）、闲置压缩共用这条链；窗口放不下的候选自动跳过，整条链失败时回到 pi 默认压缩。
+	// idleCompaction：闲置超过 1 小时缓存后，下一次请求从预先算好的摘要开始，不再整段重写 15 万以上的上下文。删掉整节三项都关。
+	"background": {
+		"model": ["gpt-6-luna/low", "claude-haiku-5-5/low"],
+		"idleCompaction": true
+	},
+
 	// 凡是指定模型的位置都写模型原子 "<模型>/<强度>"（强度取最后一段：off minimal low medium high xhigh max）；
 	// 供应商可省略："claude-opus-5-5/high" 会匹配 magpie/claude/claude-opus-5-5 或 anthropic/claude-opus-5-5。
 	// 写成数组就是有序候选链：前面的优先，最终报错或额度用完时同一回合换下一个并让出错的模型冷却，下一次派活再从第一个选。
 	// /fire-master 角色表：角色名自定；每个角色写 model（原子或数组）+ use 适用场景。Master 只按 use 选角色，
 	// 质量要求明显不同时临时调强度；一个候选都没登录的角色不会出现在角色表里。
 	"master": {
-		// 在跑子代理的进展行：小模型按新输出写一句“在做什么”，满 30 秒出第一句、之后有新输出最多每 2 分钟一次；false 关闭。
-		"progress": ["gpt-6-luna/low", "claude-haiku-5-5/low"],
 		"roles": {
 			"工程师": {
 				"model": ["claude-opus-5-5/medium", "gpt-6-astra/medium"],
