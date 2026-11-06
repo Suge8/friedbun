@@ -62,5 +62,5 @@ AGENTS.md 是地图：命令入口、代码看不出的约束、"遇到某种情
 ## Skill
 
 - description 每轮常驻上下文，按「指针」写；模型需要自己发现时才开放自动触发。
-- 只靠手动命令或其他 skill 明确指向的，加 `disable-model-invocation: true`，它就不进自动列表；登记到 skill 库 `AGENTS.md` 的手动表。
+- 只靠手动命令或其他 skill 明确指向的，加 `disable-model-invocation: true`，它就不进自动列表。
 - 正文超过 500 行就按情形拆出参考文件，引用只走一层。
