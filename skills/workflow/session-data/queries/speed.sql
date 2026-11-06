@@ -1,4 +1,9 @@
 -- 速度总览：指挥官等待、各角色运行、审查结局、首次编辑、子代理时间分解
+-- 口径：按会话文件名日期筛选；p50/p90 取排序后第 floor(n*p) 项（0 起）。
+-- 指挥官等待=不带工具调用的助手回复到下一次事件，用户消息终止等待。
+-- 运行与审查耗时取事件正文的本次运行，缺失时只计结局次数（events 对 timed）。
+-- 首次编辑=子会话首条任务到第一次 edit/write，没有编辑的不计。
+-- 子代理时间 模型生成=requests.gen_ms 合计，并发工具分别计时，合计可能超过墙钟。
 WITH f AS (SELECT id, sub FROM sessions WHERE date >= $since AND ($until = '' OR date <= $until)),
 gaps AS (
  SELECT file_id, kind, ts, LAG(kind) OVER w AS pk, LAG(ts) OVER w AS pt FROM marks WINDOW w AS (PARTITION BY file_id ORDER BY pos)),

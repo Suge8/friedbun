@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * 本机 pi 会话与 magpie 用量的派生 SQLite：每次查询前增量同步，再跑 SQL 或命名查询。
- * 用法见 `bun sd.ts help`；表与字段见同目录 SKILL.md。
+ * 用法见 `bun sd.ts help`；列含义与口径是 SCHEMA 里的行内注释（SQLite 连注释存进 sqlite_master），改表结构要加 SCHEMA_VERSION 触发重建。
  *
  * 业务规则：
  * - 数据库只是派生缓存，只读来源、不回写；删掉或 `rebuild` 即可重建。
@@ -16,29 +16,61 @@ import { closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, 
 import { homedir } from "node:os";
 import { basename, dirname, join } from "node:path";
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 const CHUNK = 32 * 1024 * 1024;
 const QUERIES = join(import.meta.dir, "queries");
 const SCHEMA = `
-CREATE TABLE sessions(
- id INTEGER PRIMARY KEY, file TEXT UNIQUE, session TEXT, sub INT, project TEXT, date TEXT, cwd TEXT, name TEXT,
- started INT, off INT DEFAULT 0, prev INT, first_user INT, first_edit INT);
+CREATE TABLE sessions( -- 每个 jsonl 一行：主会话与 subagents/ 下的子会话
+ id INTEGER PRIMARY KEY, file TEXT UNIQUE,
+ session TEXT, -- 首行 id，用它对 magpie 的 session；文件名里的 uuid 过半不等于它，别用
+ sub INT, -- 1=子代理
+ project TEXT,
+ date TEXT, -- 文件名前 10 个字符；speed 系查询按它筛选，其余按事件时间
+ cwd TEXT, name TEXT, started INT,
+ off INT DEFAULT 0, -- 已读字节偏移；文件只追加，变小就整文件重读
+ prev INT, -- 增量同步的断点状态：上一条用户消息或工具结果的时刻
+ first_user INT, -- 子会话首条任务时刻
+ first_edit INT -- 子会话第一次 edit/write 调用时刻；没有编辑为空
+);
 CREATE INDEX sessions_session ON sessions(session);
-CREATE TABLE requests(
- id INTEGER PRIMARY KEY, response_id TEXT UNIQUE, session TEXT, file_id INT, pos INT, ts INT, src TEXT,
- provider TEXT, model TEXT, served TEXT, account TEXT, effort TEXT, agent TEXT,
+CREATE TABLE requests( -- 一次上游请求一行。pi 助手消息与 magpie 行按 responseId 合并，token 只存一份
+ id INTEGER PRIMARY KEY, response_id TEXT UNIQUE, session TEXT,
+ file_id INT, -- 空=没有会话文件的调用（评测、一次性脚本，约占 magpie 行的 70%）
+ pos INT,
+ ts INT, -- 结束时刻，epoch 毫秒 UTC
+ src TEXT, -- 'magpie'=对上了，token 与 served/account/ttft_ms/cache_write_1h/status 以 magpie 为准；'pi'=没对上，用 pi 记录的用量，这些列为空
+ provider TEXT,
+ model TEXT, -- pi 侧名字
+ served TEXT, -- 上游实际模型
+ account TEXT, effort TEXT, agent TEXT,
  in_tok INT, out_tok INT, cache_read INT, cache_write INT, cache_write_1h INT, reasoning INT,
- ttft_ms INT, ms INT, status INT, cost REAL, stop TEXT, gen_ms INT,
+ ttft_ms INT, ms INT, status INT,
+ cost REAL, -- pi 的估算
+ stop TEXT,
+ gen_ms INT, -- 上一条用户消息或工具结果到本回复的间隔；并发工具分别计时，合计可能超过墙钟时间
  ctx INT GENERATED ALWAYS AS (coalesce(in_tok,0)+coalesce(cache_read,0)+coalesce(cache_write,0)) VIRTUAL);
 CREATE INDEX requests_session ON requests(session, ts);
 CREATE INDEX requests_ts ON requests(ts);
 CREATE INDEX requests_file ON requests(file_id);
-CREATE TABLE tools(file_id INT, call_id TEXT, name TEXT, ts INT, done_ts INT, chars INT, ms REAL, err INT, path TEXT, kind TEXT, nested INT);
+CREATE TABLE tools( -- 工具调用
+ file_id INT, call_id TEXT, name TEXT, ts INT, done_ts INT,
+ chars INT, -- 结果文本字符数
+ ms REAL, err INT,
+ path TEXT, -- 只记 read/edit/write
+ kind TEXT, -- 按命令文本归类 test/wait/build/other，供子代理时间分解
+ nested INT -- 1=codemode 内嵌套的调用（技能读次数只数 read 工具，含嵌套，不含 cat）
+);
 CREATE INDEX tools_call ON tools(file_id, call_id);
-CREATE TABLE compactions(file_id INT, ts INT, tokens_before INT, in_tok INT, out_tok INT, cache_read INT, cache_write INT, reasoning INT, cost REAL);
-CREATE TABLE marks(file_id INT, pos INT, ts INT, kind TEXT);
-CREATE TABLE worker_events(file_id INT, pos INT, ts INT, name TEXT, outcome TEXT, rounds INT, run_s INT);
-CREATE TABLE roles(file_id INT, pos INT, name TEXT, role TEXT, start INT);
+CREATE TABLE compactions( -- 压缩条目；用量与花费是压缩调用自己的（pi 记录，magpie 不记压缩调用）
+ file_id INT, ts INT, tokens_before INT, in_tok INT, out_tok INT, cache_read INT, cache_write INT, reasoning INT, cost REAL);
+CREATE TABLE marks( -- 指挥官侧回合标记，kind: user / end（不带工具调用的助手回复）/ event（子代理事件）
+ file_id INT, pos INT, ts INT, kind TEXT);
+CREATE TABLE worker_events( -- 指挥官收到的子代理返回与审查事件
+ file_id INT, pos INT, ts INT, name TEXT, outcome TEXT, rounds INT,
+ run_s INT -- 事件正文里的本次运行秒数；缺失为空
+);
+CREATE TABLE roles( -- 子代理名到角色的映射；角色未知记 '?'（在 speed 查询里）
+ file_id INT, pos INT, name TEXT, role TEXT, start INT);
 CREATE TABLE meta(key TEXT PRIMARY KEY, value);
 `;
 const PER_FILE_TABLES = ["requests", "tools", "compactions", "marks", "worker_events", "roles"];
@@ -116,7 +148,7 @@ function listFiles() {
  return out;
 }
 
-// ---- 从会话条目里抽取的规则（speed 系口径见 SKILL.md）----
+// ---- 从会话条目里抽取的规则 ----
 
 function toolKind(call: Obj) {
  const s = String(call.arguments?.command ?? call.arguments?.code ?? "");

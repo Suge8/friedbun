@@ -1,4 +1,5 @@
 -- 各模型输出 token/秒
+-- 口径：主会话与子会话都算，按会话文件名日期筛选；只取输出≥300 token、耗时 1–600 秒的回复，含首 token 等待。
 WITH x AS (
  SELECT coalesce(q.model, '?') AS model, q.out_tok * 1000.0 / q.gen_ms AS rate
  FROM requests q JOIN sessions s ON s.id = q.file_id
