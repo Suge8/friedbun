@@ -24,7 +24,7 @@ import prompt
 
 HERE = Path(__file__).resolve().parent
 SYSTEM_MD = HERE.parent.parent / "config" / "pi" / "SYSTEM.md"
-DEFAULT_MODEL = "codex/gpt-6.1-terra"
+DEFAULT_MODEL = "claude/claude-sonnet-5-5"
 JUDGE_MODEL = "claude/claude-haiku-5-5"
 REQUIRED = {"id", "section", "split", "behavior", "source", "turns", "fixture", "expect", "checks"}
 OPTIONAL = {"judge_files"}
@@ -366,7 +366,7 @@ def main() -> None:
         p.add_argument("--files", help="只加载 cases/ 下这些文件（不带 .json），逗号分隔")
         p.add_argument("--split", help="只跑这些 split，逗号分隔（train,val,test）；optimize 固定 train 训练 + val 验证")
         p.add_argument("--system", default=str(SYSTEM_MD), help="基线 SYSTEM.md")
-        p.add_argument("--model", default=DEFAULT_MODEL, help="任务模型；验收可用 claude/claude-opus-5-5")
+        p.add_argument("--model", default=DEFAULT_MODEL, help="任务模型；验收加跑 claude/claude-opus-5-5")
         p.add_argument("--judge-model", default=JUDGE_MODEL)
         p.add_argument("--thinking", default="medium")
         p.add_argument("--conc", type=int, default=6, help="并发会话数")

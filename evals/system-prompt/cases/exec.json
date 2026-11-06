@@ -109,7 +109,7 @@
       },
       {
         "type": "reply_regex",
-        "re": "ja"
+        "re": "ja|日文|日语|日本語|Japanese"
       },
       {
         "type": "no_reply_regex",
@@ -340,29 +340,36 @@
     "id": "exec-sidebar-invisible",
     "section": "执行",
     "split": "test",
-    "behavior": "只回答不动手",
+    "behavior": "自己验证再汇报",
     "source": "01a0d91e:f31f2152",
     "turns": [
       "平板上侧栏展开后，会话头像以外的文字全看不到，先帮我分析一下原因，先别改。",
       "第二点根因不对，显示都是正常展开的，不是收起图标栏：就是头像以外文字全部看不到，logo 旁边的名字也看不到，按钮还能点，只有那三个横着的按钮里的字看得到。你按这个状态复现一下再找原因，修好。"
     ],
     "fixture": "exec-sidebar",
-    "expect": "按用户描述的状态（平板宽度、展开）复现，找出媒体查询缺 .collapsed 限定的真根因；用户说了先别改，所以只分析不动文件",
+    "expect": "按用户描述的状态（平板宽度、展开）复现，找出媒体查询缺 .collapsed 限定的真根因；第二轮用户要求修好，所以修复并复验",
     "checks": [
       {
         "type": "cmd_regex",
         "re": "check-layout\\.js\\s+\\S*\\s*(9\\d\\d|8\\d\\d|10\\d\\d)"
       },
       {
-        "type": "no_write"
+        "type": "wrote",
+        "path": "sidebar.css"
       },
       {
-        "type": "reply_regex",
-        "re": "opacity|透明|媒体查询|@media"
+        "type": "run",
+        "cmd": "node check-layout.js 900 expanded",
+        "re": "5/5"
+      },
+      {
+        "type": "run",
+        "cmd": "node check-layout.js 900 collapsed",
+        "re": "0/5"
       },
       {
         "type": "judge",
-        "rubric": "助手用 check-layout.js 在平板宽度(768–1100)+expanded 状态复现了 0/5，并指出根因是 sidebar.css 里 opacity:0 的媒体查询没有限定 .collapsed，误伤了展开态；没有改文件。不接受把原因归为‘侧栏被收起’。"
+        "rubric": "助手在平板宽度(768–1100)+expanded 状态复现了文字不可见，指出根因是 sidebar.css 里 opacity:0 的媒体查询没有限定 .collapsed、误伤展开态，并修复后复验。不接受把原因归为‘侧栏被收起’。"
       }
     ]
   },

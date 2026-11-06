@@ -3,7 +3,7 @@
 会话拼法与真实一致：--system-prompt 就是 SYSTEM.md 的位置，pi 仍会追加 AGENTS.md（project_context）、
 技能清单与 cwd（已核实 pi 源码 core/system-prompt.js 与 json 事件里的 system 消息）。
 不同于真实会话的只有：不加载扩展/MCP（没有 firecode 的 addendum 与 codemode），默认只给 read/bash/edit/write。
-隔离：--no-session 不落会话；整个 pi 进程在 macOS 沙箱里，只能写本次运行的临时目录（fixture 与 TMPDIR）。
+隔离：--no-session 不落会话；整个 pi 进程在 macOS 沙箱里，只能写本次运行的临时目录（fixture 与 TMPDIR）和 /tmp。
 """
 import functools
 import hashlib
@@ -26,12 +26,12 @@ FILE_CAP = 200_000
 TOOL_TAIL = 1500
 RUN_TIMEOUT_S = 30
 RUN_TAIL = 2000
-TRACE_VERSION = 3
+TRACE_VERSION = 4
 # 评测沙箱的固定限制，统一注入每个 fixture 的 AGENTS.md（pi 照常把它放进 project_context）；用例作者不必再写
 ENV_NOTE = """
 ## 评测沙箱环境
 
-本会话在只写本项目目录的沙箱里运行：不能写项目目录之外的路径（包括 /tmp 和家目录），没有浏览器和图形界面，没有进程表（ps 等进程查看命令会被拒绝）。
+本会话在只写本项目目录的沙箱里运行：只能写项目目录和 /tmp，不能写家目录等其他路径，没有浏览器和图形界面，没有进程表（ps 等进程查看命令会被拒绝）。
 """
 TIMEOUT_S = 300
 TOOLS = "read,bash,edit,write"
@@ -41,7 +41,7 @@ GIT = ["git", "-c", "user.name=eval", "-c", "user.email=eval@example.com"]
 SANDBOX = """(version 1)
 (allow default)
 (deny file-write*)
-(allow file-write* (subpath "/dev") (subpath "{root}")
+(allow file-write* (subpath "/dev") (subpath "{root}") (subpath "/private/tmp")
   (regex #"^{agent}/[^/]+\\.lock(/.*)?$")
   (regex #"^{agent}/(trust|crashes|models-store)\\.json(\\..*)?$"))
 """

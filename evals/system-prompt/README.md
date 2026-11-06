@@ -19,7 +19,7 @@ uv run sp.py compare --cand <best.json|SYSTEM.md> --n 3   # 基线 vs 候选，�
 uv run sp.py demo                                 # 合成 trace 演示各判定项判对错
 ```
 
-通用参数：`--cases`（目录或文件）、`--ids`、`--model`（默认 `codex/gpt-6.1-terra`，验收可用 `claude/claude-opus-5-5`）、`--judge-model`（默认 haiku）、`--reflection-model`、`--conc`。模型 id 必须在 `~/.pi/agent/models.json` 里。
+通用参数：`--cases`（目录或文件）、`--ids`、`--model`（默认 `claude/claude-sonnet-5-5`，验收加跑 `claude/claude-opus-5-5`）、`--judge-model`（默认 haiku）、`--reflection-model`、`--conc`。模型 id 必须在 `~/.pi/agent/models.json` 里。
 
 ## 每次评测怎么跑
 
@@ -29,3 +29,9 @@ uv run sp.py demo                                 # 合成 trace 演示各判定
 4. 用例 schema、判定项和高风险项见 `cases/README.md`。
 
 新增 fixture：在 `fixtures/` 下建目录，用例里写目录名。
+
+## 已知结论（2026-11）
+
+- GEPA 自动改写（分节与整份）在 test 上没有可复现的提升，Opus 上分节拼合版反而退步，未采用。
+- 原版在 Sonnet/Opus 上 val+test 约 0.92–0.93；Terra 上反复失分的几类（只修点名那处、先别改仍动手、做完一项就停）在 Sonnet/Opus 上已接近满分。按这些弱点手改规则后，Sonnet/Opus 上没有可测出的差别，也未采用。
+- 用例在强模型上偏易，要靠它判断规则改动，先按新的真实纠正补更难的用例。Sonnet val+test 每条 3 次约 $15，Opus test 每条 1 次约 $5。
