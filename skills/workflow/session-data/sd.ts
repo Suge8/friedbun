@@ -116,7 +116,7 @@ function listFiles() {
  return out;
 }
 
-// ---- 从会话条目里抽取的规则（口径与 FireCode evals/usage/speed.ts 一致）----
+// ---- 从会话条目里抽取的规则（speed 系口径见 SKILL.md）----
 
 function toolKind(call: Obj) {
  const s = String(call.arguments?.command ?? call.arguments?.code ?? "");

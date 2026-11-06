@@ -1,4 +1,4 @@
--- 各模型输出 token/秒（同 speed.ts 口径）
+-- 各模型输出 token/秒
 WITH x AS (
  SELECT coalesce(q.model, '?') AS model, q.out_tok * 1000.0 / q.gen_ms AS rate
  FROM requests q JOIN sessions s ON s.id = q.file_id

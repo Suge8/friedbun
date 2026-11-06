@@ -1,4 +1,4 @@
--- 速度总览：指挥官等待、各角色运行、审查结局、首次编辑、子代理时间分解（同 speed.ts 口径）
+-- 速度总览：指挥官等待、各角色运行、审查结局、首次编辑、子代理时间分解
 WITH f AS (SELECT id, sub FROM sessions WHERE date >= $since AND ($until = '' OR date <= $until)),
 gaps AS (
  SELECT file_id, kind, ts, LAG(kind) OVER w AS pk, LAG(ts) OVER w AS pt FROM marks WINDOW w AS (PARTITION BY file_id ORDER BY pos)),

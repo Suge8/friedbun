@@ -29,7 +29,7 @@ bun ~/.agents/skills/workflow/session-data/sd.ts list      # 命名查询、说�
 | 各角色子代理的结果与运行时长 | `worker_runs` |
 | 每个技能 SKILL.md 近 30 天被读次数 | `skill_reads` |
 | 工具结果大小分布 | `tool_result_sizes` |
-| 指挥官等待、运行与审查耗时、首次编辑、子代理时间分解；各模型 token/秒；角色 start 与审查次数分布 | `speed`、`speed_models`、`speed_roles`（口径同 FireCode `evals/usage/speed.ts`） |
+| 指挥官等待、运行与审查耗时、首次编辑、子代理时间分解；各模型 token/秒；角色 start 与审查次数分布 | `speed`、`speed_models`、`speed_roles` |
 | 按实际服务模型的请求数与 token | `usage_by_model` |
 
 闲置与缓存类查询用 `-p model=%claude%` 限定模型；有 `ttft_ms`、`cache_write_1h` 的只有 magpie 日志覆盖的请求，要完整数据加 `--since 2026-10-30`。
@@ -44,6 +44,10 @@ bun ~/.agents/skills/workflow/session-data/sd.ts list      # 命名查询、说�
 - 技能读次数只数 `read` 工具（含 codemode 内嵌套），不含 `cat`。
 - 不读 `~/.config/magpie/claude-accounts` 下订阅桥自己的记录。
 
-## 与 speed.ts 的差别
+## speed 系口径
 
-`speed` 系查询在同一份数据上与 speed.ts 逐项一致，只有一处不同：speed.ts 用 readline 切行，会在 JSON 字符串里的 U+2028 处断行，把那一行当坏行丢掉；这里只按换行符切，个别模型的回复数因此多 1–2 条（2026-10-15 起的数据里是 claude-haiku-5-5 多 1 条）。
+- 按会话文件名日期筛选；百分位取排序后第 floor(n×p) 项。
+- 指挥官等待：从不带工具调用的助手回复到下一次事件，用户消息终止等待；子代理运行与审查耗时取事件正文里的本次运行，缺失时只计结局次数。
+- 生成耗时：用户消息或工具结果到下一条助手回复；并发工具分别计时，合计可能超过墙钟时间。
+- 输出速度：主会话与子会话都算，只取输出至少 300 token、耗时 1–600 秒的回复，含首 token 等待。
+- 首次编辑：子会话首条任务到第一次 edit/write 调用；没有编辑的会话不计。
