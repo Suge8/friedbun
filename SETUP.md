@@ -44,7 +44,7 @@ pi install npm:pi-firecode
 - skills 软链让本仓库的克隆成为 skills 的真身：装完不删，更新用 `git pull`。
 - `~/.zshrc` 末尾追加一行 `source ~/.config/friedbun/workstation.zsh`（须在 `compinit` 之后），并删掉其中已有的 autosuggestions、syntax-highlighting、starship、fastfetch 加载语句，避免重复加载。
 
-**完成标准**：表中每个落点都已就位；`uilane --help` 打印用法；`herdr config check` 输出 `ok`；`ls ~/.agents/skills/workflow/research/SKILL.md` 存在；新开的 zsh 里 `echo $PI_CACHE_RETENTION` 输出 `long`；`bbu --login open about:blank` 与 `bbu --login close` 裸退出码都为 0。
+**完成标准**：表中每个落点都已就位；`uilane --help` 打印用法；`herdr config check` 输出 `ok`；`ls ~/.agents/skills/search/research/SKILL.md` 存在；新开的 zsh 里 `echo $PI_CACHE_RETENTION` 输出 `long`；`bbu --login open about:blank` 与 `bbu --login close` 裸退出码都为 0。
 
 ## 步骤 3：可选 key
 
