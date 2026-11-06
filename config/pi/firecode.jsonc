@@ -41,18 +41,18 @@
 			},
 			"初级工程师": {
 				"model": ["claude-sonnet-5-5/medium", "gpt-6.1-terra/medium"],
-				"use": "需求与验收明确的普通实现、局部修复与按既有模式的多文件改动；遇到产品或架构取舍上报"
+				"use": "需求与验收明确的普通实现、局部修复与按既有模式的多文件改动；遇到产品或架构取舍上报；也做状态机审计（只读，每个怀疑在真实代码上复现）"
 			},
 			"杂务工": {
 				"model": ["gpt-6.1-terra/medium", "claude-haiku-5-5/medium"],
 				"use": "规格明确、可由测试或类型检查验证的机械活：改名、模式迁移、样板、脚本与跑命令；确定性脚本优先，先做一个样本"
 			},
 			"调研员": {
-				"model": ["gpt-6.1-terra/high", "claude-sonnet-5-5/medium"],
+				"model": ["gpt-6.1-terra/high", "claude-haiku-5-5/high"],
 				"use": "只读调研：联网搜索、查文档与版本、读长日志与轨迹、定位代码、整理数据；返回带出处的结论"
 			},
 			"哨兵": {
-				"model": ["gpt-6-luna/high", "claude-haiku-5-5/medium"],
+				"model": ["gpt-6-luna/medium", "claude-haiku-5-5/medium"],
 				"use": "CI、部署、长测试等待"
 			}
 		}
