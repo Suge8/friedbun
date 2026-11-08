@@ -21,6 +21,8 @@ uv run sp.py demo                                 # 合成 trace 演示各判定
 
 通用参数：`--cases`（目录或文件）、`--ids`、`--model`（默认 `claude/claude-sonnet-5-5`，验收加跑 `claude/claude-opus-5-5`）、`--judge-model`（默认 haiku）、`--reflection-model`、`--conc`。模型 id 必须在 `~/.pi/agent/models.json` 里。
 
+比较工作区里已改动的 SYSTEM.md 时，先用 `git show HEAD:config/pi/SYSTEM.md` 将改动前版本存到临时文件，再显式传 `--system <临时文件> --cand <工作区 SYSTEM.md>`；`--system` 默认读工作区，省略会变成新版与自身比较。已提交的候选应选对应改动前的提交作基线。
+
 ## 每次评测怎么跑
 
 1. 候选节按 `[节名]` 拼回完整 SYSTEM.md，经 `pi --system-prompt` 送入（与真实会话同位置）；pi 仍追加 fixture 里的 `AGENTS.md`、`skills/` 技能清单和 cwd。不加载扩展，所以没有 firecode addendum 与 codemode。
