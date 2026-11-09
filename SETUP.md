@@ -52,9 +52,9 @@ pi install npm:pi-firecode
 读者在对话里给了哪个 key 就配哪个，没给的跳过，对应功能不可用，其余照常。
 
 - TinyFish：web-search 的 `--quick` 和 `fetch` 走它。写进 `~/.config/friedbun/env.zsh` 并 `chmod 600`：`export TINYFISH_API_KEY='<tinyfish-key>'`。文件只用 Bash/Zsh 通用的 `export` 赋值；Pi Shell 工具会加载它，不依赖图形应用继承终端环境。
-- DeepSeek：uilane（网页与桌面的跨屏机械流程快车道）的决策器，存进钥匙串，并按 `uilane --help` 的「Configuration」写 `~/.config/uilane.json` 的 `deciders` 列表：`security add-generic-password -a uilane -s uilane-flash -w '<deepseek-key>'`。有 OpenAI 等其他兼容 chat/completions 的密钥时，同一列表里再加一项，主选先问、慢了并行问下一个。
+- OpenAI：uilane（网页与桌面的跨屏机械流程快车道）的决策者是 OpenAI Decisions API，唯一一个，无需写配置文件；密钥存进钥匙串即开启：`security add-generic-password -a uilane -s uilane-gpt -w '<openai-key>'`。
 
-**完成标准**：配好决策者后 `uilane status` 输出以 `on:` 开头。
+**完成标准**：存好密钥后 `uilane status` 输出以 `on:` 开头。
 
 ## 步骤 4：请读者做三件事
 
@@ -82,4 +82,4 @@ pi install npm:pi-firecode
 
 ## 卸载
 
-按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、`~/.config/uilane.json` 与钥匙串里的 `uilane-flash`、`uilane-gpt` 等 uilane 的密钥；browse 先运行 `browse uninstall` 再卸 npm 包。
+按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、`~/.config/uilane.json` 与钥匙串里 uilane 的密钥 `uilane-gpt`（早期版本还有 `uilane-flash`）；browse 先运行 `browse uninstall` 再卸 npm 包。
