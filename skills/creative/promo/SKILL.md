@@ -6,7 +6,7 @@ description: 制作项目宣传物料：Hero/OG/社媒图、商店截图、READM
 
 # Promo（物料工坊）
 
-编排者，自己不生成：Logo 和 AI 图归 gpt-image，文案归 writing-for-humans，截图归 better-browser-use 与系统工具。本 skill 管：项目是什么 → 缺什么物料 → 按对的工具链生产 → 成套落盘。
+编排者，自己不生成：Logo 和 AI 图归 gpt-image，文案归 writing-for-humans，截图归 browser 与系统工具。本 skill 管：项目是什么 → 缺什么物料 → 按对的工具链生产 → 成套落盘。
 
 ## Step 0 — 建立语境
 
