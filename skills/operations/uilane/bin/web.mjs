@@ -46,7 +46,7 @@ function parse(snapshot) {
   return els.map(({ i, ...e }) => e);
 }
 
-export function web({ login, mine, as }) {
+export function web({ login, mine, as, url }) {
   const lane = [...(login ? ['--login'] : []), ...(mine ? ['--mine'] : []), ...(as ? ['--as', as] : [])];
   const bbu = (args) => {
     const r = spawnSync('bbu', [...lane, ...args, '--json'], { encoding: 'utf8' });
@@ -71,6 +71,15 @@ export function web({ login, mine, as }) {
   const unsettledBy = (cur, prev) =>
     (cur.screen === before && 'no change after the action') || (cur.screen !== prev?.screen && 'still changing') || (cur.pending && 'requests pending');
   return {
+    prepare() {
+      if (url) {
+        const r = bbu(['open', url]);
+        if (!r.success) throw new Error(`cannot open ${url}: ${r.error}`);
+        return;
+      }
+      const here = bbu(['get', 'url']).result?.url ?? '';
+      if (!here || here === 'about:blank') throw new Error('the session is on a blank page: pass --url <start address>');
+    },
     async observe() {
       const t0 = performance.now();
       let prev;
