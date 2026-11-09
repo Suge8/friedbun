@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // uilane：把一段已规划好的机械界面操作交给快速决策器一步步做完，结束时把轨迹、停止原因和当前界面交回调用方。
 import { parseArgs } from 'node:util';
-import { CONFIG, decider, deciders, readConfig, writeConfig } from './decide.mjs';
+import { decider, key, readConfig, writeConfig } from './decide.mjs';
 import { parseExpect, runLane } from './lane.mjs';
 import { web } from './web.mjs';
 import { app } from './app.mjs';
@@ -30,22 +30,17 @@ step is one of them, the run hands back to you with it listed in "blocked".
   --max-steps N   decisions before handing back (default 30)
 
 Output: one JSON object. status "done" (exit 0) only when the run finished and every --expect
-was met; otherwise status "handoff" (exit 1) with reason: handoff, decision_timeout, decider_error, action_failed, no_effect (the same action left the screen
-unchanged), unexpected_screen, step_limit, expect_failed, observe_failed. steps is the
-trajectory; screen (+ url, or the bcu state id) is where to take over. Usage and configuration errors exit 2.
+was met; otherwise status "handoff" (exit 1) with reason: handoff, low_confidence (the decider was not
+sure enough of its pick), decision_timeout, decider_error, too_many_options (more than 255 candidates),
+action_failed, no_effect (the same action left the screen unchanged), unexpected_screen, step_limit,
+expect_failed, observe_failed. steps is the trajectory (each with the decider's confidence); screen
+(+ url, or the bcu state id) is where to take over. Usage and configuration errors exit 2.
 
-Configuration: ~/.config/uilane.json plus keychain keys. uilane is on whenever a decider is
-configured; "uilane off" turns it off ({"off": true}), "uilane on" back on, "uilane status" shows it.
-  {"hedge": 3, "deciders": [
-     {"model": "gpt-5.4-mini", "url": "https://api.openai.com/v1", "key": "uilane-gpt", "effort": "none"},
-     {"model": "deepseek-flash", "url": "https://api.deepseek.com", "key": "uilane-flash",
-      "extra": {"thinking": {"type": "disabled"}}}]}
-Each decider is any OpenAI-compatible POST <url>/chat/completions. key is the keychain service name
-(security add-generic-password -a uilane -s <key> -w <api key>); a decider without a key is skipped.
-effort (optional) is sent as reasoning_effort; extra (optional) is merged into the request body.
-The first decider is asked first. When it has not answered after hedge seconds (default 3), the next
-is asked about the same screen in parallel, and so on; the first valid answer wins. With no answer
-after 10 s the run hands back.
+Configuration: the only decider is the OpenAI Decisions API (gpt-6-luna), with its key in the keychain:
+  security add-generic-password -a uilane -s uilane-gpt -w <openai api key>
+uilane is on whenever that key exists; "uilane off" writes {"off": true} to ~/.config/uilane.json,
+"uilane on" removes the flag, "uilane status" shows it. There is nothing else to configure. One decider, no
+retry and no fallback: an error, no answer within 10 s, or a pick below 0.15 confidence hands back to you.
 `;
 
 const DEFAULT_MAX_STEPS = 30;
@@ -60,6 +55,7 @@ if (!argv.length || argv.some((a) => a === '-h' || a === '--help')) {
   process.stdout.write(HELP);
   process.exit(0);
 }
+const apiKey = key();
 if (['status', 'on', 'off'].includes(argv[0])) {
   if (argv.length > 1) die(`${argv[0]} takes no arguments`);
   const config = readConfig();
@@ -68,12 +64,11 @@ if (['status', 'on', 'off'].includes(argv[0])) {
     else delete config.off;
     writeConfig(config);
   }
-  const on = deciders(config).map((d) => d.model);
-  process.stdout.write(config.off ? 'off\n' : on.length ? `on: ${on.join(', then ')}\n` : `off: no decider configured (see uilane --help)\n`);
+  process.stdout.write(config.off ? 'off\n' : apiKey ? 'on: OpenAI Decisions (gpt-6-luna)\n' : 'off: no key uilane-gpt in the keychain (see uilane --help)\n');
   process.exit(0);
 }
-const entrants = deciders();
-if (!entrants.length) die(readConfig().off ? 'off (uilane on to turn it back on)' : `off: no decider configured in ${CONFIG} and the keychain (see uilane --help)`);
+if (!apiKey) die(`off: no key uilane-gpt in the keychain (see uilane --help)`);
+if (readConfig().off) die('off (uilane on to turn it back on)');
 
 let opts;
 try {
@@ -117,7 +112,7 @@ try {
   if (kind === 'app' && expect.some((e) => e.kind === 'url')) throw new Error('url: expectations are for uilane web');
   surface = kind === 'web' ? web({ stealth: v.stealth, as: v.as, url: v.url }) : app({ app: v.app, pid: v.pid && Number(v.pid) });
   surface.prepare?.();
-  decide = decider(entrants, (readConfig().hedge ?? 3) * 1000);
+  decide = decider(apiKey);
 } catch (e) {
   die(e.message);
 }

@@ -15,6 +15,8 @@ const handoffDesc = (blocked) =>
 // 决策器与回报里的屏幕上限；结果核对用全文。
 const SCREEN_CHARS = 12000;
 const q = JSON.stringify;
+// 决策器对所选项的把握度低于它就交回（reobserve 不动界面，不受限）。
+const MIN_CONFIDENCE = 0.15;
 
 function candidates(elements, data) {
   const options = [];
@@ -75,9 +77,10 @@ export async function runLane({ surface, decide, goal, data, expect, maxSteps })
     const opt = options.find((o) => o.id === d.choice);
     // 同一动作做完界面一字未变，决策器又选它：再按也不会变，交回而不是耗到步数上限。
     if (last?.desc === opt.desc && last.screen === obs.screen) { stop = { reason: 'no_effect', detail: opt.desc }; break; }
+    if (opt.id !== 'reobserve' && d.confidence < MIN_CONFIDENCE) { stop = { reason: 'low_confidence', detail: `picked ${q(opt.desc)} with confidence ${d.confidence}` }; break; }
     const step = {
       action: opt.id in reserved ? opt.id : opt.desc,
-      by: d.by,
+      confidence: d.confidence,
       ...(obs.unsettled && { unsettled: obs.unsettled }),
       ms: { observe: observeMs, decide: decideMs },
     };
