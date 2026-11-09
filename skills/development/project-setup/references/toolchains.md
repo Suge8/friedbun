@@ -17,7 +17,7 @@
 | Tauri 2 | `@wdio/tauri-service`（embedded driver 模式，应用内装 `tauri-plugin-wdio-webdriver`） | 官方推荐；macOS 靠内嵌 WebDriver 支持（tauri-driver 不支持 macOS）；`browser.tauri.execute()` 直达后端、IPC mock、前后端日志捕获。纯前端逻辑用它的 browser mode（Vite dev server + 拦截 invoke），不用起 Tauri 二进制 |
 | Electron | Playwright `_electron.launch()` | 官方仍标实验性；能拿 BrowserWindow、主进程 console、IPC |
 | 浏览器扩展 | Playwright `launchPersistentContext` + `--load-extension`，`channel: 'chromium'` | 该 channel 的新 headless 模式可加载扩展（默认的 headless shell 不行）；能进 service worker / popup / content script 三个上下文 |
-| Web 前端 | better-browser-use（日常操作与调试）；Playwright（回归套件） | better-browser-use 默认车道 console/network 完整，`--login` 带登录态，单次验证优先用它 |
+| Web 前端 | better-browser-use（日常操作与调试）；Playwright（回归套件） | better-browser-use 默认车道 console/network 完整，`--mine <账户>` 用用户本人的登录态，单次验证优先用它 |
 | CLI 工具 | 直接调用 + 输出断言；golden file diff；bats | 固定 seed/时间，输出与 known-good 快照 diff |
 | API / 服务 | curl/httpie + 响应断言；supertest/内存启动 | 断言状态码 + 响应体关键字段，不是"200 就算过" |
 | npm/crate 库 | 单测 + `pack` 后在临时目录真实 install 冒烟 | 防止 exports/files 字段错误这种测试测不到的发布事故 |
