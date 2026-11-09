@@ -78,4 +78,4 @@ pi install npm:pi-firecode
 
 ## 卸载
 
-按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、`~/.config/uilane.json` 与钥匙串里的 `uilane-gpt`、`uilane-flash`（旧版 uilane 留下的）；browse 先运行 `browse uninstall` 再卸 npm 包。
+按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、旧版 uilane 留下的 `~/.config/uilane.json`；browse 先运行 `browse uninstall` 再卸 npm 包。

@@ -43,12 +43,11 @@ bbu --mine <账户> execute --file ./flow.js
 bbu --mine <账户> close
 ```
 
-- 账户是用户日常浏览器里的账户（profile），名字是用户在 browse 扩展选项页起的，大小写不论；`bbu --mine` 不带参数列出在线与离线的账户。
-- 账户离线（没开窗口）时 bbu 开它一个窗口，约 4 秒连上，前台立即还给原应用；之后每条比直接用 browse 多约 0.3 秒。报「did not connect to browse」是那个账户没装或没配对 browse 扩展，请用户装上。
+- 账户是用户日常浏览器里的账户（profile），名字是用户在 browse 扩展选项页起的，大小写不论。离线（没开窗口）时 bbu 开它一个窗口，约 4 秒连上，前台立即还给原应用。报「did not connect to browse」是那个账户没装或没配对 browse 扩展，请用户装上。
 - bbu 按检出（加 `--as`）建好会话并代入：不用 `--session`/`-s`、`session new|use|delete|reset`、`execute --rm`，带了 bbu 直接报错（退出码 2），不要照 `browse skill` 自己管会话。`close` 删除会话、关掉它开的标签。
 - `close` 等上一条命令返回后再发，不与 `execute` 同行并发：打断运行中的 execute 会让该账户的浏览器卡死。遇到 `The browser isn't responding (asleep or frozen?)` 或 `Page.enable`/`Target.setAutoAttach did not answer within 10000 ms` 就停下告诉用户，不重试：重试会留下一堆 about:blank 标签，恢复要 `browse relay restart`，那会打断别的 agent，由用户定。
 - 要用户亲手做的一步（验证码、通行密钥、付款确认）用 `browse skill` 里的 `handoff()`，不用控制台。
-- 页面里有别的扩展插入的 frame（如 1Password 的内联菜单）时，浏览器会重挂调试器，当次 `execute` 报 page closed。请用户把那个扩展的「网站访问权限」改成「点击时」（1Password 已改），再重跑那一步。
+- 页面里有别的扩展插入的 frame（如 1Password 的内联菜单）时，浏览器会重挂调试器，当次 `execute` 报 page closed。请用户把那个扩展的「网站访问权限」改成「点击时」，再重跑那一步。
 - `snapshot()` 看不到跨源 iframe 里的内容（Apple 登录表单在 idmsa.apple.com 的 iframe 里），用 `page.frameLocator(...)` 定位。
 
 ## 登录
@@ -100,7 +99,7 @@ op item get "<标题>" --vault Agent --otp                       # 条目里存�
 
 - `errors` 文本模式只打印 `✗`、不带内容，用 `errors --json`；其中 `line`/`column` 从 0 计，行号以 `text` 里的堆栈为准。
 - 同一会话内的命令串行发，不并行。
-- 按屏推进：`snapshot -i` 看一屏，把这一屏能确定的动作用 `batch --bail`（`--mine` 下写进同一段 `execute`）一次发完，再看下一屏；脚本里读结果加 `--json`。跨页流程做完核对结果本身（商品名、金额、确认文字），不是页面标题：标题开始前就满足，残留的旧状态也会让漏掉的步骤看起来像完成。很长的机械流程会把页面内容堆满上下文时，派子 agent 做，只收它的结果与核对证据。
+- 按屏推进：`snapshot -i` 看一屏，把这一屏能确定的动作用 `batch --bail` 一次发完，再看下一屏；脚本里读结果加 `--json`。
 - `find` 命中多个元素时不报错，直接操作第一个；同名元素多（每行都有「编辑」）时先 `snapshot -i` 再用 ref。`find` 的动作只有 click、fill、check、hover、text。
 - `snapshot -c` 会丢掉非交互的文字（确认码、正文），读文字用 `snapshot` 或 `get text`。
 
