@@ -29,26 +29,26 @@ a() { (cd "$T/a" && "$BBU" "$@" 2>&1); }
 b() { (cd "$T/b" && "$BBU" "$@" 2>&1); }
 
 # 1 共享浏览器：两个检出从冷启动并发打开，各占一个可见窗口，登录实时共享
-a --login open "$U/a" >/dev/null & first=$!
-b --login open "$U/b" >/dev/null
+a --stealth open "$U/a" >/dev/null & first=$!
+b --stealth open "$U/b" >/dev/null
 wait "$first"
-check "login: A 停在自己的页面" "$(a --login get url)" "$U/a"
-check "login: B 停在自己的页面" "$(b --login get url)" "$U/b"
-check "login: A 窗口可见" "$(a --login eval 'document.visibilityState')" visible
-check "login: B 窗口可见" "$(b --login eval 'document.visibilityState')" visible
-a --login eval 'document.cookie="who=a; max-age=600"' >/dev/null
-check "login: A 的登录 B 立即可见" "$(b --login eval 'document.cookie')" "who=a"
+check "stealth: A 停在自己的页面" "$(a --stealth get url)" "$U/a"
+check "stealth: B 停在自己的页面" "$(b --stealth get url)" "$U/b"
+check "stealth: A 窗口可见" "$(a --stealth eval 'document.visibilityState')" visible
+check "stealth: B 窗口可见" "$(b --stealth eval 'document.visibilityState')" visible
+a --stealth eval 'document.cookie="who=a; max-age=600"' >/dev/null
+check "stealth: A 的登录 B 立即可见" "$(b --stealth eval 'document.cookie')" "who=a"
 
 # 2 关闭只关自己的窗口
-a --login close >/dev/null
-check "login: A 关闭后 B 不受影响" "$(b --login get url)" "$U/b"
+a --stealth close >/dev/null
+check "stealth: A 关闭后 B 不受影响" "$(b --stealth get url)" "$U/b"
 
 # 3 共享浏览器整体关闭后，下一条命令自动恢复，登录态留在 profile 里
 agent-browser close --all >/dev/null 2>&1
 until [ "$(agent-browser session list)" = "No active sessions" ]; do sleep 0.1; done
-b --login open "$U/b" >/dev/null
-check "login: 重启后自动恢复到可见窗口" "$(b --login eval 'document.visibilityState')" visible
-check "login: 重启后登录态仍在" "$(b --login eval 'document.cookie')" "who=a"
+b --stealth open "$U/b" >/dev/null
+check "stealth: 重启后自动恢复到可见窗口" "$(b --stealth eval 'document.visibilityState')" visible
+check "stealth: 重启后登录态仍在" "$(b --stealth eval 'document.cookie')" "who=a"
 
 # 4 开发车道：按检出隔离，--as 再隔离，登录态跨重启保留
 a open "$U/dev" >/dev/null

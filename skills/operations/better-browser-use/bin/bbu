@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # bbu = agent-browser + 登录态。bbu 独占 session 命名，浏览器的启动、复用、回收归 agent-browser。
 # 默认车道：每个检出一个 Chrome for Testing，登录态按检出存取（agent-browser restore）。
-# --login：全机一个 CloakBrowser + agent 专用 profile，每个检出一个窗口，登录实时共享。
+# --stealth：全机一个 CloakBrowser + agent 专用 profile，每个检出一个窗口，登录实时共享。
 # --mine <账户>：换成 browse（经扩展操作用户自己的浏览器），每个检出每个账户一个 browse 会话。
-# --as <名字>：同一检出里再开一个会话；默认车道是另一份登录态，--login 是另一个窗口，--mine 是另一个会话。
+# --as <名字>：同一检出里再开一个会话；默认车道是另一份登录态，--stealth 是另一个窗口，--mine 是另一个会话。
 # import <域名>...：从用户日常浏览器复制这些站点的 cookie 进共享浏览器。
 # 文中 #编号 均为 vercel-labs/agent-browser 的 issue 或 PR，修复或合并后删掉对应绕行。
 set -euo pipefail
@@ -20,7 +20,7 @@ die() { echo "bbu: $*" >&2; exit 2; }
 lane=dev as="" account=""
 while :; do
   case "${1:-}" in
-    --login) lane=login; shift ;;
+    --stealth) lane=stealth; shift ;;
     --mine) lane=mine account="${2:-}"; shift $(($# > 1 ? 2 : 1)) ;;
     --as) as="${2:?bbu: --as needs a name}"; shift 2 ;;
     *) break ;;
@@ -49,7 +49,7 @@ shared() {
   seed="$profile/bbu-fingerprint-seed"
   [ -s "$seed" ] || { (umask 077; mkdir -p "$profile"); echo $(( (RANDOM << 15 | RANDOM) % 90000 + 10000 )) > "$seed"; }
   # CloakBrowser 的内核版本跟它自己的发布走，agent-browser 落后于稳定版的警告和升级建议对它不适用。
-  AGENT_BROWSER_SESSION=bbu-login AGENT_BROWSER_EXECUTABLE_PATH="$bin" AGENT_BROWSER_PROFILE="$profile" \
+  AGENT_BROWSER_SESSION=bbu-stealth AGENT_BROWSER_EXECUTABLE_PATH="$bin" AGENT_BROWSER_PROFILE="$profile" \
     AGENT_BROWSER_ARGS="--fingerprint=$(< "$seed")" AGENT_BROWSER_NO_VERSION_CHECK=1 ab_ "$@"
 }
 # 浏览器没在跑时 get cdp-url 只报错、不启动它（0.41 起），先用 get url 启动。
@@ -75,9 +75,9 @@ if [ "$lane" = dev ]; then
   ab() { agent-browser "$@"; }
   ab_ session info >/dev/null
 else
-  # 每条 --login 命令都经过共享会话：它启动或复用浏览器，并把 agent 的活动计入共享浏览器的闲置计时。
+  # 每条 --stealth 命令都经过共享会话：它启动或复用浏览器，并把 agent 的活动计入共享浏览器的闲置计时。
   url="$(shared_url)"
-  AGENT_BROWSER_SESSION="$(ab_ session id --scope worktree --prefix bbu-login)${as:+_$as}"
+  AGENT_BROWSER_SESSION="$(ab_ session id --scope worktree --prefix bbu-stealth)${as:+_$as}"
   export AGENT_BROWSER_SESSION
   ab() { agent-browser --cdp "$url" --pin-tab "$@"; }
   # 每个会话占一个独立窗口：同一窗口里的后台标签被浏览器降速，动画与截图停摆。

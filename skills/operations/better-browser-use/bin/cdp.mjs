@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // bbu 直接做的事，agent-browser 与 browse 没有对应命令：
-//   window <ws> [targetId]   --login：targetId 的标签还在就打印它，否则在默认存储空间后台开一个新窗口、
+//   window <ws> [targetId]   --stealth：targetId 的标签还在就打印它，否则在默认存储空间后台开一个新窗口、
 //                            打印其 targetId（为什么要新窗口见 bbu）。
 //   mine <账户> <会话前缀> [身份]
 //                            --mine：确保默认浏览器的这个账户连着 browse（离线就开它的一个窗口、
