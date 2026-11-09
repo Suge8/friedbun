@@ -39,22 +39,18 @@ pi install npm:pi-firecode
 | `config/zsh/workstation.zsh` | `~/.config/friedbun/workstation.zsh` | 整体写入 |
 | `<repo>/skills` | `~/.agents/skills` | 软链 `ln -s`，已有目录先改名 `.bak` |
 | `~/.agents/skills/operations/better-browser-use/bin/bbu` | `~/.local/bin/bbu` | 软链 `ln -sf`，先 `mkdir -p ~/.local/bin`（workstation.zsh 把它加进 PATH） |
-| `~/.agents/skills/operations/uilane/bin/uilane` | `~/.local/bin/uilane` | 软链 `ln -sf` |
 
 - 合并：并入我们的键，冲突以我们的值为准，读者自己的键原样保留；`deviceId`、`lastChangelogVersion` 是作者本机状态，不并入。
 - skills 软链让本仓库的克隆成为 skills 的真身：装完不删，更新用 `git pull`。
 - `~/.zshrc` 末尾追加一行 `source ~/.config/friedbun/workstation.zsh`（须在 `compinit` 之后），并删掉其中已有的 autosuggestions、syntax-highlighting、starship、fastfetch 加载语句，避免重复加载。
 
-**完成标准**：表中每个落点都已就位；`uilane --help` 打印用法；`herdr config check` 输出 `ok`；`ls ~/.agents/skills/search/research/SKILL.md` 存在；新开的 zsh 里 `echo $PI_CACHE_RETENTION` 输出 `long`；`bbu --login open about:blank` 与 `bbu --login close` 裸退出码都为 0。
+**完成标准**：表中每个落点都已就位；`herdr config check` 输出 `ok`；`ls ~/.agents/skills/search/research/SKILL.md` 存在；新开的 zsh 里 `echo $PI_CACHE_RETENTION` 输出 `long`；`bbu --stealth open about:blank` 与 `bbu --stealth close` 裸退出码都为 0。
 
 ## 步骤 3：可选 key
 
 读者在对话里给了哪个 key 就配哪个，没给的跳过，对应功能不可用，其余照常。
 
 - TinyFish：web-search 的 `--quick` 和 `fetch` 走它。写进 `~/.config/friedbun/env.zsh` 并 `chmod 600`：`export TINYFISH_API_KEY='<tinyfish-key>'`。文件只用 Bash/Zsh 通用的 `export` 赋值；Pi Shell 工具会加载它，不依赖图形应用继承终端环境。
-- OpenAI：uilane（网页与桌面的跨屏机械流程快车道）的决策者是 OpenAI Decisions API，唯一一个，无需写配置文件；密钥存进钥匙串即开启：`security add-generic-password -a uilane -s uilane-gpt -w '<openai-key>'`。
-
-**完成标准**：存好密钥后 `uilane status` 输出以 `on:` 开头。
 
 ## 步骤 4：请读者做三件事
 
@@ -78,8 +74,8 @@ pi install npm:pi-firecode
 
 ## 步骤 6：交付
 
-告诉读者：已装好什么；SYSTEM.md 已换成作者的版本，会改变 agent 的语气和习惯，不想要就用 `~/.pi/agent/SYSTEM.md.bak` 还原（没有 `.bak` 就删掉该文件）；跳过的可选 key 以后照步骤 3 补上即可；uilane 出问题时 `uilane off` 一键关闭；Pi 配置变更后重启 Pi；之后修改私有环境文件，后续 Shell 工具调用会直接读取，已有终端仍需重新加载环境。
+告诉读者：已装好什么；SYSTEM.md 已换成作者的版本，会改变 agent 的语气和习惯，不想要就用 `~/.pi/agent/SYSTEM.md.bak` 还原（没有 `.bak` 就删掉该文件）；跳过的可选 key 以后照步骤 3 补上即可；Pi 配置变更后重启 Pi；之后修改私有环境文件，后续 Shell 工具调用会直接读取，已有终端仍需重新加载环境。
 
 ## 卸载
 
-按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、`~/.config/uilane.json` 与钥匙串里 uilane 的密钥 `uilane-gpt`（早期版本还有 `uilane-flash`）；browse 先运行 `browse uninstall` 再卸 npm 包。
+按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、`~/.config/uilane.json` 与钥匙串里的 `uilane-gpt`、`uilane-flash`（旧版 uilane 留下的）；browse 先运行 `browse uninstall` 再卸 npm 包。
