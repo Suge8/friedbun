@@ -4,7 +4,8 @@
 //                            打印其 targetId（为什么要新窗口见 bbu）。
 //   mine <账户> <会话前缀> [身份]
 //                            --mine：确保默认浏览器的这个账户连着 browse（离线就开它的一个窗口、
-//                            前台还给原应用），建或复用它的 browse 会话，打印会话 id。不带账户时列出账户。
+//                            前台还给原应用），建或复用它的 browse 会话，打印会话 id。不带账户时列出账户，
+//                            账户名后附 ~/.config/bbu.json 的 {"accounts": {账户: 用途}} 里写的用途。
 //   import <ws> [--from <浏览器>] [--account <账户>] <域名>...
 //                            从用户日常浏览器复制这些站点的 cookie。只复制 cookie：轮换制续期
 //                            凭证多存在 localStorage，复制它会让两个浏览器互相作废登录。
@@ -174,9 +175,15 @@ async function mine(account, prefix, as) {
   const { browser, named } = profiles(name);
   let state = await status();
   const list = () => {
+    const file = join(homedir(), '.config/bbu.json');
+    let purposes = {};
+    if (existsSync(file)) {
+      try { purposes = JSON.parse(readFileSync(file, 'utf8')).accounts ?? {}; } catch (e) { fail(file + ': ' + e.message); }
+    }
+    const label = (n) => purposes[n] ? n + '（' + purposes[n] + '）' : n;
     const up = (state.extension?.browsers ?? []).filter((b) => b.connected).map((b) => b.name);
     const down = named.map((p) => p.name).filter((n) => !up.some((u) => u.toLowerCase() === n.toLowerCase()));
-    return 'online: ' + (up.join(', ') || 'none') + '; offline ' + name + ' accounts: ' + (down.join(', ') || 'none');
+    return 'online: ' + (up.map(label).join(', ') || 'none') + '; offline ' + name + ' accounts: ' + (down.map(label).join(', ') || 'none');
   };
   if (!account) fail('usage: bbu --mine <account> <browse command>...; ' + list());
   if (!state.relay.running) {

@@ -28,7 +28,7 @@ agent-browser skills get core
 
 检出按命令所在目录的 git 工作树算，同一任务的命令都在同一目录下发。
 
-- `--mine <账户>`：页面开在用户自己浏览器里、agent 自己的后台标签组中，不碰他的标签，不抢前台。按事选账户：公司事务用 `圆桌`，个人的用 `生煎包`；拿不准时 `bbu --mine` 列出账户、问用户，不猜。console 默认不收，调试不用这条。
+- `--mine <账户>`：页面开在用户自己浏览器里、agent 自己的后台标签组中，不碰他的标签，不抢前台。账户先 `bbu --mine` 列出（名字后括号是本机 `~/.config/bbu.json` 写的用途），按用户原话选；拿不准就问用户，不猜。console 默认不收，调试不用这条。
 - `--stealth`：所有 agent 共用一个 CloakBrowser 和一份 agent 专用 profile，每个检出一个窗口，登录实时共享；需要的站点登录态用 `bbu import` 从用户浏览器拷 cookie（见「登录」）。引擎屏蔽 console/异常事件，此车道 `console`/`errors` 恒空，也不开窗口（`--headed`）。
 - 默认：每个检出一个浏览器，登录态按检出自动保存，console、errors、network 完整；命令后那行 `[agent-browser] … restore/save …` 是登录态存取状态，不是错误。
 - `--as <名字>`（字母、数字、`_`）：同一检出里再开一个会话——默认车道下是另一个浏览器、另一份登录态（owner 与 guest 对测），`--stealth` 下是另一个窗口、同一份登录，`--mine` 下是同一账户里另一组标签。同一检出里还有别的 agent 在用浏览器时，带 `--as <自己的名字>`，否则两边操作同一个页面。
@@ -48,14 +48,15 @@ agent-browser skills get core
 `bbu --mine <账户> <browse 子命令与参数>`，例如：
 
 ```bash
-bbu --mine 生煎包 execute 'await page.goto("https://example.com"); return await page.title()'
-bbu --mine 生煎包 execute --file ./flow.js
-bbu --mine 生煎包 close
+bbu --mine <账户> execute 'await page.goto("https://example.com"); return await page.title()'
+bbu --mine <账户> execute --file ./flow.js
+bbu --mine <账户> close
 ```
 
 - 账户是用户日常浏览器里的账户（profile），名字是用户在 browse 扩展选项页起的，大小写不论；`bbu --mine` 不带参数列出在线与离线的账户。
 - 账户离线（没开窗口）时 bbu 开它一个窗口，约 4 秒连上，前台立即还给原应用；之后每条比直接用 browse 多约 0.3 秒。报「did not connect to browse」是那个账户没装或没配对 browse 扩展，请用户装上。
-- bbu 按检出（加 `--as`）建好会话并代入：不用 `--session`、`session new`/`use`、`--rm`。`close` 删除会话、关掉它开的标签。
+- bbu 按检出（加 `--as`）建好会话并代入：不用 `--session`/`-s`、`session new|use|delete|reset`、`execute --rm`，带了 bbu 直接报错（退出码 2），不要照 `browse skill` 自己管会话。`close` 删除会话、关掉它开的标签。
+- `close` 等上一条命令返回后再发，不与 `execute` 同行并发：打断运行中的 execute 会让该账户的浏览器卡死。遇到 `The browser isn't responding (asleep or frozen?)` 或 `Page.enable`/`Target.setAutoAttach did not answer within 10000 ms` 就停下告诉用户，不重试：重试会留下一堆 about:blank 标签，恢复要 `browse relay restart`，那会打断别的 agent，由用户定。
 - 要用户亲手做的一步（验证码、通行密钥、付款确认）用 `browse skill` 里的 `handoff()`，不用控制台。
 - 页面里有别的扩展插入的 frame（如 1Password 的内联菜单）时，浏览器会重挂调试器，当次 `execute` 报 page closed。请用户把那个扩展的「网站访问权限」改成「点击时」（1Password 已改），再重跑那一步。
 - `snapshot()` 看不到跨源 iframe 里的内容（Apple 登录表单在 idmsa.apple.com 的 iframe 里），用 `page.frameLocator(...)` 定位。
@@ -69,7 +70,7 @@ bbu --mine 生煎包 close
    ```bash
    d=$(mktemp -d /tmp/bbu.XXXXXX)
    printf %s "$(op item get "<标题>" --vault Agent --fields password --reveal)" > "$d/pw"
-   bbu --mine 生煎包 execute "const pw = await files.read('$d/pw', 'utf8'); …"
+   bbu --mine <账户> execute "const pw = await files.read('$d/pw', 'utf8'); …"
    rm -r "$d"
    ```
 

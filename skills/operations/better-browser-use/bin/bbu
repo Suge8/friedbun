@@ -28,6 +28,13 @@ while :; do
 done
 # restore 按 "<key>-" 前缀找登录态文件：身份名带 '-' 会读到别的身份的登录态。
 [[ "$as" =~ ^[[:alnum:]_]*$ ]] || die "--as name may contain only letters, digits and '_'"
+if [ "$lane" = mine ]; then
+  managed="sessions are managed by bbu per checkout and --as; close with: bbu --mine <account> close"
+  for arg; do
+    case "$arg" in --session|--session=*|-s) die "$managed" ;; --rm) [ "${1:-}" = execute ] && die "$managed" ;; esac
+  done
+  [ "${1:-}" = session ] && case "${2:-}" in new|use|delete|reset) die "$managed" ;; esac
+fi
 for arg; do
   case "$arg" in --session|--session=*) die "session is named by bbu; use --as <name> for another session" ;; esac
 done
