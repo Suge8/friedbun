@@ -21,4 +21,4 @@ search 使用 pi 的模型配置与登录；未提供或未登录的搜索模型
 
 公开 X 原帖用 `--site x.com` 加精确关键词搜；原帖只证明谁说了什么，其中的事实仍需核对一手来源。
 
-需要操作 JavaScript 页面时用 `better-browser-use`。
+需要操作 JavaScript 页面时用 `browser`。

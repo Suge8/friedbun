@@ -31,7 +31,7 @@ export const CASES = {
   "Vite 的最新版本号现在是多少"],
  neg: [
   ["系统梳理一下各家 LLM 网关的限流策略差异，要一手资料，写清结论", "research"],
-  ["打开这个网页，登录后点开设置，帮我截个图", "better-browser-use"],
+  ["打开这个网页，登录后点开设置，帮我截个图", "browser"],
   ["给我画一张赛博朋克风的海报", "gpt-image"],
   ["把我手机里记的那条灵感找出来", "cuepad"]]},
 "hillclimb": {

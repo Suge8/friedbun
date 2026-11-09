@@ -25,7 +25,7 @@ export const CASES = {
       "做个页面让我在手机上验收，对比两种重试策略的延迟曲线",
     ],
     neg: [
-      ["截一张 localhost:5173 首页的图存到 /tmp/home.png", "better-browser-use"],
+      ["截一张 localhost:5173 首页的图存到 /tmp/home.png", "browser"],
       ["把 docs/design.md 里提到的待办整理成 TODO 清单，写回文件末尾", null],
       ["帮我配个 cron：每天早上 9 点跑一次 scripts/bench.ts", null],
       ["docs/design.md 导出成 PDF，放在 docs/ 下面", null],
@@ -82,7 +82,7 @@ export const CASES = {
     ],
     neg: [
       ["用 Kotlin 写个 Android 端的 SyncEngine，协程加 Flow", null],
-      ["用 bcu 把 Xcode 打开，点一下 Run 看模拟器里的效果", "better-computer-use"],
+      ["用 bcu 把 Xcode 打开，点一下 Run 看模拟器里的效果", "desktop"],
       ["ios 目录加个 README，把构建步骤写成中文", null],
       ["CI 里 Xcode 的 signing 报错了，帮我看下 .github/workflows/ci.yml 怎么配", null],
     ],
@@ -97,7 +97,7 @@ export const CASES = {
     neg: [
       ["看板的任务详情页该长什么样？出三种不同布局让我挑", "prototype"],
       ["写 /jobs 的分页接口，加 limit 和 cursor", null],
-      ["用 bbu 打开 localhost:5173，看看控制台有没有报错", "better-browser-use"],
+      ["用 bbu 打开 localhost:5173，看看控制台有没有报错", "browser"],
       ["把 SyncEngine 里 Task 之后的数据竞争修掉", "write-swift"],
     ],
   },
@@ -115,7 +115,7 @@ export const CASES = {
       ["给 scripts/ 下的 Python 脚本选个命令行参数解析库", null],
     ],
   },
-  "better-browser-use": {
+  "browser": {
     pos: [
       "打开 localhost:5173 看看看板有没有控制台报错",
       "登录我的 GitHub，看 relay 仓库的 Actions 为什么红了",
@@ -123,13 +123,13 @@ export const CASES = {
       "dev server 起着呢，预览一下首页长什么样",
     ],
     neg: [
-      ["打开系统设置，把 DNS 改成 1.1.1.1", "better-computer-use"],
+      ["打开系统设置，把 DNS 改成 1.1.1.1", "desktop"],
       ["Playwright 最新版 API 有什么变化？查一下", "web-search"],
       ["把 https://hono.dev/docs/getting-started/bun 的正文抓下来存成 md", "web-search"],
       ["写一个 e2e 用例覆盖登录流程，用 Playwright", "better-test"],
     ],
   },
-  "better-computer-use": {
+  "desktop": {
     pos: [
       "看一下 Xcode 现在停在哪个报错，点开它",
       "bcu 把 Finder 里下载文件夹最新的 dmg 拖到桌面",
@@ -137,7 +137,7 @@ export const CASES = {
       "在微信里给张三发一句“晚点到”",
     ],
     neg: [
-      ["打开 Chrome 里的 localhost:3000 并截个图", "better-browser-use"],
+      ["打开 Chrome 里的 localhost:3000 并截个图", "browser"],
       ["ssh 登录 nas 把 docker 容器重启一下", "ssh"],
       ["写个 AppleScript 脚本批量重命名 Finder 里的文件", null],
       ["launchd 的 plist 怎么写，让 relay 每小时跑一次？写一个", null],
@@ -167,7 +167,7 @@ export const CASES = {
     neg: [
       ["系统调研一下 Node 里持久化任务队列有哪些方案，以官方文档为准，给结论和来源", "research"],
       ["看一下 src/queue.ts 里重试是怎么实现的", null],
-      ["用浏览器打开 hono.dev 文档，点开侧栏的 Middleware 截个图", "better-browser-use"],
+      ["用浏览器打开 hono.dev 文档，点开侧栏的 Middleware 截个图", "browser"],
       ["解释一下 CAP 定理", null],
     ],
   },

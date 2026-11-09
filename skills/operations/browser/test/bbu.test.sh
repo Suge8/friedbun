@@ -50,7 +50,7 @@ b --stealth open "$U/b" >/dev/null
 check "stealth: 重启后自动恢复到可见窗口" "$(b --stealth eval 'document.visibilityState')" visible
 check "stealth: 重启后登录态仍在" "$(b --stealth eval 'document.cookie')" "who=a"
 
-# 4 开发车道：按检出隔离，--as 再隔离，登录态跨重启保留
+# 4 测试浏览器：按检出隔离，--as 再隔离，登录态跨重启保留
 a open "$U/dev" >/dev/null
 a eval 'document.cookie="dev=a; max-age=600"' >/dev/null
 b open "$U/dev" >/dev/null

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # bbu = agent-browser + 登录态。bbu 独占 session 命名，浏览器的启动、复用、回收归 agent-browser。
-# 默认车道：每个检出一个 Chrome for Testing，登录态按检出存取（agent-browser restore）。
+# 默认（测试浏览器）：每个检出一个 Chrome for Testing，登录态按检出存取（agent-browser restore）。
 # --stealth：全机一个 CloakBrowser + agent 专用 profile，每个检出一个窗口，登录实时共享。
 # --mine <账户>：换成 browse（经扩展操作用户自己的浏览器），每个检出每个账户一个 browse 会话。
-# --as <名字>：同一检出里再开一个会话；默认车道是另一份登录态，--stealth 是另一个窗口，--mine 是另一个会话。
+# --as <名字>：同一检出里再开一个会话；测试浏览器是另一份登录态，--stealth 是另一个窗口，--mine 是另一个会话。
 # import <域名>...：从用户日常浏览器复制这些站点的 cookie 进共享浏览器。
 # 文中 #编号 均为 vercel-labs/agent-browser 的 issue 或 PR，修复或合并后删掉对应绕行。
 set -euo pipefail
@@ -65,12 +65,12 @@ shared_url() { shared get cdp-url 2>/dev/null || { shared get url >/dev/null && 
 if [ "${1:-}" = import ]; then
   url="$(shared_url)"
   exec 9>&-
-  exec node "$DIR/cdp.mjs" import "$url" "${@:2}"
+  exec node "$DIR/helper.mjs" import "$url" "${@:2}"
 fi
 
 if [ "$lane" = mine ]; then
   # 锁内做：同一账户离线时并发的命令只开一个窗口。
-  session="$(node "$DIR/cdp.mjs" mine "$account" "$(ab_ session id --scope worktree --prefix bbu-mine)" "$as" 9>&-)"
+  session="$(node "$DIR/helper.mjs" mine "$account" "$(ab_ session id --scope worktree --prefix bbu-mine)" "$as" 9>&-)"
   exec 9>&-
   [ "${1:-}" = close ] && exec browse session delete --session "$session"
   OPENCODE_BROWSER_SESSION="$session" exec browse "$@"
@@ -100,7 +100,7 @@ else
   if [[ "$info" != *'"browserLaunched":true'* ]] || [ "$BBU_HOME/profile/DevToolsActivePort" -nt "$socket_dir/$AGENT_BROWSER_SESSION.pid" ] ||
     [ -z "$target" ] || [[ "$(ab_ --cdp "$url" --pin-tab --json tab list)" != *"$target"* ]]; then
     [[ "$info" == *'"active":true'* ]] && ab_ close >/dev/null
-    target="$(node "$DIR/cdp.mjs" window "$url" "$target" 9>&-)"
+    target="$(node "$DIR/helper.mjs" window "$url" "$target" 9>&-)"
     (umask 077; mkdir -p "$socket_dir"; echo "{\"targetId\":\"$target\",\"pinned\":true}" > "$binding")
     ab_ --cdp "$url" --pin-tab get url >/dev/null
   fi
