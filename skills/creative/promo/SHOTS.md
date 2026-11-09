@@ -4,7 +4,7 @@
 
 | 项目类型 | 工具 | 要点 |
 |---|---|---|
-| Web | better-browser-use | 设精确视口 + 2x deviceScaleFactor 直出高清；亮/暗两套 |
+| Web | browser | 设精确视口 + 2x deviceScaleFactor 直出高清；亮/暗两套 |
 | 浏览器扩展 | Playwright 自带 Chromium `launchPersistentContext` + `--load-extension`（品牌 Chrome 137+ 已不支持该 flag，见 MOTION.md） | popup/sidepanel 有 URL 可直接开页截图；UI 若由 IndexedDB/Dexie 重建，seed 数据库造真实感会话比驱动真实操作稳 |
 | 桌面 app | 原生 `screencapture -l <窗口ID>` | 先把窗口 set 到目标尺寸再截；带系统圆角阴影版直接用，进 HTML 合成用 `-o` 去阴影版 |
 | CLI / TUI | `freeze --execute "<命令>"` 或 freeze 截取输出 | 直出带窗口 chrome 的精美 SVG/PNG |
@@ -28,7 +28,7 @@ SWIFT
 
 ## HTML 合成管线（从"能看"到"能宣传"的关键一步）
 
-写一个本地临时 HTML：目标平台精确尺寸的画布 + 背景（VISUAL 链 B 的底图，或 CSS 渐变）+ 截图（圆角 + 阴影 + 可选轻微透视）+ 标题文案（writing-for-humans 出，字体色板沿用现有品牌或界面）→ better-browser-use 按画布尺寸整屏截图 → 成图。
+写一个本地临时 HTML：目标平台精确尺寸的画布 + 背景（VISUAL 链 B 的底图，或 CSS 渐变）+ 截图（圆角 + 阴影 + 可选轻微透视）+ 标题文案（writing-for-humans 出，字体色板沿用现有品牌或界面）→ browser 按画布尺寸整屏截图 → 成图。
 
 要点：文案层级最多两级（大标题 + 一行副题）；构图留呼吸感，宁空勿挤。
 

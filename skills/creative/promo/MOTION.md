@@ -6,7 +6,7 @@
 |---|---|---|
 | Web / 浏览器扩展 | Playwright 脚本驱动操作 + `recordVideo` 录制 | 全自动，可重复 |
 | CLI / TUI | **VHS**：写 .tape 脚本直出 GIF/MP4 | 全自动，改脚本重跑即可 |
-| 桌面 app | `screencapture -v -l <CGWindowID> out.mov` 录指定窗口（被遮挡也录、不抢焦点；窗口 ID 获取见 SHOTS.md 桌面块）+ better-computer-use 驱动 | **实验性**：bcu 未实测，首次做好人工搭手准备 |
+| 桌面 app | `screencapture -v -l <CGWindowID> out.mov` 录指定窗口（被遮挡也录、不抢焦点；窗口 ID 获取见 SHOTS.md 桌面块）+ desktop 驱动 | **实验性**：bcu 未实测，首次做好人工搭手准备 |
 
 ## 浏览器扩展录制：先过授权关
 

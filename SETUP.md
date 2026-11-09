@@ -38,7 +38,7 @@ pi install npm:pi-firecode
 | `config/fastfetch/` 两个文件 | `~/.config/fastfetch/` | 整体写入 |
 | `config/zsh/workstation.zsh` | `~/.config/friedbun/workstation.zsh` | 整体写入 |
 | `<repo>/skills` | `~/.agents/skills` | 软链 `ln -s`，已有目录先改名 `.bak` |
-| `~/.agents/skills/operations/better-browser-use/bin/bbu` | `~/.local/bin/bbu` | 软链 `ln -sf`，先 `mkdir -p ~/.local/bin`（workstation.zsh 把它加进 PATH） |
+| `~/.agents/skills/operations/browser/bin/bbu` | `~/.local/bin/bbu` | 软链 `ln -sf`，先 `mkdir -p ~/.local/bin`（workstation.zsh 把它加进 PATH） |
 
 - 合并：并入我们的键，冲突以我们的值为准，读者自己的键原样保留；`deviceId`、`lastChangelogVersion` 是作者本机状态，不并入。
 - skills 软链让本仓库的克隆成为 skills 的真身：装完不删，更新用 `git pull`。
