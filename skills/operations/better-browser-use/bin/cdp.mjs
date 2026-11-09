@@ -1,13 +1,15 @@
 #!/usr/bin/env node
-// bbu 在窗口车道（--login、--mine）直接做的事，agent-browser 没有对应命令：
-//   window <ws> [targetId]   targetId 的标签还在就打印它，否则在默认存储空间后台开一个新窗口、打印其 targetId
-//                            （为什么要新窗口见 bbu）。
-//   approve <pid> <命令>...  运行命令；它连接浏览器 pid 时弹出的「允许远程调试」对话框由 bcu 在后台按下允许。
-//   import <ws> [--from <浏览器>] <域名>...
+// bbu 直接做的事，agent-browser 与 browse 没有对应命令：
+//   window <ws> [targetId]   --login：targetId 的标签还在就打印它，否则在默认存储空间后台开一个新窗口、
+//                            打印其 targetId（为什么要新窗口见 bbu）。
+//   mine <账户> <会话前缀> [身份]
+//                            --mine：确保默认浏览器的这个账户连着 browse（离线就开它的一个窗口、
+//                            前台还给原应用），建或复用它的 browse 会话，打印会话 id。不带账户时列出账户。
+//   import <ws> [--from <浏览器>] [--account <账户>] <域名>...
 //                            从用户日常浏览器复制这些站点的 cookie。只复制 cookie：轮换制续期
 //                            凭证多存在 localStorage，复制它会让两个浏览器互相作废登录。
 import { execFile, execFileSync, spawn } from 'node:child_process';
-import { createDecipheriv, pbkdf2Sync } from 'node:crypto';
+import { createDecipheriv, createHash, pbkdf2Sync } from 'node:crypto';
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -52,74 +54,6 @@ async function window(ws, target) {
   }
 }
 
-// 对话框在连接发起后不到 1 s 出现；这么久还没出现说明连接没走到审批，不再等。
-const PROMPT_TIMEOUT_MS = '10000';
-const bcu = async (args, options) => JSON.parse((await run('bcu', [...args, '--json'], options)).stdout);
-const frontPid = async () => {
-  const { stdout } = await run('lsappinfo', ['info', (await run('lsappinfo', ['front'])).stdout.trim()]);
-  return Number(stdout.match(/pid = (\d+)/)[1]);
-};
-// 浏览器弹对话框前必定激活自己的窗口（Chromium DevToolsConnectionDialog 构造时调 Activate()，外部拦不住）：
-// 订阅应用激活事件，浏览器一激活就把前台还给 argv[1]。
-// 就绪时打印系统双击间隔（秒）。
-const GUARD = `ObjC.import('AppKit');
-function run([browser, front]) {
-  const previous = $.NSRunningApplication.runningApplicationWithProcessIdentifier(Number(front));
-  $.NSWorkspace.sharedWorkspace.notificationCenter.addObserverForNameObjectQueueUsingBlock(
-    $.NSWorkspaceDidActivateApplicationNotification, $(), $.NSOperationQueue.mainQueue, (note) => {
-      if (note.userInfo.objectForKey($.NSWorkspaceApplicationKey).processIdentifier === Number(browser)) previous.activateWithOptions(0);
-    });
-  console.log($.NSEvent.doubleClickInterval);
-  $.NSRunLoop.currentRunLoop.run;
-}`;
-function guard(browser, front) {
-  const child = spawn('osascript', ['-l', 'JavaScript', '-e', GUARD, browser, String(front)], { stdio: ['ignore', 'ignore', 'pipe'] });
-  return new Promise((resolve, reject) => {
-    child.stderr.once('data', (line) => resolve({ interval: Number(line), stop: () => child.kill() }));
-    child.once('exit', () => reject(new Error('front-app guard exited')));
-  });
-}
-
-// Chromium 144 起每个 CDP 连接都要用户在对话框里允许。只按自己这次连接的对话框：调用方持全机锁，
-// 连接前浏览器已有对话框就拒绝，之后出现的只能是这次连接的。按钮按位置认，不按文字（界面语言各异）：
-// macOS 上 Chromium 对话框的按钮从左到右是 [附加按钮] 取消 允许，允许在最后。
-async function approve(pid, command) {
-  const [{ roots }, front] = await Promise.all([bcu(['find-roots', '--pid', pid, '--kind', 'sheet']), frontPid()]);
-  if (roots.length) fail('the browser is showing a dialog; dismiss it and retry');
-  const { interval, stop } = await guard(pid, front);
-  process.on('exit', stop);
-  const child = spawn(command[0], command.slice(1), { stdio: 'inherit' });
-  const exited = new Promise((resolve) => child.on('exit', (code) => resolve({ code: code ?? 1 })));
-  const abort = new AbortController();
-  const prompted = bcu(['wait-for', '--pid', pid, '--role', 'sheet', '--timeout', PROMPT_TIMEOUT_MS], { signal: abort.signal })
-    .then((state) => ({ state }), (error) => ({ error }));
-  const first = await Promise.race([exited, prompted]);
-  if (first.code !== undefined) {
-    abort.abort();
-    return first.code;
-  }
-  try {
-    if (first.error) throw first.error;
-    const shown = Date.now();
-    const { stateId } = first.state;
-    const sheet = (await bcu(['search-ui', '--state', stateId, '--role', 'sheet'])).matches[0].ref;
-    const dialog = await bcu(['expand-ui', '--state', stateId, '--ref', sheet]);
-    const allow = dialog.nodes.filter((node) => node.role === 'button').at(-1).ref;
-    // 对话框显示后一个双击间隔内的按键被当作误触忽略（Chromium 的 InputEventActivationProtector）。
-    await new Promise((resolve) => setTimeout(resolve, Math.max(0, interval * 1000 - (Date.now() - shown))));
-    // 连接一建立命令就会结束，不必等 bcu 确认对话框已关；bcu 先失败才说明没按成。
-    const pressed = run('bcu', ['act-ui', '--headless', '--state', dialog.stateId, JSON.stringify([{ action: 'press', ref: allow }]),
-      '--expect-role', 'sheet', '--expect-gone', '--timeout', '2000'], { signal: abort.signal });
-    const done = await Promise.race([exited, pressed.then(() => exited, (error) => ({ error }))]);
-    if (done.error) throw done.error;
-    abort.abort();
-    return done.code;
-  } catch (error) {
-    child.kill();
-    fail('could not approve remote debugging: ' + (error.stderr || error.message).trim());
-  }
-}
-
 // macOS 上 Chromium 系浏览器的数据目录（~/Library/Application Support 下）与钥匙串里的 cookie 密钥项。
 const BROWSERS = {
   chrome: { bundle: 'com.google.chrome', dir: 'Google/Chrome', key: 'Chrome Safe Storage' },
@@ -141,11 +75,22 @@ function defaultBrowser() {
   return name ?? fail('default browser ' + (bundle ?? 'unknown') + ' is not supported; pass --from <' + SUPPORTED + '>');
 }
 
-function readCookies(name, domains) {
+// 账户即浏览器的 profile：名字是用户在浏览器里看到的，目录在 Local State 的 info_cache 里。
+function profiles(name) {
   const browser = BROWSERS[name] ?? fail('unknown browser ' + name + '; supported: ' + SUPPORTED);
   const root = join(homedir(), 'Library/Application Support', browser.dir);
   if (!existsSync(root)) fail(name + ' has no data at ' + root);
-  const profile = JSON.parse(readFileSync(join(root, 'Local State'), 'utf8')).profile?.last_used ?? 'Default';
+  const { info_cache = {}, last_used = 'Default' } = JSON.parse(readFileSync(join(root, 'Local State'), 'utf8')).profile ?? {};
+  const named = Object.entries(info_cache).map(([dir, info]) => ({ dir, name: info.name }));
+  return { browser, root, named, lastUsed: last_used };
+}
+const findProfile = (named, account) => named.find((p) => p.name.toLowerCase() === account.toLowerCase());
+
+function readCookies(name, account, domains) {
+  const { browser, root, named, lastUsed } = profiles(name);
+  const profile = account
+    ? findProfile(named, account)?.dir ?? fail(name + ' has no account ' + account + '; accounts: ' + named.map((p) => p.name).join(', '))
+    : lastUsed;
   const source = [join(root, profile, 'Network/Cookies'), join(root, profile, 'Cookies')].find(existsSync)
     ?? fail(name + ' profile ' + profile + ' has no cookie store');
   const password = execFileSync('security', ['find-generic-password', '-w', '-s', browser.key], { encoding: 'utf8' }).trim();
@@ -187,24 +132,100 @@ function readCookies(name, domains) {
   });
 }
 
+// open -g 给浏览器开账户窗口时浏览器仍会把自己推到前台（实测，-g 拦不住）：
+// 订阅应用激活事件，bundle 的应用一激活就把前台还给 front 进程。就绪时打印一行。
+const GUARD = `ObjC.import('AppKit');
+function run([bundle, front]) {
+  const previous = $.NSRunningApplication.runningApplicationWithProcessIdentifier(Number(front));
+  $.NSWorkspace.sharedWorkspace.notificationCenter.addObserverForNameObjectQueueUsingBlock(
+    $.NSWorkspaceDidActivateApplicationNotification, $(), $.NSOperationQueue.mainQueue, (note) => {
+      if (note.userInfo.objectForKey($.NSWorkspaceApplicationKey).bundleIdentifier.js.toLowerCase() === bundle) previous.activateWithOptions(0);
+    });
+  console.log('ready');
+  $.NSRunLoop.currentRunLoop.run;
+}`;
+async function guard(bundle) {
+  const { stdout } = await run('lsappinfo', ['info', (await run('lsappinfo', ['front'])).stdout.trim()]);
+  const child = spawn('osascript', ['-l', 'JavaScript', '-e', GUARD, bundle, stdout.match(/pid = (\d+)/)[1]], { stdio: ['ignore', 'ignore', 'pipe'] });
+  process.on('exit', () => child.kill());
+  await new Promise((resolve, reject) => {
+    child.stderr.once('data', resolve);
+    child.once('exit', () => reject(new Error('front-app guard exited')));
+  });
+  return () => child.kill();
+}
+
+// 账户开着窗口时扩展约 4 s 内连上 browse；中继刚启动时扩展要先重连。
+const ONLINE_TIMEOUT_MS = 30000;
+const browse = async (...args) => (await run('browse', args)).stdout;
+const status = async () => JSON.parse(await browse('status', '--json'));
+const online = (state, account) => state.extension?.browsers?.find((b) => b.connected && b.name.toLowerCase() === account.toLowerCase());
+async function waitOnline(account, ms) {
+  for (const end = Date.now() + ms; Date.now() < end; await new Promise((r) => setTimeout(r, 250))) {
+    const state = await status();
+    if (online(state, account)) return state;
+  }
+}
+
+// browse CLI 不能选账户（session new 没有 browser 参数），中继的 /cli/session/new 能；会话 id 只许小写字母、
+// 数字和 '-'，所以账户名取哈希。会话建在哪个账户就一直在那，账户名进 id 才不会把两个账户混进同一会话。
+async function mine(account, prefix, as) {
+  const name = defaultBrowser();
+  const { browser, named } = profiles(name);
+  let state = await status();
+  const list = () => {
+    const up = (state.extension?.browsers ?? []).filter((b) => b.connected).map((b) => b.name);
+    const down = named.map((p) => p.name).filter((n) => !up.some((u) => u.toLowerCase() === n.toLowerCase()));
+    return 'online: ' + (up.join(', ') || 'none') + '; offline ' + name + ' accounts: ' + (down.join(', ') || 'none');
+  };
+  if (!account) fail('usage: bbu --mine <account> <browse command>...; ' + list());
+  if (!state.relay.running) {
+    // 任一操作类命令都会拉起中继；中继进程会继承管道，所以不接它的输出。
+    await new Promise((resolve) => spawn('browse', ['session', 'list'], { stdio: 'ignore' }).once('exit', resolve));
+    state = (await waitOnline(account, 5000)) ?? await status();
+  }
+  if (!online(state, account)) {
+    const profile = findProfile(named, account) ?? fail('no account named ' + account + '; ' + list());
+    const stop = await guard(browser.bundle);
+    await run('open', ['-g', '-n', '-b', browser.bundle, '--args', '--profile-directory=' + profile.dir, 'about:blank']);
+    state = await waitOnline(account, ONLINE_TIMEOUT_MS)
+      ?? fail(account + ' opened but did not connect to browse; is the browse extension added and paired in it? ' + list());
+    // 窗口出现与扩展上线先后不定，多守一会儿再撤。
+    await new Promise((r) => setTimeout(r, 500));
+    stop();
+  }
+  const id = [prefix, createHash('sha256').update(account.toLowerCase()).digest('hex').slice(0, 8), ...(as ? [as.toLowerCase().replaceAll('_', '-')] : [])].join('-');
+  const token = readFileSync(join(process.env.XDG_DATA_HOME || join(homedir(), '.local/share'), 'browse/relay-token'), 'utf8').trim();
+  const response = await fetch(state.endpoint + '/cli/session/new', {
+    method: 'POST',
+    headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' },
+    body: JSON.stringify({ id, browser: online(state, account).name }),
+  });
+  const body = await response.json();
+  if (!response.ok && body.code !== 'session-already-exists') fail(body.error);
+  return id;
+}
+
 const [command, ...args] = process.argv.slice(2);
 try {
   if (command === 'window') {
     console.log(await window(args[0], args[1]));
-  } else if (command === 'approve') {
-    process.exit(await approve(args[0], args.slice(1)));
+  } else if (command === 'mine') {
+    console.log(await mine(...args));
   } else if (command === 'import') {
     const [ws, ...rest] = args;
     if (process.platform !== 'darwin') fail('import supports macOS only');
-    const from = rest[0] === '--from' ? rest.splice(0, 2)[1] : defaultBrowser();
+    const options = {};
+    while (rest[0] === '--from' || rest[0] === '--account') options[rest.shift().slice(2)] = rest.shift();
+    const { from = defaultBrowser(), account } = options;
     const domains = rest.map((d) => d.replace(/^https?:\/\//, '').replace(/^\.|[/:].*$/g, '').toLowerCase());
-    if (!domains.length) fail('usage: bbu import [--from <' + SUPPORTED + '>] <domain>...');
-    const cookies = await readCookies(from, domains);
-    if (!cookies.length) fail(from + ' has no cookies for ' + domains.join(' '));
+    if (!domains.length) fail('usage: bbu import [--from <' + SUPPORTED + '>] [--account <account>] <domain>...');
+    const cookies = await readCookies(from, account, domains);
+    if (!cookies.length) fail(from + (account ? ' account ' + account : '') + ' has no cookies for ' + domains.join(' '));
     const browser = await connect(ws);
     await browser.send('Storage.setCookies', { cookies });
     browser.close();
-    console.log('imported ' + cookies.length + ' cookies for ' + domains.join(' ') + ' from ' + from);
+    console.log('imported ' + cookies.length + ' cookies for ' + domains.join(' ') + ' from ' + from + (account ? ' account ' + account : ''));
   } else {
     fail('unknown command ' + command);
   }
