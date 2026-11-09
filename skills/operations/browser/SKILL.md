@@ -31,7 +31,7 @@ bbu --mine <账户> execute --file ./flow.js
 bbu --mine <账户> close
 ```
 
-- 账户名是用户在 browse 扩展选项页起的，大小写不论。离线时 bbu 自己开窗口连上。报「did not connect to browse」是该账户没装或没配对 browse 扩展，请用户装。
+- 账户名就是浏览器里的账户（profile）名，大小写不论；`bbu import --account` 用的也是它。离线时 bbu 自己开窗口连上。报「did not connect to browse」是该账户没装或没配对 browse 扩展，请用户装。
 - 会话由 bbu 按检出建好，带 `--session`/`-s`、`session new|use|delete|reset`、`execute --rm` 直接报错（退出码 2）。`close` 删会话、关它开的标签。
 - `close` 等上一条命令返回后再发：打断运行中的 `execute` 会让该账户的浏览器卡死。遇到 `The browser isn't responding (asleep or frozen?)` 或 `Page.enable`/`Target.setAutoAttach did not answer within 10000 ms` 就停下告诉用户，不重试：重试留下一堆 about:blank 标签，恢复要 `browse relay restart`，会打断别的 agent，由用户定。
 - 用户亲手做的步骤（验证码、通行密钥、付款确认）用 `handoff()`。
@@ -60,7 +60,7 @@ rm -r "$d"
 1. `bbu import <域名>...` 后 `bbu --stealth reload`：从用户默认浏览器复制 cookie，默认读上次用的账户，别的加 `--account <账户>`；只支持 macOS 上的 Chromium 系，默认浏览器不是时加 `--from chrome|helium|edge|brave|vivaldi|chromium`。首次读某浏览器时 macOS 弹钥匙串授权，命令等到用户点「始终允许」。
 2. 仍未登录，或用户说导入后日常浏览器掉线（站点轮换续期凭证，复制出的会话互相作废）：请用户在 agent 窗口单独登录一次（见下节）。agent 专用账号密码同样从 Agent 保险库取，存进变量传给 `fill`。
 
-开发中的项目：账号密码用 `auth save` 存凭据库，新检出未登录时 `bbu auth login <名>`；手机验证码这类请用户登一次。
+开发中的项目（测试浏览器）：账号密码用 `auth save` 存凭据库，新检出未登录时 `bbu auth login <名>`；手机验证码这类请用户登一次。
 
 ## 请用户看或操作页面（测试、隐身浏览器）
 

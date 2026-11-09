@@ -58,7 +58,7 @@ pi install npm:pi-firecode
 
 1. 在 magpie 完成所需订阅账号的授权：Claude、ChatGPT（Codex）等。只用 API 时由 agent 将 key 录入 magpie，无需额外登录。Pi 的模型账号由 magpie 管理，不重复在 Pi `/login`。
 2. 在终端运行 `bcu setup`，在「系统设置 → 隐私与安全性」给 `bcu.app` 打开**辅助功能**和**屏幕录制**，回终端按回车。
-3. 给 agent 用自己的浏览器（`bbu --mine`）：在默认浏览器每个要交给 agent 的账户里，从 `browse extension` 给出的地址添加 browse 扩展，运行 `browse pair` 把它打印的配对码填进扩展；再在扩展选项页给账户起名，agent 按这个名字选账户；可选在 `~/.config/bbu.json` 给账户写用途，形如 `{"accounts": {"账户名": "公司"}}`，`bbu --mine` 会把它附在账户名后。用到 1Password 等会往网页插入菜单的扩展时，把它的网站访问权限改成「点击时」，否则 agent 在那些页面上的操作会被打断。
+3. 给 agent 用自己的浏览器（`bbu --mine`）：在默认浏览器每个要交给 agent 的账户里，从 `browse extension` 给出的地址添加 browse 扩展，运行 `browse pair` 把它打印的配对码填进扩展；再在扩展选项页把名字改成和这个浏览器账户（profile）同名，agent 按这个名字选账户，账户离线时 bbu 也按它找到并打开；可选在 `~/.config/bbu.json` 给账户写用途，形如 `{"accounts": {"账户名": "公司"}}`，`bbu --mine` 会把它附在账户名后。用到 1Password 等会往网页插入菜单的扩展时，把它的网站访问权限改成「点击时」，否则 agent 在那些页面上的操作会被打断。
 
 **完成标准**：`pi --list-models` 至少列出一个模型；`bcu doctor` 裸退出码为 0；`bbu --mine` 的输出在 online 后列出读者起的账户名。
 
