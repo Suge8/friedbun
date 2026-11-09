@@ -1,6 +1,6 @@
 # 配置这台机器
 
-你是读者的 coding agent。`config/` 下是作者机器上真实在用的文件，不是模板：把它们落到系统标准位置，装上作者用的包。全程自己做完，只在步骤 4 请读者做两件只能本人做的事。
+你是读者的 coding agent。`config/` 下是作者机器上真实在用的文件，不是模板：把它们落到系统标准位置，装上作者用的包。全程自己做完，只在步骤 4 请读者做三件只能本人做的事。
 
 环境要求：Apple Silicon、macOS 14+、Homebrew、Node 26+。`<repo>` 指本仓库根目录的绝对路径。改动读者已有的文件前，原地复制一份加 `.bak` 后缀。
 
@@ -10,6 +10,7 @@
 npm install --global --ignore-scripts @earendil-works/pi-coding-agent@latest
 npm install --global --allow-scripts=agent-browser agent-browser && agent-browser install
 npm install --global cloakbrowser && cloakbrowser install
+npm install --global @opencode/browse
 brew install herdr starship fastfetch zsh-autosuggestions zsh-syntax-highlighting
 herdr plugin install -y smarzban/herdr-file-viewer
 brew install --cask ghostty font-maple-mono-nf-cn suge8/tap/bcu
@@ -55,14 +56,15 @@ pi install npm:pi-firecode
 
 **完成标准**：配了 DeepSeek 时 `uilane status` 输出以 `on:` 开头。
 
-## 步骤 4：请读者做两件事
+## 步骤 4：请读者做三件事
 
-把下面两件事一次交给读者，等读者说做完：
+把下面三件事一次交给读者，等读者说做完：
 
 1. 在 magpie 完成所需订阅账号的授权：Claude、ChatGPT（Codex）等。只用 API 时由 agent 将 key 录入 magpie，无需额外登录。Pi 的模型账号由 magpie 管理，不重复在 Pi `/login`。
 2. 在终端运行 `bcu setup`，在「系统设置 → 隐私与安全性」给 `bcu.app` 打开**辅助功能**和**屏幕录制**，回终端按回车。
+3. 给 agent 用自己的浏览器（`bbu --mine`）：在默认浏览器每个要交给 agent 的账户里，从 `browse extension` 给出的地址添加 browse 扩展，运行 `browse pair` 把它打印的配对码填进扩展；再在扩展选项页给账户起名，agent 按这个名字选账户。用到 1Password 等会往网页插入菜单的扩展时，把它的网站访问权限改成「点击时」，否则 agent 在那些页面上的操作会被打断。
 
-**完成标准**：`pi --list-models` 至少列出一个模型；`bcu doctor` 裸退出码为 0。
+**完成标准**：`pi --list-models` 至少列出一个模型；`bcu doctor` 裸退出码为 0；`bbu --mine` 的输出在 online 后列出读者起的账户名。
 
 ## 步骤 5：校正模型
 
@@ -80,4 +82,4 @@ pi install npm:pi-firecode
 
 ## 卸载
 
-按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、`~/.config/uilane.json` 与钥匙串里的 `uilane-flash`、`uilane-startlux`。
+按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、`~/.config/uilane.json` 与钥匙串里的 `uilane-flash`、`uilane-startlux`；browse 先运行 `browse uninstall` 再卸 npm 包。
