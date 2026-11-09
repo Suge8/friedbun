@@ -14,9 +14,6 @@ const handoffDesc = (blocked) =>
 
 // 决策器与回报里的屏幕上限；结果核对用全文。
 const SCREEN_CHARS = 12000;
-// 置信度门只对 startlux 生效（flash 不给概率）；选"重新观察"不拦，没把握时它本身就是安全的退路。
-const MIN_CONFIDENCE = 0.6;
-const MAX_NONE_PROBABILITY = 0.3;
 const q = JSON.stringify;
 
 function candidates(elements, data) {
@@ -56,6 +53,7 @@ export async function runLane({ surface, decide, goal, data, expect, maxSteps })
   let stop;
   let blocked = [];
   let last;
+  let doneRetries = 0;
   const t0 = performance.now();
   const ms = (t) => Math.round(performance.now() - t);
   for (;;) {
@@ -77,23 +75,29 @@ export async function runLane({ surface, decide, goal, data, expect, maxSteps })
     const opt = options.find((o) => o.id === d.choice);
     // 同一动作做完界面一字未变，决策器又选它：再按也不会变，交回而不是耗到步数上限。
     if (last?.desc === opt.desc && last.screen === obs.screen) { stop = { reason: 'no_effect', detail: opt.desc }; break; }
-    if (opt.id !== 'reobserve' && (d.confidence < MIN_CONFIDENCE || d.none > MAX_NONE_PROBABILITY)) {
-      stop = { reason: 'low_confidence', detail: `${d.by} picked ${q(opt.desc)} with confidence ${d.confidence}, none ${d.none}` };
-      break;
-    }
     const step = {
       action: opt.id in reserved ? opt.id : opt.desc,
       by: d.by,
-      ...(d.confidence && { confidence: d.confidence }),
       ...(obs.unsettled && { unsettled: obs.unsettled }),
       ms: { observe: observeMs, decide: decideMs },
     };
     steps.push(step);
+    // 点完"保存/下一步"页面常还在跳转，决策器此刻看到的是旧屏：done 声明了但 --expect 没满足，先等一下再看（至多两次）。
+    if (opt.id === 'done' && !expect.every((e) => met(e, obs)) && doneRetries++ < 2) {
+      history.push('reobserve (done claimed, expectations not met yet)');
+      await new Promise((r) => setTimeout(r, 1000));
+      continue;
+    }
     if (opt.id === 'done' || opt.id === 'handoff') { stop = { reason: opt.id }; break; }
     if (opt.id === 'reobserve') { history.push('reobserve'); continue; }
     last = { desc: opt.desc, screen: obs.screen };
     const ta = performance.now();
-    const a = await surface.act(opt, obs).catch((e) => ({ ok: false, error: e.message }));
+    let a = await surface.act(opt, obs).catch((e) => ({ ok: false, error: e.message }));
+    // 加载遮罩、过渡动画盖住目标时稍等重试一次；常驻的广告 iframe 重试也无用，照常交回。
+    if (!a.ok && /covered by/.test(a.error)) {
+      await new Promise((r) => setTimeout(r, 1000));
+      a = await surface.act(opt, obs).catch((e) => ({ ok: false, error: e.message }));
+    }
     step.ms.act = ms(ta);
     history.push(opt.desc);
     if (!a.ok) { stop = { reason: 'action_failed', detail: a.error }; break; }
