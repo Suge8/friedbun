@@ -158,8 +158,10 @@ async function guard(bundle) {
 
 // 账户开着窗口时扩展约 4 s 内连上 browse；中继刚启动时扩展要先重连。
 const ONLINE_TIMEOUT_MS = 30000;
+const RECONNECT_MS = 12000;
 const browse = async (...args) => (await run('browse', args)).stdout;
-const status = async () => JSON.parse(await browse('status', '--json'));
+// 中继没在跑时 status 照样打印 JSON（relay.running 为 false），只是退出码非 0。
+const status = async () => JSON.parse(await browse('status', '--json').catch((e) => e.stdout || Promise.reject(e)));
 const online = (state, account) => state.extension?.browsers?.find((b) => b.connected && b.name.toLowerCase() === account.toLowerCase());
 async function waitOnline(account, ms) {
   for (const end = Date.now() + ms; Date.now() < end; await new Promise((r) => setTimeout(r, 250))) {
@@ -189,7 +191,8 @@ async function mine(account, prefix, as) {
   if (!state.relay.running) {
     // 任一操作类命令都会拉起中继；中继进程会继承管道，所以不接它的输出。
     await new Promise((resolve) => spawn('browse', ['session', 'list'], { stdio: 'ignore' }).once('exit', resolve));
-    state = (await waitOnline(account, 5000)) ?? await status();
+    // 已开着窗口的账户在中继就绪后 2–7 s 内自己重连（实测）；等短了会误判离线，往它已有的窗口里塞一个 about:blank。
+    state = (await waitOnline(account, RECONNECT_MS)) ?? await status();
   }
   if (!online(state, account)) {
     const profile = findProfile(named, account) ?? fail('no account named ' + account + '; ' + list());
