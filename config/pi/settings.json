@@ -1,42 +1,41 @@
 {
-  "defaultModel": "claude/claude-opus-5-5",
-  "defaultProvider": "magpie",
-  "defaultThinkingLevel": "medium",
-  "quietStartup": true,
-  "defaultProjectTrust": "always",
-  "enabledModels": [
-    "magpie/**"
-  ],
-  "showCacheMissNotices": true,
-  "httpProxy": "http://127.0.0.1:7890",
-  "httpIdleTimeoutMs": 900000,
-  "shellCommandPrefix": "if [ -f ~/.config/friedbun/env.zsh ]; then . ~/.config/friedbun/env.zsh || exit; fi",
-  "compaction": {
-    "reserveTokens": 50000,
-    "modelOverrides": {
-      "magpie/claude/claude-opus-5-5": {
-        "reserveTokens": 650000
-      },
-      "magpie/claude/claude-sonnet-5-5": {
-        "reserveTokens": 650000
-      },
-      "magpie/claude/claude-haiku-5-5": {
-        "reserveTokens": 650000
-      },
-      "magpie/deepseek/deepseek-flash": {
-        "reserveTokens": 498576
-      }
-    }
-  },
-  "terminal": {
-    "showTerminalProgress": true
-  },
-  "treeFilterMode": "no-tools",
-  "defaultTools": [
-    "+codemode"
-  ],
-  "codemode": {
-    "mode": "on"
-  },
-  "hideThinkingBlock": false
+	"defaultModel": "claude/claude-opus-5-5",
+	"defaultProvider": "magpie",
+	"defaultThinkingLevel": "medium",
+	"quietStartup": true,
+	"defaultProjectTrust": "always",
+	"enabledModels": ["magpie/**"],
+	"showCacheMissNotices": true,
+	"httpProxy": "http://127.0.0.1:7890",
+	"httpIdleTimeoutMs": 900000,
+	"shellCommandPrefix": "if [ -f ~/.config/friedbun/env.zsh ]; then . ~/.config/friedbun/env.zsh || exit; fi",
+	"compaction": {
+		"reserveTokens": 50000,
+		"modelOverrides": {
+			"magpie/claude/claude-fable-5-2": {
+				"reserveTokens": 650000
+			},
+			"magpie/claude/claude-opus-5-5": {
+				"reserveTokens": 650000
+			},
+			"magpie/claude/claude-sonnet-5-5": {
+				"reserveTokens": 650000
+			},
+			"magpie/claude/claude-haiku-5-5": {
+				"reserveTokens": 650000
+			},
+			"magpie/deepseek/deepseek-flash": {
+				"reserveTokens": 498576
+			}
+		}
+	},
+	"terminal": {
+		"showTerminalProgress": true
+	},
+	"treeFilterMode": "no-tools",
+	"defaultTools": ["+codemode"],
+	"codemode": {
+		"mode": "on"
+	},
+	"hideThinkingBlock": true
 }

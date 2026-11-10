@@ -64,7 +64,7 @@ pi install npm:pi-firecode
 
 ## 步骤 5：校正模型
 
-用 `magpie models pi` 选型号，`magpie pi <provider/model>` 写入默认模型，再以 `pi --list-models magpie` 核对。`firecode.jsonc` 的模型原子去掉最后的思考档后，完整引用应在 Pi 目录中；magpie 型号本身含斜杠，不能只取前两段。缺少的模型按配置注释换成可用的同档模型，思考档沿用；`master.roles` 保留角色名（指挥官提示词按名点"哨兵"）。
+用 `magpie models pi` 选型号，`magpie pi <provider/model>` 写入默认模型，再以 `pi --list-models magpie` 核对。`firecode.jsonc` 的模型原子去掉最后的思考档后，完整引用应在 Pi 目录中；magpie 型号本身含斜杠，不能只取前两段。缺少的模型按配置注释换成可用的同档模型，思考档沿用。
 
 `~/.pi/agent/models.json` 由 magpie 生成，上下文窗口、输出上限与价格都以它为准，不手改、不另覆盖。`settings.json` 的 `compaction.modelOverrides` 按 `magpie/<型号>` 写压缩点，换型号时同步改键。选定模型后发一条短请求确认账号可用，不以目录命中代替验证。已有会话不强切模型；切到新的 magpie 会话后再清 Pi 旧登录，保留 magpie 仍读取的官方客户端凭据。
 
