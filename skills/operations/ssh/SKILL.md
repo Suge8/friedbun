@@ -1,6 +1,6 @@
 ---
 name: ssh
-description: "已授权 SSH：按 ~/.ssh/config 别名连接服务器/路由器，执行远程命令、传文件、排障。"
+description: "访问已授权的服务器，本机网络配置等，执行远程命令、排障。"
 ---
 
 # SSH

@@ -53,7 +53,7 @@ export const CASES = {
       "PR 标题和正文你来写吧，把 diff 里重要的点讲清楚",
     ],
     neg: [
-      ["把这些改动提交一下，commit message 按仓库风格来", "manual:ship"],
+      ["把这些改动提交一下，commit message 按仓库风格来", null],
       ["写一下 CHANGELOG 里 2.1 的条目", null],
       ["review 一下这个分支的 diff，看有没有问题", null],
       ["写一段团队群里要发的更新，说一下重试上限改成 5 的原因", null],

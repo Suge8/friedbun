@@ -1,6 +1,6 @@
 ---
 name: retro
-description: 复盘一次编码会话，提出改进 agent 环境的候选。
+description: 复盘编码会话，提出改进 agent 环境的候选。
 disable-model-invocation: true
 ---
 
