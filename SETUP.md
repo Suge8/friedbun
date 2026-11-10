@@ -30,6 +30,7 @@ pi install npm:pi-firecode
 | --- | --- | --- |
 | `config/pi/settings.json` | `~/.pi/agent/settings.json` | 合并 |
 | `config/pi/SYSTEM.md` | `~/.pi/agent/SYSTEM.md` | 整体写入 |
+| `~/.pi/agent/SYSTEM.md` | `~/.claude/CLAUDE.md` | 可选，软链 `ln -s`：让原生 Claude Code 读同一份规则；已有文件先改名 `.bak` |
 | `config/pi/firecode.jsonc` | `~/.pi/agent/extensions/firecode/config.jsonc` | 整体写入 |
 | `config/herdr/config.toml` | `~/.config/herdr/config.toml` | 整体写入 |
 | `config/ghostty/config` | `~/.config/ghostty/config` | 整体写入 |
