@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>架构报告</title>
+<!--
+报告数据：只改下方 <script id="data"> 的 JSON；features、modules、edges 的顺序随意，页面自己排。写完运行 node check-report.mjs <本文件或 data.json>，必须退出 0；有错会逐条列出。
+给人读的文字（title、scope、features.label、metrics.label、problems.text、verify、note、outOfScope）写给没读过代码的人：先说是什么问题、
+对用户有什么影响、该由谁处理；文件:行放在句末括号里；不写内部编号、代号和函数名。fix 给动手的人看，可以写技术细节。
+{
+  "project": "pi",                              项目名
+  "title": "会话生命周期",                      标签页标题
+  "scope": "会话（src/session、src/runner）：发送、恢复、分叉时会话状态怎么流动",
+                                                一句话说清这次看的是哪块功能，路径可放括号里；不写分支和提交号
+  "features": [{"id": "send", "label": "发送消息"}],   功能入口：命令、路由、界面动作；改前改后共用
+  "before": {
+    "modules": [{"id": "store", "label": "src/session/store.ts"}],   label 写文件路径
+    "edges": [
+      {"from": "send", "to": "store", "kind": "call"},       功能→模块：这个功能执行时调用到它；如实列全
+      {"from": "runner", "to": "store", "kind": "import"}    模块→模块：from 依赖 to
+    ]
+  },
+  "after": null,                                改后，格式同 before；看档或还没改完时为 null
+  "fixes": [{
+    "n": 1, "title": "会话状态只由 store 持有",
+    "status": "todo",                           todo 待做 / done 已解 / kept 保留 / reverted 撤销；第一条 todo 是先解的
+    "nodes": ["store", "runner"],               涉及的功能或模块 id（改前或改后有即可）
+    "problems": [{"kind": "hidden", "level": "repro", "loc": "src/ui/panel.ts:40", "text": "界面另存一份运行状态"}],
+                                                kind：hidden 隐藏联系 / needless 多余耦合 / surplus 冗余 / special 特殊情况
+                                                level 证据：repro 探针带断言复现过 / code 读代码确认 / history 从提交历史看出 / guess 推测
+    "fix": "修法", "verify": "验证与结果", "note": "保留或撤销的理由"
+  }],
+  "metrics": [{"label": "加一种会话状态要动几处", "before": 5, "after": 1, "source": "count",
+               "evidence": {"before": ["src/ui/panel.ts:88"], "after": ["src/session/store.ts:30"]}, "fix": 1}],
+                                                每项是一个能数的量，不给总分；after 还没测时为 null
+                                                source：script 提取脚本从代码算出 / count 按具体场景逐处数出
+                                                evidence 可选：改前、改后各列计入的每一处 "文件:行"，可省一侧
+                                                fix 可选：这项是哪条修法的收益
+  "outOfScope": ["导出的 Markdown 会漏掉分叉出去的消息，该由导出功能另修（src/export/markdown.ts:30）"]
+}
+-->
+<style>
+:root{
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  --round:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"PingFang SC",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  /* 纸面与纸纹：米色底上一层极淡的纤维噪点 */
+  --paper:oklch(0.962 0.018 84);--paper-edge:oklch(0.5 0.05 70 / .16);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .3 0 0 0 0 .16 0 0 0 .55 -.22'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  /* 毛线色：每个功能一种，与纸面对比不低于 3:1 */
+  --y0:oklch(0.61 0.13 38);--y1:oklch(0.58 0.1 250);--y2:oklch(0.59 0.1 152);--y3:oklch(0.6 0.13 355);
+  --y4:oklch(0.6 0.12 78);--y5:oklch(0.59 0.08 200);--y6:oklch(0.58 0.11 300);--y7:oklch(0.59 0.11 124);
+  --ply:oklch(1 0 0 / .5);--neutral-thread:oklch(0.6 0.02 70);--arc:oklch(0.6 0.03 66);
+  --bg:oklch(0.984 0.008 85);
+  --raised:oklch(0.996 0.004 85);
+  --surface:oklch(0.955 0.014 82);
+  --surface-2:oklch(0.925 0.018 80);
+  --ink:oklch(0.27 0.025 60);
+  --mute:oklch(0.48 0.025 62);
+  --faint:oklch(0.68 0.02 70);
+  --line:oklch(0.89 0.016 78);
+  --node-edge:oklch(0.45 0.05 65 / .14);
+  --edge:oklch(0.76 0.025 70);
+  --edge-hot:oklch(0.55 0.03 62);
+  --accent:oklch(0.5 0.15 268);
+  --accent-soft:oklch(0.5 0.15 268 / 0.1);
+  --todo:oklch(0.55 0.18 30);   --todo-ink:oklch(0.5 0.17 30);   --todo-deep:oklch(0.4 0.15 30);
+  --done:oklch(0.52 0.12 155);  --done-ink:oklch(0.46 0.11 155); --done-deep:oklch(0.36 0.1 155);
+  --kept:oklch(0.8 0.14 78);    --kept-ink:oklch(0.5 0.11 68);   --kept-deep:oklch(0.9 0.09 84);
+  --reverted:oklch(0.53 0.016 60); --reverted-ink:oklch(0.48 0.016 60); --reverted-deep:oklch(0.38 0.015 60);
+  --ring:0 0 0 1px oklch(0.4 0.05 60 / .1),0 4px 12px -2px oklch(0.35 0.05 55 / .12);
+  --sheet-shadow:0 0 0 1px oklch(0.4 0.05 60 / .1),0 -8px 32px -8px oklch(0.3 0.05 55 / .22);
+  --ease-enter:cubic-bezier(.16,1,.3,1);
+  --ease-move:cubic-bezier(.77,0,.175,1);
+  --ease-drawer:cubic-bezier(.32,.72,0,1);
+  --ctl:32px;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:oklch(0.245 0.014 62);--paper-edge:oklch(1 0 0 / .07);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .92 0 0 0 0 .8 0 0 0 .22 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --y0:oklch(0.74 0.11 40);--y1:oklch(0.74 0.09 250);--y2:oklch(0.75 0.1 152);--y3:oklch(0.74 0.11 355);
+  --y4:oklch(0.8 0.11 82);--y5:oklch(0.76 0.08 200);--y6:oklch(0.74 0.1 300);--y7:oklch(0.77 0.1 122);
+  --ply:oklch(1 0 0 / .28);--neutral-thread:oklch(0.6 0.016 68);--arc:oklch(0.62 0.02 70);
+  --bg:oklch(0.205 0.012 62);
+  --raised:oklch(0.29 0.016 64);
+  --surface:oklch(0.25 0.014 62);
+  --surface-2:oklch(0.31 0.016 62);
+  --ink:oklch(0.94 0.012 80);
+  --mute:oklch(0.74 0.018 75);
+  --faint:oklch(0.55 0.016 70);
+  --line:oklch(0.33 0.014 64);
+  --node-edge:oklch(1 0 0 / .08);
+  --edge:oklch(0.45 0.018 66);
+  --edge-hot:oklch(0.64 0.02 70);
+  --accent:oklch(0.74 0.12 268);
+  --accent-soft:oklch(0.74 0.12 268 / 0.16);
+  --todo:oklch(0.56 0.17 30);   --todo-ink:oklch(0.74 0.14 32);  --todo-deep:oklch(0.4 0.14 30);
+  --done:oklch(0.53 0.12 155);  --done-ink:oklch(0.76 0.12 155); --done-deep:oklch(0.36 0.1 155);
+  --kept:oklch(0.8 0.13 78);    --kept-ink:oklch(0.84 0.11 80);  --kept-deep:oklch(0.9 0.08 84);
+  --reverted:oklch(0.52 0.016 62); --reverted-ink:oklch(0.72 0.016 66); --reverted-deep:oklch(0.36 0.015 60);
+  --ring:0 0 0 1px oklch(1 0 0 / .08);
+  --sheet-shadow:0 0 0 1px oklch(1 0 0 / .1),0 -8px 32px -8px oklch(0 0 0 / .6);
+}}
+@media (pointer:coarse){:root{--ctl:40px}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;background:var(--bg)}
+body{margin:0;color:var(--ink);font:15px/1.6 var(--sans);font-feature-settings:"tnum"}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:inherit;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+code{font:12.5px/1.5 var(--mono)}
+.ic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+[hidden]{display:none!important}
+h1,h2,h3{margin:0;font-weight:600}
+
+/* 顶栏：项目名与范围；有改后数据时右侧是改前 / 改后切换 */
+.bar{position:sticky;top:0;z-index:5;background:var(--bg)}
+.bar.stuck{box-shadow:0 1px 0 var(--line)}
+.bar-in{max-width:1440px;margin:0 auto;padding:10px 32px;display:flex;align-items:center;gap:16px}
+.who{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 12px}
+.who h1{font-size:17px;font-weight:700;line-height:1.4;overflow-wrap:anywhere}
+.who p{margin:0;color:var(--mute);font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+.seg{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;flex:none;padding:3px;border-radius:10px;background:var(--surface)}
+.seg button{position:relative;z-index:1;height:var(--ctl);padding:0 18px;border-radius:7px;font-size:14px;color:var(--mute);white-space:nowrap;transition:color .16s}
+.seg button[aria-pressed=true]{color:var(--ink);font-weight:600}
+.seg .thumb{position:absolute;top:3px;left:3px;width:calc(50% - 3px);height:var(--ctl);border-radius:7px;background:var(--raised);box-shadow:var(--ring);transition:translate .26s var(--ease-move)}
+.seg[data-on=after] .thumb{translate:100%}
+@media (hover:hover) and (pointer:fine){.seg button:not([aria-pressed=true]):hover{color:var(--ink)}}
+
+main{max-width:1440px;margin:0 auto;padding:12px 32px calc(48px + var(--sheet-h,0px))}
+
+/* 错误 */
+.err{max-width:760px;margin:12px auto;padding:20px 24px;border-radius:12px;background:color-mix(in srgb,var(--todo) 8%,var(--bg));color:var(--ink)}
+.err h1{font-size:17px;color:var(--todo-ink)}
+.err p{margin:4px 0 12px;color:var(--mute)}
+.err ol{margin:0;padding-left:22px;font:13px/1.7 var(--mono);overflow-wrap:anywhere}
+
+/* 状态 */
+.s-todo{--s:var(--todo);--s-ink:var(--todo-ink);--s-deep:var(--todo-deep);--s-on:#fff}
+.s-done{--s:var(--done);--s-ink:var(--done-ink);--s-deep:var(--done-deep);--s-on:#fff}
+.s-kept{--s:var(--kept);--s-ink:var(--kept-ink);--s-deep:var(--kept-deep);--s-on:oklch(0.25 0.04 70)}
+.s-reverted{--s:var(--reverted);--s-ink:var(--reverted-ink);--s-deep:var(--reverted-deep);--s-on:#fff}
+.st{display:inline-flex;align-items:center;gap:4px;color:var(--s-ink);font-size:13px;font-weight:600;white-space:nowrap}
+.st .ic{width:14px;height:14px}
+/* 毛线团：一条修法（一个根因）的标记，颜色即状态；编号描一圈深色边，压在毛线纹上也读得清 */
+.yb{position:relative;display:inline-grid;place-items:center;flex:none;width:var(--d,26px);height:var(--d,26px);color:var(--s-on);font:800 max(11px,calc(var(--d,26px)*.46))/1 var(--round);font-feature-settings:"tnum"}
+.yb svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.yb b{position:relative;text-shadow:0 0 2px var(--s-deep),0 0 1px var(--s-deep),0 0 3px var(--s-deep)}
+.yb .bb{fill:var(--s)}
+.yb .bs{fill:none;stroke:var(--s-deep);stroke-width:1.5;stroke-linecap:round;opacity:.55}
+.yb .bl{fill:none;stroke:#fff;stroke-width:1.3;stroke-linecap:round;opacity:.32}
+.yb .bh{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;opacity:.5}
+.yb .bt{fill:none;stroke:var(--s);stroke-width:2.4;stroke-linecap:round}
+.tag{display:inline-flex;align-items:center;gap:1px;height:24px;padding:0 8px 0 6px;border-radius:12px;background:var(--s);color:var(--s-on);font:800 13px/1 var(--round);box-shadow:0 0 0 2px var(--paper),0 2px 4px -1px oklch(0.3 0.05 55 / .3)}
+.tag .ic{width:13px;height:13px;stroke-width:2.8}
+
+/* 整体指标一行；数字旁的小标记是来源 */
+.metrics{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(148px,228px);justify-content:start;gap:10px;margin:0 0 20px;padding:2px;overflow-x:auto;scrollbar-width:none}
+.mc{display:flex;flex-direction:column;justify-content:space-between;gap:6px;padding:10px 12px 9px;border-radius:12px;background:var(--raised);box-shadow:var(--ring);transition:background-color .16s,box-shadow .16s}
+.mc[aria-pressed=true]{box-shadow:0 0 0 2px var(--accent)}
+.mc:active{background:var(--surface)}
+@media (hover:hover) and (pointer:fine){.mc:hover{background:var(--surface)}}
+.ml{font-size:12.5px;line-height:1.4;color:var(--mute)}
+.src{display:inline-block;margin-left:5px;padding:0 4px;border-radius:4px;box-shadow:inset 0 0 0 1px var(--line);font-size:10.5px;line-height:15px;font-weight:500;color:var(--mute);vertical-align:1px;white-space:nowrap}
+.mv,.gn{display:flex;align-items:baseline;gap:5px;font-family:var(--round);white-space:nowrap}
+.mv .b,.gn .b{color:var(--mute)}
+.mv .ar,.gn .ar{color:var(--mute);font-size:12px}
+.mv .a,.gn .a{font-weight:700;color:var(--ink)}
+.mv .a.na,.gn .a.na{font-weight:500;color:var(--mute)}
+.mv .b{font-size:15px}.mv .a{font-size:22px;line-height:1.1}.mv .a.na{font-size:14px}
+/* 数字行定高：改前只剩改前数字时行高不变，切换时下方地图不跳 */
+.mv{height:25px}
+
+/* 地图与结的列表 */
+.map{display:grid;grid-template-columns:minmax(0,1fr) 380px;grid-template-areas:"graph side";gap:12px 40px;align-items:start}
+.side{grid-area:side;position:sticky;top:var(--bar-h,60px);max-height:calc(100dvh - var(--bar-h,60px) - 16px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:2px 4px 16px;margin:0 -4px}
+.graph-col{grid-area:graph;min-width:0}
+/* 改前改后两份图例叠在同一格里，切换时高度不变，地图不跳 */
+.legend{display:grid;margin:0 0 8px;color:var(--ink);font-size:12.5px}
+.legend>div{grid-area:1/1;display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;align-content:start;transition:opacity .3s,visibility 0s}
+.legend:not([data-on=after])>[data-for=after],.legend[data-on=after]>[data-for=before]{opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
+.legend span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.legend svg{overflow:visible}
+.legend .yb,.tally .yb{--d:16px}.legend .tag{height:18px;font-size:11.5px;box-shadow:none}
+.lg{stroke:var(--edge-hot);stroke-width:1.6;fill:none}
+.lg.n{stroke:var(--neutral-thread);stroke-width:1.8}.lg.gone{stroke:var(--todo-ink)}.lg.new{stroke:var(--done-ink)}
+.lg-ghost{width:18px;height:12px;border:1px dashed var(--faint);border-radius:3px}
+
+.lh{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;margin:0 12px 6px}
+.lh h2{font-size:15px}
+.tally{display:flex;flex-wrap:wrap;gap:2px 12px}
+.tally .st{font-size:12.5px;font-weight:500;gap:5px}
+.lh h2 small{margin-left:6px;color:var(--mute);font-size:13px;font-weight:500}
+.tally b{font-weight:600}
+.fixes{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.fx-btn{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:10px;align-items:start;width:100%;padding:10px 12px;border-radius:12px;transition:background-color .16s}
+.fx-btn>.yb{--d:26px;margin-top:-2px}
+.fx-title{font-weight:600;font-size:14.5px;line-height:1.45}
+.fx-btn>.st{margin-top:1px}
+.fx-more{grid-column:2/-1;display:grid;gap:4px;margin-top:4px}
+.gain{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:13px}
+.gl{color:var(--mute);line-height:1.45}
+.gn{font-size:14px}
+.vf{font-size:13px;line-height:1.5}
+.vf b{font-weight:600;color:var(--mute);margin-right:6px}
+.kinds{font-size:12.5px;color:var(--mute)}
+.kinds b{color:var(--ink);font-weight:600}
+.fx-btn[aria-pressed=true]{background:var(--accent-soft)}
+.fixes li:not(.lead):has(>[aria-expanded=true]){background:var(--surface);border-radius:12px}
+.fx-btn:active{background:var(--surface-2)}
+@media (hover:hover) and (pointer:fine){.fx-btn:not([aria-pressed=true]):not([aria-expanded=true]):hover{background:var(--surface)}}
+.fx-detail:not(:empty){padding:0 14px 16px 48px;animation:rise .18s var(--ease-enter)}
+@keyframes rise{from{opacity:0;transform:translateY(-3px)}}
+/* 第一条是先解的结：纸面底、大号毛线团，收益数字放大 */
+.lead{margin-bottom:8px;padding:12px 4px 4px;border-radius:18px;background:var(--grain),var(--paper);box-shadow:inset 0 0 0 1px var(--paper-edge)}
+.lead-h{margin:0 12px 2px;font-size:12.5px;font-weight:600;color:var(--s-ink)}
+.lead .fx-btn{padding-top:6px}
+.lead .fx-title{font-size:16.5px}
+.lead .fx-btn>.yb{--d:36px;margin-top:-4px}
+.lead .gain{align-items:center;margin-top:6px;padding:10px 12px;border-radius:12px;background:var(--raised);box-shadow:0 0 0 1px var(--node-edge)}
+.lead .gn .b{font-size:17px}.lead .gn .a{font-size:26px}.lead .gn .a.na{font-size:15px}
+/* 改前只剩改前数字，接过改后数字的醒目样式 */
+body[data-side=before] :is(.mv,.gn) .b{font-weight:700;color:var(--ink)}
+body[data-side=before] .mv .b{font-size:22px;line-height:1.1}
+body[data-side=before] .lead .gn .b{font-size:26px}
+body[data-side=before] .b>.on-b{font-size:13px;font-weight:500;color:var(--mute)}
+.gain.none{background:none;box-shadow:inset 0 0 0 1px var(--node-edge)}
+
+/* 详情正文 */
+.body{font-size:14px;line-height:1.65}
+.body h3{font-size:12.5px;color:var(--mute);margin:16px 0 6px;font-weight:600;display:flex;gap:6px;align-items:baseline}
+.body>h3:first-child{margin-top:0}
+.body p{margin:0}
+.fix-text{font-size:14.5px}
+.probs{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.probs li{display:grid;gap:1px}
+.ph{display:flex;align-items:center;gap:6px}
+.pk{font-size:12px;font-weight:600;color:var(--mute);white-space:nowrap;line-height:1.9}
+/* 证据等级：复现最可信，实底；代码、历史描边；推测虚线 */
+.lv,.rp{display:inline-flex;align-items:center;gap:3px;height:18px;padding:0 6px;border-radius:5px;font-size:11.5px;font-weight:600;line-height:1;white-space:nowrap;color:var(--mute);box-shadow:inset 0 0 0 1px var(--line)}
+.lv .ic,.rp .ic{width:12px;height:12px;stroke-width:2.4}
+.lv-repro,.rp{background:var(--ink);color:var(--bg);box-shadow:none}
+.lv-code{color:var(--ink);box-shadow:inset 0 0 0 1px var(--edge-hot)}
+.lv-guess{box-shadow:none;outline:1px dashed var(--faint);outline-offset:-1px;font-weight:500}
+.rp{justify-self:start}
+.probs code,.ev code{color:var(--ink);overflow-wrap:anywhere;-webkit-user-select:all;user-select:all;line-height:1.9}
+.probs p{color:var(--ink)}
+.mt+.mt{margin-top:12px}
+.mt-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.mt-src{color:var(--mute);font-size:13px}
+.ev{list-style:none;margin:2px 0 0;padding:0}
+.body .ev-h{margin-top:6px;font-size:12.5px;font-weight:600;color:var(--mute)}
+.rel{display:grid;gap:8px}
+.rel div{display:grid;grid-template-columns:5.5em minmax(0,1fr);gap:8px}
+.rel span{color:var(--mute);font-size:12.5px;line-height:1.9}
+.rel ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 12px}
+.rel li{overflow-wrap:anywhere}
+.rel .m{font:12.5px/1.9 var(--mono)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips .yb{--d:22px}
+.chips button{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:2px 10px 2px 4px;border-radius:14px;background:var(--surface);font-size:13.5px}
+@media (hover:hover) and (pointer:fine){.chips button:hover{background:var(--surface-2)}}
+.node-card{padding:12px 12px 16px;margin-bottom:12px;border-radius:12px;background:var(--surface);animation:rise .18s var(--ease-enter)}
+.card-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px}
+.card-head .t{flex:1;min-width:0;font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.card-head .t small{display:block;font-weight:400;color:var(--mute);font-size:12.5px}
+.card-head .t.m{font:600 13.5px/1.5 var(--mono)}
+.icon-btn{display:inline-grid;place-items:center;width:var(--ctl);height:var(--ctl);border-radius:8px;color:var(--mute);flex:none}
+.icon-btn:active{background:var(--surface-2)}
+@media (hover:hover) and (pointer:fine){.icon-btn:hover{background:var(--surface-2);color:var(--ink)}}
+.empty{color:var(--mute);font-size:14px;padding:24px 0}
+.oos{margin-top:40px}
+.oos h2{font-size:14px;margin-bottom:8px}
+.oos ul{margin:0;padding-left:20px;font-size:14px}
+.oos li{overflow-wrap:anywhere}
+.oos li+li{margin-top:4px}
+/* 改前只讲问题有多大：团一律待修的红，不显示状态字、计数、验证、说明、改后数字、改后依据与改后连线；结局只在改后出现 */
+body[data-side=before] :is(.yb,.lead){--s:var(--todo);--s-ink:var(--todo-ink);--s-deep:var(--todo-deep);--s-on:#fff}
+body[data-side=before] :is(.st,.tally,.on-a,.ar,.a),body:not([data-side=before]) .on-b{display:none}
+
+/* 图：毛线。功能是线头、模块是纸签；调用是各色毛线，线端缝一颗同色小珠；根因是线缠成的毛线团。
+   改前改后是同一张图：切到改后，同一根线就地变形，已解的团捋直成 ✓ 签，没变的线褪成灰，去掉的标红、新增的标绿 */
+.graph{position:relative;border-radius:22px;background:var(--grain),var(--paper);box-shadow:inset 0 0 0 1px var(--paper-edge)}
+.graph svg.edges{position:absolute;inset:0;overflow:visible;pointer-events:none}
+.probe{position:absolute;left:0;top:0;visibility:hidden}
+.colh{position:absolute;top:12px;font-size:12px;color:var(--mute);line-height:20px;white-space:nowrap}
+.e{--cable:var(--yc,var(--edge));transition:opacity .35s}
+.e path{fill:none;stroke:var(--cable);stroke-linecap:round;transition:stroke .45s,stroke-width .45s,opacity .45s}
+.e .w{stroke-width:3}
+.e .hl{stroke:var(--ply);stroke-width:1.1;stroke-dasharray:1.4 3.2}
+.e .bd{fill:var(--cable);stroke:var(--paper);stroke-width:1.3;transition:fill .45s}
+.e.k-import{--cable:var(--arc)}
+.e.k-import .w{stroke-width:1.4}
+.e .ah{fill:var(--cable);stroke:none;transition:fill .45s}
+.graph.after .e:not(.k-import){--cable:var(--neutral-thread)}
+.graph.after .e:not(.rm):not(.add) .w{stroke-width:1.8}
+.graph.after .e:not(.rm):not(.add) .hl{opacity:0}
+.graph.after .e.rm{--cable:var(--todo-ink)}
+.graph.after .e.add{--cable:var(--done-ink)}
+.graph.focusing .e{opacity:.1}
+.graph.focusing .e.lit{opacity:1}
+.graph.focusing .e.lit .w{stroke-width:4.4}
+.graph.focusing .e.lit .bd{r:4px}
+.graph.focusing .e.lit.k-import{--cable:var(--accent)}
+.graph.focusing .e.lit.k-import .w{stroke-width:2}
+.graph.after.focusing .e.lit:not(.rm):not(.add):not(.k-import){--cable:var(--accent)}
+.graph.after.focusing .e.lit:not(.k-import) .w{stroke-width:3}
+.knot{position:absolute;z-index:2;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;transition:opacity .3s,visibility 0s,transform .2s var(--ease-enter)}
+.knot>.yb,.knot>.tag{grid-area:1/1}
+.knot .yb{transition:opacity .35s,transform .6s var(--ease-move),scale .2s var(--ease-enter)}
+.knot .yb svg{filter:drop-shadow(0 2px 1.5px oklch(0.3 0.06 50 / .32))}
+.knot .tag{opacity:0;transform:scale(.3);transition:opacity .3s,transform .45s var(--ease-enter)}
+.graph.after .knot.solved .yb{opacity:0;transform:rotate(300deg) scale(.2)}
+.graph.after .knot.solved .tag{opacity:1;transform:none;transition-delay:.22s}
+.knot.cur::before{content:"";position:absolute;inset:1px;border-radius:50%;box-shadow:0 0 0 2.5px var(--accent);background:var(--accent-soft)}
+.graph.after .knot.solved.cur::before{inset:7px -2px;border-radius:14px}
+/* 选中只放大线团本身，点按区保持 44px，窄屏上不越过两侧的节点 */
+.knot.cur .yb{scale:1.12}
+.graph.focusing .knot{opacity:.32}
+.graph.focusing .knot.lit{opacity:1}
+@media (hover:hover) and (pointer:fine){.knot:hover{transform:scale(1.08)}}
+.knot:active{transform:scale(.95)}
+
+.node{position:absolute;display:flex;align-items:center;padding:0 10px 0 14px;border-radius:12px;background:var(--raised);font-size:13px;line-height:1;white-space:nowrap;box-shadow:0 0 0 1px var(--node-edge),0 1.5px 0 var(--node-edge);transition:opacity .16s,background-color .3s,box-shadow .3s,color .3s}
+.node .t{display:flex;min-width:0;overflow:hidden}
+.node .t>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.node.c-m .t{font:12.5px/1 var(--mono)}
+.node .dir{flex-shrink:1;color:var(--mute)}
+.node .base{flex-shrink:0;max-width:100%}
+/* 功能名换行不截断；第一行与圆点对齐 */
+.node.c-f{--pt:6.5px;align-items:flex-start;padding-top:var(--pt);padding-left:26px;border-radius:15px;font-weight:550;line-height:17px;white-space:normal}
+.node.c-f .t,.node.c-f .t>span{overflow:visible;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;text-wrap:balance}
+.node.c-f::before{content:"";position:absolute;left:10px;top:calc(var(--pt) + 2.5px);width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 30%,color-mix(in oklch,var(--yc) 55%,white),var(--yc) 62%);box-shadow:0 0 0 1px color-mix(in oklch,var(--yc) 70%,black)}
+@media (pointer:coarse){.node.c-f{--pt:9.5px}}
+.gh{position:absolute;box-sizing:border-box;padding-top:7px;font:11.5px/14px var(--mono);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .16s}
+.graph.focusing .gh{opacity:.45}.graph.focusing .gh.lit{opacity:1}
+.node.ghost{background:none;box-shadow:inset 0 0 0 1.5px var(--edge);color:var(--faint)}
+.node.ghost .t,.node.ghost .dir{color:var(--mute)}
+.graph.after .node.ghost .t{text-decoration:line-through}
+/* 改前不透露改后：只在改后才有的文件连同编号藏起，位置留着，切换时别的节点不挪 */
+.graph:not(.after) :is(.node,.gb).ghost{visibility:hidden}
+@media (hover:hover) and (pointer:fine){.node:hover{background:var(--surface)}}
+.node:active{background:var(--surface-2)}
+.graph.focusing .node,.graph.focusing .gb{opacity:.38}
+.graph.focusing .node.lit,.graph.focusing .gb.lit{opacity:1}
+.node.pri{box-shadow:0 0 0 2px var(--accent),0 3px 10px -4px var(--accent)}
+.node.ghost.pri{box-shadow:inset 0 0 0 2px var(--accent)}
+.gb{position:absolute;--d:20px;transition:opacity .16s,box-shadow .16s;border-radius:50%}
+.gb::after{content:"";position:absolute;inset:-5px -1px}
+.gb.cur{box-shadow:0 0 0 2px var(--raised),0 0 0 3.5px var(--accent)}
+.gb .bt{display:none}
+/* 枢纽：多数功能都经过的模块，功能连向它的线默认收起，聚焦时只画亮起的那几根；穿过毛线团的照常画 */
+.graph .e.hub:not(.thru):not(.lit){opacity:0}
+.hubtag{display:inline-flex;align-items:center;gap:3px;flex:none;margin-left:8px;padding:0 6px 0 4px;height:17px;border-radius:9px;background:var(--surface-2);color:var(--mute);font:500 10.5px/1 var(--sans);white-space:nowrap}
+.hubtag .ic{width:12px;height:12px}
+.graph.narrow .node.hub{flex-direction:column;align-items:flex-start;justify-content:center;gap:3px}
+.graph.narrow .node.hub .t{max-width:100%}
+.graph.narrow .node.hub .hubtag{margin-left:0}
+/* 不属于当前一侧的线与团隐去（放在最后，压过聚焦时的淡显） */
+.graph .e.off{opacity:0}
+.graph .knot.off{opacity:0;visibility:hidden;transition:opacity .3s,visibility 0s .3s}
+
+/* 手机 */
+.sheet{display:none}
+@media (max-width:999px){
+  .bar-in{padding:8px 16px;gap:12px}
+  .who{display:block}
+  .who h1{font-size:16px}
+  .who p{font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .who p.open{display:block}
+  .who p[role=button]{cursor:pointer}
+  main{padding:12px 16px calc(32px + var(--sheet-h,0px))}
+  .metrics{grid-auto-columns:minmax(108px,1fr);margin:0 -16px 16px;padding:2px 16px}
+  .map{grid-template-columns:minmax(0,1fr);grid-template-areas:"side" "graph";gap:16px}
+  .side{position:static;max-height:none;overflow:visible;padding:0;margin:0 -12px}
+  .sheet{display:flex;flex-direction:column;position:fixed;z-index:10;left:0;right:0;bottom:0;max-height:min(42dvh,400px,var(--fit,100dvh));padding-bottom:env(safe-area-inset-bottom,0px);border-radius:16px 16px 0 0;background:var(--raised);box-shadow:var(--sheet-shadow);transform:translateY(calc(100% + 24px));visibility:hidden;transition:transform .3s var(--ease-drawer),visibility 0s .3s}
+  .sheet.open{transform:translateY(var(--drag,0px));visibility:visible;transition:transform .32s var(--ease-drawer),visibility 0s}
+  .sheet.dragging{transition:none}
+  .sheet.tall{max-height:86dvh}
+  .sheet-head{position:relative;display:flex;align-items:flex-start;gap:4px;padding:18px 8px 8px 16px;touch-action:none}
+  .sheet-head::before{content:"";position:absolute;top:7px;left:50%;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--line)}
+  .sheet-head .t{flex:1;min-width:0;display:flex;gap:8px;align-items:flex-start;font-weight:600;font-size:15px;line-height:1.45;padding-top:8px}
+  .sheet-head .t .yb{--d:28px;margin-top:-2px}
+  .sheet-head .t.m{font:600 13.5px/1.5 var(--mono);overflow-wrap:anywhere}
+  .sheet-body{overflow:auto;overscroll-behavior:contain;padding:4px 16px 20px;scrollbar-width:thin}
+  .sheet-body .st{margin-bottom:4px}
+}
+@media (max-width:640px){.node.c-m{padding-left:8px}.node.c-m .t{font-size:11.5px}.node.c-f{padding-left:22px}.node.c-f::before{left:7px}}
+@media (max-width:420px){.legend{font-size:12px}.legend>div{column-gap:10px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;transition-delay:0s!important;animation-duration:.01ms!important}}
+@media (forced-colors:active){.seg .thumb,.sheet{border:1px solid CanvasText}.node.pri{outline:2px solid Highlight}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="ybc"><circle cx="20" cy="20" r="16.6"/></clipPath></defs></svg>
+<header class="bar" id="bar"><div class="bar-in">
+  <div class="who"><h1 id="project"></h1><p id="scope"></p></div>
+  <div class="seg" role="group" aria-label="地图显示改前还是改后" id="sides" hidden>
+    <button data-side="before" aria-pressed="true">改前</button>
+    <button data-side="after" aria-pressed="false">改后</button>
+    <span class="thumb" aria-hidden="true"></span>
+  </div>
+</div></header>
+<main id="main">
+  <div class="err" id="err" role="alert" hidden></div>
+  <section class="metrics" id="metrics" aria-label="整体指标"></section>
+  <div class="map">
+    <div class="side" id="side">
+      <div id="card"></div>
+      <div class="lh"><h2 id="fixes-h">修法</h2><span class="tally" id="tally"></span></div>
+      <ol class="fixes" id="fixes" aria-labelledby="fixes-h"></ol>
+    </div>
+    <div class="graph-col">
+      <div class="legend" id="legend"></div>
+      <div class="graph" id="graph"></div>
+    </div>
+  </div>
+  <section class="oos" id="oos" aria-labelledby="oos-h" hidden></section>
+</main>
+<aside class="sheet" id="sheet" aria-labelledby="sheet-title" inert>
+  <div class="sheet-head" id="sheet-head">
+    <div class="t" id="sheet-title"></div>
+    <button class="icon-btn" data-step="-1" aria-label="上一条修法" id="sheet-prev"></button>
+    <button class="icon-btn" data-step="1" aria-label="下一条修法" id="sheet-next"></button>
+    <button class="icon-btn" data-close aria-label="关闭详情" id="sheet-close"></button>
+  </div>
+  <div class="sheet-body" id="sheet-body" tabindex="0"></div>
+</aside>
+<script id="data" type="application/json">
+{"project": "", "title": "", "scope": "", "features": [], "before": {"modules": [], "edges": []}, "after": null, "fixes": [], "metrics": [], "outOfScope": []}
+</script>
+<script id="validate">
+// 数据校验：纯函数，不碰 DOM。页面用它，命令行 node check-report.mjs <report.html|data.json> 也从这里载入同一份
+'use strict';
+const STATUS = {todo: '待做', done: '已解', kept: '保留', reverted: '撤销'};
+const KIND = {hidden: '隐藏联系', needless: '多余耦合', surplus: '冗余', special: '特殊情况'};
+const EDGE = {call: '调用触及', import: '依赖'};
+const LEVEL = {repro: ['复现', '探针带断言复现过'], code: ['代码', '读代码确认'], history: ['历史', '从提交历史看出'], guess: ['推测', '推测，没有直接证据']};
+const SOURCE = {script: ['脚本', '提取脚本从代码算出'], count: ['清点', '按具体场景逐处数出']};
+function validate(D) {
+  const E = [], arr = Array.isArray, has = (o, k) => o != null && o[k] != null && o[k] !== '';
+  if (!D || typeof D !== 'object') return ['数据不是 JSON 对象'];
+  for (const k of ['features', 'fixes', 'metrics']) if (!arr(D[k])) E.push(`${k} 应为数组`);
+  if (!D.before || !arr(D.before.modules) || !arr(D.before.edges)) E.push('before 应包含 modules 与 edges 两个数组');
+  if (D.after != null && (!arr(D.after.modules) || !arr(D.after.edges))) E.push('after 应为 null，或包含 modules 与 edges 两个数组');
+  if (D.outOfScope != null && !arr(D.outOfScope)) E.push('outOfScope 应为数组');
+  if (E.length) return E;
+  if (typeof D.project !== 'string' || !D.project) E.push('缺 project：项目名，显示在顶栏左上');
+  const feats = new Set(), all = new Set();
+  D.features.forEach((f, i) => {
+    if (!has(f, 'id') || !has(f, 'label')) return E.push(`features[${i}] 缺 id 或 label`);
+    if (feats.has(f.id)) E.push(`features[${i}]：id "${f.id}" 重复`);
+    feats.add(f.id); all.add(f.id);
+  });
+  for (const key of ['before', 'after']) {
+    const g = D[key]; if (!g) continue;
+    const side = key === 'before' ? '改前' : '改后', mods = new Set(), seen = new Map();
+    g.modules.forEach((m, i) => {
+      if (!has(m, 'id') || !has(m, 'label')) return E.push(`${key}.modules[${i}] 缺 id 或 label`);
+      if (feats.has(m.id)) E.push(`${key}.modules[${i}]：id "${m.id}" 与功能重名`);
+      else if (mods.has(m.id)) E.push(`${key}.modules[${i}]：id "${m.id}" 重复`);
+      mods.add(m.id); all.add(m.id);
+    });
+    g.edges.forEach((e, i) => {
+      const at = `${key}.edges[${i}]（${e?.from} → ${e?.to}）`;
+      const miss = ['from', 'to'].filter(k => !feats.has(e?.[k]) && !mods.has(e?.[k]));
+      miss.forEach(k => E.push(`${at}：${k} "${e?.[k]}" 不是${side}的功能或文件`));
+      if (!EDGE[e?.kind]) return E.push(`${at}：kind "${e?.kind}" 应为 call 或 import`);
+      if (miss.length) return;
+      const k = `${e.from}|${e.to}|${e.kind}`;
+      if (seen.has(k)) return E.push(`${at}：与 ${key}.edges[${seen.get(k)}] 重复`);
+      seen.set(k, i);
+      if (e.kind === 'import' && (!mods.has(e.from) || !mods.has(e.to))) E.push(`${at}：import 两端都应是 modules 里的文件`);
+      else if (e.kind === 'import' && e.from === e.to) E.push(`${at}：文件不能依赖自己`);
+      else if (e.kind === 'call' && (!feats.has(e.from) || !mods.has(e.to))) E.push(`${at}：call 应从功能指向 modules 里的文件`);
+    });
+  }
+  const ns = new Set();
+  D.fixes.forEach((f, i) => {
+    const at = `fixes[${i}]${f?.n != null ? `（#${f.n}）` : ''}`;
+    if (!Number.isInteger(f?.n)) E.push(`${at}：n 应为整数`);
+    else if (ns.has(f.n)) E.push(`${at}：编号 ${f.n} 重复`);
+    ns.add(f?.n);
+    if (!has(f, 'title')) E.push(`${at} 缺 title`);
+    if (!STATUS[f?.status]) E.push(`${at}：status "${f?.status}" 应为 todo、done、kept 或 reverted`);
+    if (!arr(f?.nodes)) E.push(`${at}：nodes 应为数组`);
+    else f.nodes.forEach(id => { if (!all.has(id)) E.push(`${at}：nodes 里的 "${id}" 不是任何功能或文件`); });
+    if (!arr(f?.problems)) E.push(`${at}：problems 应为数组`);
+    else f.problems.forEach((p, j) => {
+      if (!KIND[p?.kind]) E.push(`${at}.problems[${j}]：kind "${p?.kind}" 应为 hidden、needless、surplus 或 special`);
+      if (!LEVEL[p?.level]) E.push(`${at}.problems[${j}]：level ${p?.level == null ? '缺失' : `"${p.level}"`}，应为 repro、code、history 或 guess`);
+    });
+  });
+  D.metrics.forEach((m, i) => {
+    const at = `metrics[${i}]${m?.label ? `（${m.label}）` : ''}`;
+    if (!has(m, 'label')) E.push(`${at} 缺 label`);
+    if (typeof m?.before !== 'number') E.push(`${at}：before 应为数字`);
+    if (m?.after != null && typeof m.after !== 'number') E.push(`${at}：after 应为数字或 null`);
+    if (!SOURCE[m?.source]) E.push(`${at}：source "${m?.source}" 应为 script 或 count`);
+    const ev = m?.evidence, list = x => x == null || arr(x) && x.every(y => typeof y === 'string' && y);
+    if (ev != null && (typeof ev !== 'object' || arr(ev) || !list(ev.before) || !list(ev.after) || Object.keys(ev).some(k => k !== 'before' && k !== 'after')))
+      E.push(`${at}：evidence 应为 {"before": [...], "after": [...]}，两侧各是 "文件:行" 字符串的数组，可省略一侧`);
+    if (m?.fix != null && !ns.has(m.fix)) E.push(`${at}：fix ${m.fix} 不是任何修法的编号`);
+  });
+  return E;
+}
+</script>
+<script>
+'use strict';
+const ICON = {
+  todo: '<circle cx="8" cy="8" r="5"/>',
+  done: '<path d="M3.5 8.5l3 3 6-7"/>',
+  kept: '<path d="M6 4.5v7M10 4.5v7"/>',
+  reverted: '<path d="M6 3.5l-3 3 3 3"/><path d="M3.5 6.5H10a3 3 0 010 6H8"/>',
+  close: '<path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/>',
+  repro: '<path d="M6 2.5h4M7 2.5v4l-3.5 6.2a1 1 0 00.9 1.3h7.2a1 1 0 00.9-1.3L9 6.5v-4"/>',
+  hub: '<path d="M2.5 3.5L8 8M2.5 12.5L8 8M2.5 8H13.5"/>',
+  prev: '<path d="M10 3.5L5.5 8l4.5 4.5"/>',
+  next: '<path d="M6 3.5L10.5 8 6 12.5"/>',
+};
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const icon = k => `<svg class="ic" viewBox="0 0 16 16" aria-hidden="true">${ICON[k]}</svg>`;
+const status = s => `<span class="st s-${s}">${icon(s)}${STATUS[s]}</span>`;
+// 毛线团：底色为状态色，两组交叉的线纹裁在圆内，右下拖一截线头
+const BALL = '<svg viewBox="0 0 40 40" aria-hidden="true"><path class="bt" d="M30 32c3 3 7 2 8 5s-3 5-6 3"/><circle class="bb" cx="20" cy="20" r="17"/><g clip-path="url(#ybc)"><g class="bs"><path d="M1 17c9-7 28-7 38 5"/><path d="M2 25c10-7 27-6 36 6"/><path d="M6 34c8-5 20-5 28 3"/><path d="M14 1c-8 10-8 26 0 38"/><path d="M23 1c-7 10-7 26 1 38"/></g><g class="bl"><path d="M1 21c9-7 28-7 38 5"/><path d="M18 1c-8 10-8 26 0 38"/></g></g><path class="bh" d="M9.5 13.5a12 12 0 0 1 7-6"/></svg>';
+const ball = (f, tag = 'span', attrs = '', cls = '') => `<${tag} class="yb s-${f.status}${cls && ' ' + cls}" ${attrs}>${BALL}<b>${f.n}</b></${tag}>`;
+const mq = {wide: matchMedia('(min-width: 1000px)'), coarse: matchMedia('(pointer: coarse)'), still: matchMedia('(prefers-reduced-motion: reduce)')};
+
+
+let D;
+try { D = JSON.parse($('#data').textContent); } catch (e) { fail([`JSON 解析失败：${e.message}`]); }
+if (D) { const E = validate(D); E.length ? fail(E) : start(); }
+
+function fail(list) {
+  const el = $('#err');
+  el.hidden = false;
+  el.innerHTML = `<h1>报告数据有 ${list.length} 处错误，页面没有渲染</h1><p>改正 &lt;script id="data"&gt; 里的 JSON 后刷新</p><ol>${list.map(x => `<li>${esc(x)}</li>`).join('')}</ol>`;
+  $('#bar').hidden = true;
+  for (const c of $$('#main > :not(#err)')) c.hidden = true;
+  if (D?.title || D?.project) document.title = D.title || D.project;
+}
+
+function start() {
+  const fixes = [...D.fixes].sort((a, b) => a.n - b.n);
+  const fixByN = new Map(fixes.map(f => [f.n, f]));
+  const info = new Map();
+  D.features.forEach(f => info.set(f.id, {id: f.id, label: f.label, col: 'f'}));
+  for (const g of [D.before, D.after]) g?.modules.forEach(m => info.has(m.id) || info.set(m.id, {id: m.id, label: m.label, col: 'm'}));
+  const fixesOf = id => fixes.filter(f => f.nodes.includes(id));
+  const SIDES = D.after ? ['before', 'after'] : ['before'];
+  const present = {before: new Set(D.before.modules.map(m => m.id)), after: new Set((D.after?.modules ?? []).map(m => m.id))};
+  // 改前改后的线并成一份：两侧都有的线共用一个元素，切换时就地变形；只在一侧的淡入淡出。
+  // 改后显示：改后的线，加上改前有、改后去掉的线（标红）
+  const ekey = e => `${e.from}|${e.to}|${e.kind}`;
+  const keysB = new Set(D.before.edges.map(ekey)), keysA = new Set((D.after?.edges ?? []).map(ekey));
+  const U = [...D.before.edges.map(e => ({...e, inB: true, inA: keysA.has(ekey(e))})),
+    ...(D.after?.edges ?? []).filter(e => !keysB.has(ekey(e))).map(e => ({...e, inB: false, inA: true}))];
+  U.forEach((e, i) => { e.i = i; e.rm = !!D.after && !e.inA; });
+  const shown = (e, s) => s === 'before' ? e.inB : e.inA || e.rm;
+  // 枢纽：4 个以上功能时，七成功能都调用的模块（入口、全局状态、请求客户端这类）。连向它的线会挤成一束、说明不了什么，
+  // 默认收起，不参与排布和穿团；点功能或毛线团时照常画出。按改前改后的并集算，两侧同一组，节点不挪位
+  const hubs = (() => {
+    const nF = D.features.length, by = new Map();
+    if (nF < 4) return new Map();
+    for (const e of U) if (e.kind === 'call') (by.get(e.to) || by.set(e.to, new Set()).get(e.to)).add(e.from);
+    return new Map([...by].filter(([, f]) => f.size >= nF * .7).map(([id, f]) => [id, f.size]));
+  })();
+  U.forEach(e => { e.hub = e.kind === 'call' && hubs.has(e.to); });
+  const hubText = id => hubs.get(id) === D.features.length ? '所有功能经过' : '多数功能经过';
+
+  // 排布：模块按所在目录成组，组内相邻；组的先后与组内先后都按相连节点的平均位置反复排序（重心法）减少交叉。
+  // 改前改后共用一份模块顺序（并集），切换时节点不动
+  const featIdx = new Map(D.features.map((f, i) => [f.id, i]));
+  const yarn = id => `--yc:var(--y${featIdx.get(id) % 8})`;
+  const dirOf = id => { const l = info.get(id).label, i = l.lastIndexOf('/'); return i < 0 ? '' : l.slice(0, i + 1); };
+  const layout = (() => {
+    const nb = new Map();
+    const link = (a, b, w) => { (nb.get(a) || nb.set(a, []).get(a)).push([b, w]); };
+    const edges = U.filter(e => !e.hub && (e.inB || [e.from, e.to].some(id => info.get(id).col === 'm' && !present.before.has(id))));
+    for (const e of edges) { const w = e.kind === 'import' ? .5 : 1; link(e.from, e.to, w); link(e.to, e.from, w); }
+    const score = (ids, pos) => new Map(ids.map(id => {
+      const ls = (nb.get(id) || []).filter(([o]) => pos.has(o));
+      const sw = ls.reduce((a, [, w]) => a + w, 0);
+      return [id, sw ? ls.reduce((a, [o, w]) => a + pos.get(o) * w, 0) / sw : pos.get(id)];
+    }));
+    const byScore = (ids, v) => ids.map((id, i) => [id, i]).sort((a, b) => v.get(a[0]) - v.get(b[0]) || a[1] - b[1]).map(x => x[0]);
+    const grouped = (ids, v) => {
+      const g = new Map();
+      for (const id of byScore(ids, v)) (g.get(dirOf(id)) || g.set(dirOf(id), []).get(dirOf(id))).push(id);
+      const mean = m => m.reduce((a, id) => a + v.get(id), 0) / m.length;
+      return [...g.values()].map((m, i) => [m, mean(m), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).flatMap(x => x[0]);
+    };
+    const norm = (pos, ids) => ids.forEach((id, i) => pos.set(id, (i + .5) / ids.length));
+    const all = [...D.before.modules.map(m => m.id), ...(D.after?.modules ?? []).map(m => m.id).filter(id => !present.before.has(id))];
+    let F = D.features.map(f => f.id), M = all;
+    const pos = new Map();
+    norm(pos, F); norm(pos, M);
+    for (let k = 0; k < 8; k++) {
+      M = grouped(M, score(M, pos)); norm(pos, M);
+      F = byScore(F, score(F, pos)); norm(pos, F);
+    }
+    return {F, all: M};
+  })();
+
+  const state = {sel: null, hover: null, side: 'before'};
+  let lastTrigger = null;
+  const selFix = () => state.sel?.t === 'fix' ? fixByN.get(state.sel.n) : null;
+  const selNode = () => state.sel?.t === 'node' ? info.get(state.sel.id) : null;
+  const selMetric = () => state.sel?.t === 'metric' ? D.metrics[state.sel.i] : null;
+
+  document.title = D.title || D.project;
+  $('#project').textContent = D.project;
+  $('#scope').textContent = D.scope ?? '';
+  $('#scope').hidden = !D.scope;
+  // 窄屏上范围最多两行；真被截断时才可点开看全文
+  {
+    const sc = $('#scope');
+    // 被 line-clamp 截断时 scrollHeight 不含藏起的行，只能展开量一次再比
+    const sync = () => { if (sc.classList.contains('open')) return; const h = sc.clientHeight; sc.classList.add('open'); const cut = sc.clientHeight > h + 1; sc.classList.remove('open');
+      cut ? (sc.setAttribute('role', 'button'), sc.tabIndex = 0, sc.setAttribute('aria-expanded', 'false')) : (sc.removeAttribute('role'), sc.removeAttribute('tabindex'), sc.removeAttribute('aria-expanded')); };
+    const open = () => { if (sc.getAttribute('role') !== 'button') return; sc.classList.add('open'); sc.setAttribute('aria-expanded', 'true'); sc.removeAttribute('role'); sc.removeAttribute('tabindex'); };
+    sc.addEventListener('click', open);
+    sc.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    new ResizeObserver(sync).observe(sc);
+  }
+  $('#sides').hidden = !D.after;
+  $('#sheet-prev').innerHTML = icon('prev');
+  $('#sheet-next').innerHTML = icon('next');
+  $('#sheet-close').innerHTML = icon('close');
+
+  const svgLine = (cls, d) => `<svg width="26" height="12" aria-hidden="true"><path class="lg ${cls}" d="${d}"/></svg>`;
+  // 图例一行，每项是样例加一个短词，窄屏自动折行；改后的团只列数据里出现的状态，虚框文件出现时接在末尾。
+  // 枢纽不进图例（节点上的徽标自己说明），“点一下只看相关的线”也不写（节点悬停、按下都有反馈）
+  const item = (sample, text) => `<span>${sample}${text}</span>`;
+  const line = cls => svgLine(cls, 'M1 6h24');
+  const arc = `<svg width="26" height="12" aria-hidden="true"><path class="lg n" d="M3 1.5C18 1.5 18 10.5 6 10.5"/><path d="M2 10.5l5-3v6z" fill="var(--neutral-thread)"/></svg>`;
+  const multi = `<svg width="26" height="12" aria-hidden="true">${[['--y0', 2], ['--y2', 6], ['--y4', 10]].map(([c, y]) => `<path d="M2 ${y}h22" stroke="var(${c})" stroke-width="2.4" stroke-linecap="round"/>`).join('')}</svg>`;
+  const dot = st => `<span class="yb s-${st}">${BALL}</span>`;
+  const used = Object.keys(STATUS).filter(st => D.fixes.some(f => f.status === st));
+  const ghost = t => item('<i class="lg-ghost"></i>', t);
+  const ghosts = s => [...present[s === 'before' ? 'after' : 'before']].some(id => !present[s].has(id));
+  {
+    const knots = s => used.map(st => item(s === 'after' && st === 'done' ? `<span class="tag s-done">${icon('done')}</span>` : dot(st), STATUS[st]));
+    const side = s => (s === 'before'
+      ? [item(multi, '功能用到的文件'), item(arc, '文件依赖'), used.length && item(dot('todo'), '架构问题')]
+      : [item(line('gone'), '删除'), item(line('new'), '新增'), item(line('n'), '不变'), ...knots(s), ghosts(s) && ghost('改后删掉的文件')]).filter(Boolean).join('');
+    $('#legend').innerHTML = SIDES.map(s => `<div data-for="${s}">${side(s)}</div>`).join('');
+  }
+
+  // ---------- 图 ----------
+  // 所有模块路径共有的目录前缀只在列头写一次，窄屏上给文件名腾地方
+  const prefix = (() => {
+    const segs = [...info.values()].filter(n => n.col === 'm').map(n => n.label.split('/').slice(0, -1));
+    if (segs.length < 2) return '';
+    let k = 0;
+    while (segs.every(s => k < s.length && s[k] === segs[0][k])) k++;
+    return k ? segs[0].slice(0, k).join('/') + '/' : '';
+  })();
+  // 功能名只在词与词之间换行，避免「消息」被拆成两行；词典不认识的词会被切成连续单字（「线|程」），单字之间不断开
+  // 词间与标识符的 _ - 之后给换行机会；左括号后、标点前不给，避免行尾落单「（」或行首出现「、」
+  const words = (() => { try { const seg = new Intl.Segmenter('zh', {granularity: 'word'}), han = /^\p{Script=Han}$/u, open = /[\p{Ps}\p{Pi}]$/u, close = /^[\p{Pe}\p{Pf}\p{Po}]/u;
+    return s => [...seg.segment(s)].map(x => x.segment).reduce((h, w, i, a) => h + (i && !(han.test(w) && han.test(a[i - 1])) && !open.test(a[i - 1]) && !close.test(w) ? '<wbr>' : '') + esc(w).replace(/(\w[_-])(?=\w)/g, '$1<wbr>'), ''); } catch { return esc; } })();
+  function labelHTML(n, solo) {
+    if (n.col === 'f') return `<span class="t"><span>${words(n.label)}</span></span>`;
+    const dir = dirOf(n.id), base = n.label.slice(dir.length), rel = dir.slice(prefix.length);
+    return `<span class="t" translate="no">${solo && rel ? `<span class="dir">${esc(rel)}</span>` : ''}<span class="base">${esc(base)}</span></span>`;
+  }
+  // 文件名放不下时从中间省略，保住最后一个词：session-manager-legacy-adapter.ts → session…adapter.ts
+  // scrollWidth 取整，文字只超出零点几像素时会误判为放得下，浏览器却照样画省略号；所以按小数宽度量
+  const range = document.createRange();
+  function wide(el) {
+    range.selectNodeContents(el);
+    return range.getBoundingClientRect().width > el.getBoundingClientRect().width + .02;
+  }
+  function clipMiddle(el) {
+    const full = el.textContent, over = () => wide(el);
+    if (!over()) return;
+    const cut = full.search(/[^-_]+$/), tail = cut > 0 ? full.slice(cut) : full.slice(-Math.min(12, Math.floor(full.length / 2)));
+    for (const t of [tail, full.slice(-8)]) for (let k = full.length - t.length - 1; k > 2; k--) {
+      el.textContent = full.slice(0, k) + '…' + t;
+      if (!over()) return;
+    }
+  }
+  // 目录放不下时从中间省略，保留开头与最后一级：a/b/c/d/ → a/…/d/
+  function squeeze(el) {
+    if (!wide(el)) return;
+    const segs = el.textContent.replace(/\/$/, '').split('/');
+    for (let keep = segs.length - 2; keep >= 1; keep--) {
+      el.textContent = `${segs[0]}/…/${segs.slice(-keep).join('/')}/`;
+      if (!wide(el)) return;
+    }
+    el.textContent = `…/${segs[segs.length - 1]}/`;
+    // 单行模块连最后一级目录都放不下时只留文件名，完整路径在悬停提示与详情里
+    if (wide(el) && el.classList.contains('dir')) el.remove();
+  }
+
+  const graph = (() => {
+    const host = $('#graph');
+    const g = {host, nodes: new Map(), badges: [], edges: [], knots: [], heads: [], own: {}, cols: {}, nb: {}, roving: null, width: 0, p: 0, raf: 0, sampled: false};
+    g.build = () => {
+      const W0 = host.clientWidth;
+      if (!W0) return;
+      g.width = W0;
+      const mods = layout.all;
+      const coarse = mq.coarse.matches, RH = coarse ? 46 : 40, NH = coarse ? 36 : 30, HEAD = 40, BW = 22, GH = 22, GAP = 6;
+      const narrow = W0 < 640, HX = narrow ? 18 : 0, PAD = narrow ? 8 : 10, IN = narrow ? 8 : 20, W = W0 - 2 * IN;
+      const clamp = (lo, v, hi) => Math.round(Math.min(hi, Math.max(lo, v)));
+      // 两列之间只留够毛线团与交叉的宽度，其余给模块名和右侧依赖弧；窄屏的间隙下限 = 毛线团点按区 44 + 两侧各 1px + 线端 2px
+      const fw = narrow ? clamp(100, W * .31, 128) : clamp(150, W * .24, 230);
+      const gap = narrow ? clamp(48, W * .14, 62) : clamp(130, W * .17, 180);
+      const arc = narrow ? clamp(20, W * .055, 32) : clamp(70, W * .15, 160);
+      const mw = W - fw - gap - arc, FX = IN, MX = FX + fw + gap;
+      // 功能名可换行：先按列宽量出每个功能的高度。窄屏上编号放到名字下面一行，名字少换一行
+      // 编号一行放不下就折到下一行，每行 BR 高
+      const KB = 26, BR = 22, perRow = w => Math.max(1, Math.floor(w / BW)), fcap = perRow(fw - 26);
+      const frows = id => Math.ceil(fixesOf(id).length / fcap);
+      const fpad = id => { const n = fixesOf(id).length; return narrow ? `padding-right:6px;padding-bottom:${n ? KB + (frows(id) - 1) * BR : 0}px` : `padding-right:${PAD + n * BW}px`; };
+      const probe = document.createElement('div');
+      probe.className = 'probe';
+      probe.innerHTML = layout.F.map(id => `<span class="node c-f" style="width:${fw}px;${fpad(id)}">${labelHTML(info.get(id))}</span>`).join('') +
+        mods.map(id => `<span class="node c-m">${labelHTML(info.get(id), true)}</span><span class="node c-m">${labelHTML(info.get(id))}</span>`).join('') +
+        `<span class="hubtag">${icon('hub')}所有功能经过</span>`;
+      host.append(probe);
+      const pn = $$('.node', probe), tw = el => $('.t', el).getBoundingClientRect().width;
+      const fh = pn.slice(0, layout.F.length).map(el => Math.max(NH, Math.ceil(el.getBoundingClientRect().height)));
+      const lw = new Map(mods.map((id, i) => [id, [tw(pn[layout.F.length + 2 * i]), tw(pn[layout.F.length + 2 * i + 1])]]));
+      const hw = $('.hubtag', probe).getBoundingClientRect().width;
+      probe.remove();
+      // 模块的编号默认排在名字右侧；会把名字挤到不足一行六成时，改排到名字下面，名字独占一行
+      const ML = narrow ? 8 : 14, room = mw - ML - PAD, mcap = perRow(room);
+      // 同目录两个以上的模块共用一个目录小标题，行里只写文件名；独自一个的直接写目录加文件名
+      const P = new Map(), heads = [];
+      let y = HEAD;
+      mods.forEach((id, i) => {
+        const dir = dirOf(id), first = i === 0 || dirOf(mods[i - 1]) !== dir;
+        const size = first ? mods.slice(i).findIndex(o => dirOf(o) !== dir) : 0, n = size < 0 ? mods.length - i : size;
+        if (first) {
+          if (i) y += GAP;
+          if (n > 1) { heads.push({dir, y, ids: mods.slice(i, i + n)}); y += GH; }
+        }
+        // 窄屏上枢纽徽标放在文件名下一行，这一行加高
+        const solo = first && n === 1, hx = hubs.has(id) ? HX : 0, nb = fixesOf(id).length;
+        const line = hx ? Math.max(lw.get(id)[+!solo], hw) : lw.get(id)[+!solo] + (hubs.has(id) ? hw + 8 : 0), left = room - nb * BW - 4;
+        const brow = nb && left < line && left < room * .6 ? Math.ceil(nb / mcap) : 0, ex = hx + brow * BR;
+        P.set(id, {x: MX, w: mw, h: NH + ex, y: y + (RH + ex) / 2, col: 'm', solo, brow});
+        y += RH + ex;
+      });
+      const nf = layout.F.length, need = fh.reduce((a, h) => a + h, 0) + Math.max(0, nf - 1) * 10;
+      const span = Math.max(y - HEAD, need, RH);
+      const cy = layout.F.map((_, i) => HEAD + (i + .5) * span / nf);
+      for (let i = 0; i < nf; i++) cy[i] = Math.max(cy[i], i ? cy[i - 1] + (fh[i - 1] + fh[i]) / 2 + 10 : HEAD + fh[0] / 2);
+      for (let i = nf - 1; i >= 0; i--) cy[i] = Math.min(cy[i], i < nf - 1 ? cy[i + 1] - (fh[i] + fh[i + 1]) / 2 - 10 : HEAD + span - fh[i] / 2);
+      layout.F.forEach((id, i) => P.set(id, {x: FX, w: fw, h: fh[i], y: cy[i], col: 'f'}));
+      const X1 = FX + fw, X2 = MX - 2, KX = Math.round((X1 + X2) / 2);
+
+      // 同一节点同一侧的多条线按对端高低错开，便于循线；两侧的线一起排，切换时线端不动
+      const ports = new Map(), off = new Map();
+      const port = (id, side, i, end, y) => { const k = id + side; (ports.get(k) || ports.set(k, Object.assign([], {h: P.get(id).h})).get(k)).push([i, end, y]); };
+      for (const e of U) {
+        port(e.from, '>r', e.i, 'from', P.get(e.to).y);
+        port(e.to, e.kind === 'import' ? '>r' : '>l', e.i, 'to', P.get(e.from).y);
+      }
+      for (const list of ports.values()) {
+        list.sort((a, b) => a[2] - b[2]);
+        const step = Math.min(5, (Math.min(list.h, 44) - 14) / Math.max(1, list.length - 1));
+        list.forEach(([i, end], j) => off.set(i + end, (j - (list.length - 1) / 2) * step));
+      }
+
+      // 毛线团：一条修法牵涉的功能→模块线都穿过它，进出顺序相反，交叉就缠在团里；改后已解的平行穿过，只挂一个 ✓ 签。
+      // 一根线属于几个根因就依次穿过几个团，两团之间露出的那段就是它们共用的线。两侧各排一次
+      const KS = 50, KR = 22, K = {}, via = {};
+      U.forEach(e => { e.thru = false; });
+      for (const s of SIDES) {
+        const calls = U.filter(e => (s === 'before' ? e.inB : e.inA) && e.kind !== 'import'), ks = [];
+        for (const f of fixes) {
+          const ids = new Set(f.nodes);
+          // 先取两端都在修法里的线；修法只列了模块时，取接进这些模块的线
+          const into = calls.filter(e => ids.has(e.to)), both = into.filter(e => ids.has(e.from)), all = both.length ? both : into;
+          // 优先穿不连枢纽的线；修法只牵涉枢纽时才让连枢纽的线穿团，这几根照常画出
+          const mine = all.some(e => !e.hub) ? all.filter(e => !e.hub) : all;
+          mine.forEach(e => { e.thru = true; });
+          if (mine.length) ks.push({f, mine, tied: s === 'after' && f.status === 'done', y: mine.reduce((a, e) => a + P.get(e.from).y + P.get(e.to).y, 0) / mine.length / 2});
+        }
+        // 团与团上下至少隔一个点按区（44px）再加余量，放不下就把图拉高
+        ks.sort((a, b) => a.y - b.y);
+        ks.forEach((k, i) => { k.y = Math.max(k.y, HEAD + KR, i ? ks[i - 1].y + KS : 0); });
+        K[s] = ks;
+      }
+      const H = Math.max(HEAD + span + 18, ...SIDES.map(s => (K[s].at(-1)?.y ?? 0) + KR + 6));
+      for (const s of SIDES) {
+        const ks = K[s], v = via[s] = new Map();
+        for (let i = ks.length - 1; i >= 0; i--) ks[i].y = Math.min(ks[i].y, i === ks.length - 1 ? H - KR - 6 : ks[i + 1].y - KS);
+        for (const k of ks) {
+          const n = k.mine.length, step = Math.min(narrow ? 2.6 : 3.4, 20 / n), o = j => (j - (n - 1) / 2) * step;
+          const end = (e, key) => P.get(e[key]).y;
+          const byIn = [...k.mine].sort((a, b) => end(a, 'from') - end(b, 'from') || end(a, 'to') - end(b, 'to'));
+          const byOut = [...k.mine].sort((a, b) => end(a, 'to') - end(b, 'to') || end(a, 'from') - end(b, 'from'));
+          byOut.forEach((e, j) => (v.get(e.i) || v.set(e.i, []).get(e.i)).push([k.y, ...(k.tied ? [o(j), o(j)] : [o(byIn.indexOf(e)), o(n - 1 - j)])]));
+        }
+        // 穿过多个团时，离模块端最远的先穿，最后一个团离模块最近，出团后直接接到模块
+        for (const [i, list] of v) { const y2 = P.get(U[i].to).y; list.sort((a, b) => Math.abs(b[0] - y2) - Math.abs(a[0] - y2)); }
+        g.own[s] = new Map(ks.map(k => [k.f.n, new Set(k.mine.map(e => e.i))]));
+      }
+
+      const ends = e => [P.get(e.from).y + off.get(e.i + 'from'), P.get(e.to).y + off.get(e.i + 'to')];
+      const direct = (y1, y2) => { const c = (X2 - X1) * .5; return `M${X1} ${y1}C${X1 + c} ${y1} ${X2 - c} ${y2} ${X2} ${y2}`; };
+      const route = (e, s) => {
+        const [y1, y2] = ends(e), v = via[s].get(e.i);
+        if (!v) return direct(y1, y2);
+        const [ky0, p0] = v[0], [kyN, , qN] = v.at(-1), d1 = (KX - X1) * .55, d2 = (X2 - KX) * .55;
+        const mid = v.map(([ky, p, q], j) => `${j ? `L${KX} ${ky + p}` : ''}${p === q ? '' : `L${KX} ${ky + q}`}`).join('');
+        return `M${X1} ${y1}C${X1 + d1} ${y1} ${KX - d1 * .7} ${ky0 + p0} ${KX} ${ky0 + p0}${mid}C${KX + d2 * .7} ${kyN + qN} ${X2 - d2} ${y2} ${X2} ${y2}`;
+      };
+      let svg = '';
+      for (const e of U) {
+        const [y1, y2] = ends(e), cls = `e k-${e.kind}${e.rm ? ' rm' : ''}${D.after && !e.inB ? ' add' : ''}${e.hub ? ' hub' : ''}${e.thru ? ' thru' : ''}`;
+        if (e.kind === 'import') {
+          const x = MX + mw + 2, r = 10 + (arc - 18) * Math.sqrt(Math.abs(y2 - y1) / span), c = x + r * 1.34, d = `M${x} ${y1}C${c} ${y1} ${c} ${y2} ${x + 6} ${y2}`;
+          e.d = {before: d, after: d};
+          svg += `<g class="${cls}" data-i="${e.i}"><path class="w" d="${d}"/><path class="ah" d="M${x} ${y2}l6.5-3.5v7z"/></g>`;
+          continue;
+        }
+        // 只在一侧的线，另一侧沿用同一条路径（看不见）；改后去掉的线不再穿团，直接连过去
+        const b = e.inB ? route(e, 'before') : null, a = e.inA ? route(e, 'after') : e.rm ? direct(y1, y2) : null;
+        e.d = {before: b ?? a, after: a ?? b};
+        const d = e.d[state.side];
+        svg += `<g class="${cls}" data-i="${e.i}" style="${yarn(e.from)}"><path class="w" d="${d}"/><path class="hl" d="${d}"/><circle class="bd" cx="${X2}" cy="${y2}" r="${narrow ? 2.8 : 3.2}"/></g>`;
+      }
+
+      let html = `<span class="colh" style="left:${FX}px">功能入口</span><span class="colh" style="left:${MX}px;max-width:${mw + arc}px;overflow:hidden;text-overflow:ellipsis">文件${prefix ? ` <code translate="no">${esc(prefix)}</code>` : ''}</span>`;
+      html += `<svg class="edges" width="${W0}" height="${H}" viewBox="0 0 ${W0} ${H}" aria-hidden="true"><g class="base">${svg}</g><g class="top"></g></svg>`;
+      const kn = new Map();
+      for (const s of SIDES) for (const k of K[s]) (kn.get(k.f.n) || kn.set(k.f.n, {}).get(k.f.n))[s] = k.y;
+      for (const [n, o] of kn) {
+        const f = fixByN.get(n), solved = !!D.after && f.status === 'done';
+        html += `<button class="knot${solved ? ' solved' : ''}" data-fix="${n}" tabindex="-1" title="${esc(f.title)}" aria-label="毛线团 ${n}：${esc(f.title)}" style="left:${KX - KR}px;top:${(o.before ?? o.after) - KR}px">${ball(f, 'span', `style="--d:${narrow ? 32 : 36}px"`)}${solved ? `<span class="tag s-done">${icon('done')}${n}</span>` : ''}</button>`;
+      }
+      for (const h of heads) html += `<span class="gh" data-ids="${esc(h.ids.join(' '))}" title="${esc(h.dir)}" translate="no" style="left:${MX + PAD + 4}px;top:${h.y}px;width:${mw - PAD - 4}px;height:${GH}px">${esc(h.dir.slice(prefix.length))}</span>`;
+      for (const [id, p] of P) {
+        const n = info.get(id), fx = fixesOf(id), isF = p.col === 'f';
+        const note = isF || !D.after ? '' : !present.before.has(id) ? '（改后新增）' : !present.after.has(id) ? '（改后已没有）' : '';
+        const hub = hubs.has(id) ? `<span class="hubtag">${icon('hub')}${hubText(id)}</span>` : '';
+        html += `<button class="node c-${p.col}${hub ? ' hub' : ''}" data-node="${esc(id)}" tabindex="-1" title="${esc(n.label)}${note}" style="${isF ? yarn(id) + ';' + fpad(id) : p.brow ? `padding-right:${PAD}px;padding-bottom:${p.brow * BR}px` : `padding-right:${PAD + fx.length * BW}px`};left:${p.x}px;top:${p.y - p.h / 2}px;width:${p.w}px;height:${p.h}px">${labelHTML(n, p.solo)}${hub}</button>`;
+        fx.forEach((f, k) => {
+          const [bx, by] = isF && narrow ? [p.x + 20 + k % fcap * BW, p.y + p.h / 2 - KB + 1 - (frows(id) - 1 - Math.floor(k / fcap)) * BR]
+            : p.brow ? [p.x + ML - 2 + k % mcap * BW, p.y + p.h / 2 - (p.brow - Math.floor(k / mcap)) * BR - 3]
+            : [p.x + p.w - (fx.length - k) * BW - 4, p.y - 10];
+          html += ball(f, 'button', `data-fix="${f.n}" data-for="${esc(id)}" tabindex="-1" aria-label="修法 ${f.n}：${esc(f.title)}" style="left:${bx}px;top:${by}px"`, 'gb');
+        });
+      }
+      cancelAnimationFrame(g.raf);
+      host.style.height = H + 'px';
+      host.classList.toggle('narrow', narrow);
+      host.innerHTML = html;
+      for (const el of $$('.gh, .node .dir', host)) squeeze(el);
+      for (const el of $$('.node .base', host)) clipMiddle(el);
+      g.nodes = new Map($$('.node', host).map(el => [el.dataset.node, el]));
+      g.badges = $$('.gb', host);
+      g.edges = $$('g.e', host).map(el => ({el, paths: $$('.w,.hl', el), ...U[+el.dataset.i]}));
+      g.knots = $$('.knot', host).map(el => [el, fixByN.get(+el.dataset.fix), kn.get(+el.dataset.fix)]);
+      g.base = $('g.base', host); g.top = $('g.top', host);
+      g.heads = $$('.gh', host).map(el => [el, el.dataset.ids.split(' ')]);
+      for (const s of SIDES) {
+        g.cols[s] = {f: [...layout.F], m: mods.filter(id => present[s].has(id))};
+        const nb = g.nb[s] = new Map();
+        for (const e of U) if (shown(e, s)) for (const [a, b] of [[e.from, e.to], [e.to, e.from]]) (nb.get(a) || nb.set(a, new Set()).get(a)).add(b);
+      }
+      g.sampled = false;
+      g.setRoving(g.nodes.has(g.roving) ? g.roving : layout.F[0] ?? mods[0]);
+      g.show(state.side, true);
+      g.apply();
+    };
+    g.setRoving = id => {
+      g.nodes.get(g.roving)?.setAttribute('tabindex', '-1');
+      g.roving = id;
+      g.nodes.get(id)?.setAttribute('tabindex', '0');
+    };
+    // 两侧路径的命令结构不同，按弧长等分取点、逐点插值；动画首尾换回原路径
+    const N = 48;
+    const pts = (el, d) => { el.setAttribute('d', d); const L = el.getTotalLength(); return Array.from({length: N + 1}, (_, k) => { const q = el.getPointAtLength(L * k / N); return [q.x, q.y]; }); };
+    const ease = t => t < .5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+    function frame(p) {
+      const t = ease(p);
+      for (const e of g.edges) {
+        if (e.d.before === e.d.after) continue;
+        const d = t <= 0 ? e.d.before : t >= 1 ? e.d.after : 'M' + e.pb.map(([x, y], k) => `${(x + (e.pa[k][0] - x) * t).toFixed(1)} ${(y + (e.pa[k][1] - y) * t).toFixed(1)}`).join('L');
+        for (const el of e.paths) el.setAttribute('d', d);
+      }
+      for (const [el, , o] of g.knots) if (o.before != null && o.after != null) el.style.translate = `0 ${((o.after - o.before) * t).toFixed(1)}px`;
+    }
+    g.show = (s, instant) => {
+      host.classList.toggle('after', s === 'after');
+      const gone = id => info.get(id).col === 'm' && !present[s].has(id);
+      for (const [id, el] of g.nodes) el.classList.toggle('ghost', gone(id));
+      for (const b of g.badges) b.classList.toggle('ghost', gone(b.dataset.for));
+      for (const [el, , o] of g.knots) el.classList.toggle('off', o[s] == null);
+      for (const e of g.edges) e.el.classList.toggle('off', !shown(e, s));
+      if (!g.cols[s][info.get(g.roving)?.col]?.includes(g.roving)) g.setRoving(layout.F[0] ?? g.cols[s].m[0]);
+      const to = s === 'after' ? 1 : 0;
+      cancelAnimationFrame(g.raf);
+      if (instant || mq.still.matches) { g.p = to; return frame(to); }
+      if (!g.sampled) {
+        for (const e of g.edges) if (e.d.before !== e.d.after) { const el = e.paths[0], cur = el.getAttribute('d'); e.pb = pts(el, e.d.before); e.pa = pts(el, e.d.after); el.setAttribute('d', cur); }
+        g.sampled = true;
+      }
+      const from = g.p, t0 = performance.now(), dur = 700 * Math.abs(to - from);
+      const tick = now => { const q = dur ? Math.min(1, (now - t0) / dur) : 1; g.p = from + (to - from) * q; frame(g.p); if (q < 1) g.raf = requestAnimationFrame(tick); };
+      g.raf = requestAnimationFrame(tick);
+    };
+    g.apply = () => {
+      if (!g.width) return;
+      const s = state.side, hv = state.hover && g.nodes.has(state.hover) ? state.hover : null;
+      const f = selFix(), nd = selNode();
+      let pri = null, lit = null, edgeOn = null;
+      const around = id => { pri = new Set([id]); lit = new Set([id, ...(g.nb[s].get(id) || [])]); edgeOn = e => e.from === id || e.to === id; };
+      if (hv) around(hv);
+      else if (f) {
+        const own = g.own[s].get(f.n) ?? new Set();
+        pri = new Set(f.nodes);
+        edgeOn = e => own.has(e.i) || pri.has(e.from) && pri.has(e.to);
+        lit = new Set([...pri, ...g.edges.filter(e => shown(e, s) && edgeOn(e)).flatMap(e => [e.from, e.to])]);
+      }
+      else if (nd) around(nd.id);
+      host.classList.toggle('focusing', !!lit);
+      for (const [el, ids] of g.heads) el.classList.toggle('lit', !!lit && ids.some(id => lit.has(id)));
+      for (const [el, k, o] of g.knots) {
+        el.classList.toggle('lit', o[s] != null && !!lit && (k === f || !hv && !f && k.nodes.some(id => pri.has(id))));
+        el.classList.toggle('cur', k === f);
+      }
+      for (const [id, el] of g.nodes) { el.classList.toggle('lit', !!lit?.has(id)); el.classList.toggle('pri', !!pri?.has(id)); }
+      for (const b of g.badges) {
+        b.classList.toggle('lit', !!lit?.has(b.dataset.for));
+        b.classList.toggle('cur', !!f && +b.dataset.fix === f.n);
+      }
+      for (const e of g.edges) {
+        const on = shown(e, s) && !!edgeOn?.(e);
+        e.el.classList.toggle('lit', on);
+        const want = on ? g.top : g.base;
+        if (e.el.parentNode !== want) want.append(e.el);
+      }
+    };
+    host.addEventListener('keydown', ev => {
+      const b = ev.target.closest('.node');
+      if (!b) return;
+      const cols = g.cols[state.side], list = cols[info.get(b.dataset.node).col], i = list.indexOf(b.dataset.node);
+      if (i < 0) return;
+      let next = null;
+      if (ev.key === 'ArrowDown') next = list[i + 1];
+      else if (ev.key === 'ArrowUp') next = list[i - 1];
+      else if (ev.key === 'Home') next = list[0];
+      else if (ev.key === 'End') next = list[list.length - 1];
+      else if (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft') {
+        const to = cols[ev.key === 'ArrowRight' ? 'm' : 'f'];
+        if (to !== list && to.length) { const y = b.offsetTop; next = to.reduce((best, id) => Math.abs(g.nodes.get(id).offsetTop - y) < Math.abs(g.nodes.get(best).offsetTop - y) ? id : best, to[0]); }
+      }
+      if (next == null) return;
+      ev.preventDefault();
+      g.setRoving(next);
+      g.nodes.get(next).focus();
+    });
+    // 在下一帧重建：回调里直接改高度会让 ResizeObserver 同帧再次通知
+    new ResizeObserver(() => requestAnimationFrame(() => { if (host.clientWidth && host.clientWidth !== g.width) g.build(); })).observe(host);
+    return g;
+  })();
+  if (!D.features.length && !D.before.modules.length) { $('#graph').outerHTML = `<p class="empty">还没有地图数据</p>`; $('#legend').hidden = true; }
+
+  // ---------- 详情 ----------
+  const metricsOf = n => D.metrics.filter(m => m.fix === n);
+  const num = v => v == null ? '待测' : String(v);
+  const srcTag = m => `<span class="src" title="${SOURCE[m.source][1]}">${SOURCE[m.source][0]}</span>`;
+  const nums = (m, cls) => `<span class="${cls}"><span class="b">${m.before}<span class="on-b"> 处</span></span><span class="ar">→</span><span class="a${m.after == null ? ' na' : ''}">${num(m.after)}</span></span>`;
+  const metricBlock = (m, withLabel = true) => `<div class="mt">${withLabel ? `<div class="mt-h"><span>${esc(m.label)}</span>${nums(m, 'gn')}</div>` : nums(m, 'mv')}` +
+    `<p class="mt-src">${SOURCE[m.source][1]}</p>` +
+    [['before', '改前'], ['after', '改后']].filter(([k]) => m.evidence?.[k]?.length).map(([k, t]) =>
+      `<div${k === 'after' ? ' class="on-a"' : ''}><p class="ev-h">${t}依据 ${m.evidence[k].length} 处</p><ul class="ev">${m.evidence[k].map(x => `<li><code translate="no">${esc(x)}</code></li>`).join('')}</ul></div>`).join('') + '</div>';
+  const lvTag = l => `<span class="lv lv-${l}" title="证据：${LEVEL[l][1]}">${l === 'repro' ? icon('repro') : ''}${LEVEL[l][0]}</span>`;
+  function fixBody(f, full) {
+    const ms = metricsOf(f.n);
+    let h = full ? status(f.status) : '';
+    if (f.fix) h += `<h3>修法</h3><p class="fix-text">${esc(f.fix)}</p>`;
+    if (f.problems.length) h += `<h3>问题 <span>${f.problems.length}</span></h3><ul class="probs">${f.problems.map(p =>
+      `<li><span class="ph"><span class="pk">${KIND[p.kind]}</span>${lvTag(p.level)}</span><code translate="no">${esc(p.loc)}</code>${p.text ? `<p>${esc(p.text)}</p>` : ''}</li>`).join('')}</ul>`;
+    if (ms.length) h += `<h3>收益</h3>${ms.map(m => metricBlock(m)).join('')}`;
+    if (full && f.verify) h += `<div class="on-a"><h3>验证</h3><p>${esc(f.verify)}</p></div>`;
+    if (full && f.note) h += `<div class="on-a"><h3>说明</h3><p>${esc(f.note)}</p></div>`;
+    return `<div class="body">${h}</div>`;
+  }
+  function metricBody(m) {
+    const f = m.fix != null ? fixByN.get(m.fix) : null;
+    return `<div class="body">${metricBlock(m, false)}${f ? `<h3>对应的修法</h3><div class="chips"><button data-fix="${f.n}">${ball(f)}${esc(f.title)}</button></div>` : ''}</div>`;
+  }
+  function nodeBody(n) {
+    const fx = fixesOf(n.id);
+    const via = key => new Set((D[key]?.edges ?? []).filter(e => e.kind === 'call' && e.to === n.id).map(e => e.from)).size;
+    const hubP = (key, cls) => `<p class="mt-src${cls}">枢纽：${D.features.length} 个功能里 ${via(key)} 个经过它，地图上收起了连向它的线</p>`;
+    let h = !hubs.has(n.id) ? '' : D.after ? hubP('before', ' on-b') + hubP('after', ' on-a') : hubP('before', '');
+    h += fx.length ? `<h3>涉及的修法</h3><div class="chips">${fx.map(f => `<button data-fix="${f.n}">${ball(f)}${esc(f.title)}</button>`).join('')}</div>` : '';
+    const groups = n.col === 'f'
+      ? [['调用触及', e => e.kind === 'call' && e.from === n.id, 'to']]
+      : [['被调用', e => e.kind === 'call' && e.to === n.id, 'from'],
+         ['依赖', e => e.kind === 'import' && e.from === n.id, 'to'], ['被依赖', e => e.kind === 'import' && e.to === n.id, 'from']];
+    const rel = key => {
+      if (n.col === 'm' && !present[key].has(n.id)) return `<p>${key === 'before' ? '改前没有这个文件' : '改后已没有这个文件'}</p>`;
+      const rows = groups.map(([label, test, end]) => [label, D[key].edges.filter(test).map(e => info.get(e[end]))]).filter(r => r[1].length);
+      return rows.length ? `<div class="rel">${rows.map(([label, ns]) => `<div><span>${label}</span><ul>${ns.map(o => `<li class="${o.col === 'm' ? 'm' : ''}">${esc(o.label)}</li>`).join('')}</ul></div>`).join('')}</div>` : '<p>没有连线</p>';
+    };
+    const pre = rel('before'), post = D.after && rel('after');
+    h += !post ? `<h3>连线</h3>${pre}` : `<div class="on-b"><h3>连线</h3>${pre}</div><div class="on-a">${pre === post ? `<h3>连线（改前改后相同）</h3>${pre}` : `<h3>改前连线</h3>${pre}<h3>改后连线</h3>${post}`}</div>`;
+    return `<div class="body">${h}</div>`;
+  }
+  const nodeTitle = n => `<h2 class="t${n.col === 'm' ? ' m' : ''}">${esc(n.label)}<small>${n.col === 'f' ? '功能入口' : '文件'}</small></h2>`;
+  const metricTitle = m => `<h2 class="t">${esc(m.label)}<small>整体指标</small></h2>`;
+
+  // 整体指标：没挂在某个结上的，排成一行；挂在结上的是那个结的收益，写在结旁
+  const overall = D.metrics.map((m, i) => [m, i]).filter(([m]) => m.fix == null);
+  $('#metrics').innerHTML = overall.map(([m, i]) => `<button class="mc" data-metric="${i}" aria-pressed="false"><span class="ml">${esc(m.label)}${srcTag(m)}</span>${nums(m, 'mv')}</button>`).join('');
+  $('#metrics').hidden = !overall.length;
+
+  // 修法列表：第一条是先做的（改后：第一个待做，没有就第一个撤销；改前不看结局，就是第一条），不点也能看出牵涉几个问题、解开换来什么
+  const leadOf = side => side === 'before' ? fixes[0] : fixes.find(f => f.status === 'todo') ?? fixes.find(f => f.status === 'reverted');
+  let lead, listed = false;
+  const kindsOf = f => Object.keys(KIND).map(k => [KIND[k], f.problems.filter(p => p.kind === k).length]).filter(x => x[1]).map(([k, c]) => `${k} ${c}`).join(' · ');
+  const fixRow = f => {
+    const ms = metricsOf(f.n), isLead = f === lead;
+    const rp = f.problems.filter(p => p.level === 'repro').length;
+    const more = (rp ? `<span class="rp" title="探针带断言复现过，是真问题而不只是写法">${icon('repro')}${rp} 条已复现</span>` : '') + (isLead ? `<span class="kinds"><b>${f.problems.length} 个问题</b>${f.problems.length ? `：${kindsOf(f)}` : ''}</span>` : '') +
+      ms.map(m => `<span class="gain"><span class="gl">${esc(m.label)}${srcTag(m)}</span>${nums(m, 'gn')}</span>`).join('') +
+      (isLead && !ms.length ? `<span class="gain none"><span class="gl">收益：这一条还没有对应的指标</span></span>` : '') +
+      (f.verify ? `<span class="vf on-a"><b>验证</b>${esc(f.verify)}</span>` : '') + (f.note ? `<span class="vf on-a"><b>说明</b>${esc(f.note)}</span>` : '');
+    return `<li${isLead ? ` class="lead s-${f.status}"` : ''}>${isLead ? `<p class="lead-h">${f.status === 'todo' ? '先做这一条' : '<span class="on-b">先做这一条</span><span class="on-a">撤销了，等重做</span>'}</p>` : ''}` +
+      `<button class="fx-btn" data-fix="${f.n}">${ball(f)}<span class="fx-title">${esc(f.title)}</span>${status(f.status)}${more ? `<span class="fx-more">${more}</span>` : ''}</button><div class="fx-detail" id="fxd-${f.n}"></div></li>`;
+  };
+  const renderFixes = side => {
+    const next = leadOf(side);
+    if (listed && next === lead) return;
+    lead = next; listed = true;
+    $('#fixes').innerHTML = fixes.length ? [lead, ...fixes.filter(f => f !== lead)].filter(Boolean).map(fixRow).join('') : `<li class="empty">还没有修法</li>`;
+  };
+  const cnt = s => fixes.filter(f => f.status === s).length;
+  $('#fixes-h').insertAdjacentHTML('beforeend', `<small>${fixes.length} 条</small>`);
+  $('#tally').innerHTML = Object.keys(STATUS).filter(cnt).map(s => `<span class="st s-${s}"><span class="yb s-${s}" aria-hidden="true">${BALL}</span>${STATUS[s]} <b>${cnt(s)}</b></span>`).join('');
+  if (D.outOfScope?.length) {
+    $('#oos').hidden = false;
+    $('#oos').innerHTML = `<h2 id="oos-h">这次范围外，另行处理</h2><ul>${D.outOfScope.map(s => `<li>${esc(s)}</li>`).join('')}</ul>`;
+  }
+
+  // ---------- 状态同步 ----------
+  function render() {
+    const f = selFix(), nd = selNode(), mt = selMetric(), wide = mq.wide.matches;
+    for (const b of $$('.fx-btn')) {
+      const on = !!f && +b.dataset.fix === f.n;
+      wide ? (b.setAttribute('aria-expanded', on), b.removeAttribute('aria-pressed')) : (b.setAttribute('aria-pressed', on), b.removeAttribute('aria-expanded'));
+    }
+    for (const d of $$('.fx-detail')) { const show = wide && f && d.id === 'fxd-' + f.n; if (!show) d.innerHTML = ''; else if (!d.innerHTML) d.innerHTML = fixBody(f); }
+    for (const b of $$('.mc')) b.setAttribute('aria-pressed', !!mt && +b.dataset.metric === state.sel.i);
+    $('#card').innerHTML = wide && (nd || mt) ? `<div class="node-card"><div class="card-head">${nd ? nodeTitle(nd) : metricTitle(mt)}<button class="icon-btn" data-close aria-label="关闭详情">${icon('close')}</button></div>${nd ? nodeBody(nd) : metricBody(mt)}</div>` : '';
+    renderSheet(f, nd, mt, wide);
+    graph.apply();
+    const h = [state.side === 'after' && 'after', f ? f.n : nd ? '@' + encodeURIComponent(nd.id) : mt ? 'm' + (state.sel.i + 1) : ''].filter(Boolean).join('/');
+    if (location.hash.slice(1) !== h) history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
+  }
+
+  const sheet = $('#sheet');
+  function renderSheet(f, nd, mt, wide) {
+    const open = !wide && !!(f || nd || mt);
+    if (open) {
+      const key = f ? 'f' + f.n : nd ? 'n' + nd.id : 'm' + state.sel.i;
+      if (sheet.dataset.key !== key) {
+        sheet.dataset.key = key;
+        $('#sheet-title').className = 't' + (nd?.col === 'm' ? ' m' : '');
+        $('#sheet-title').innerHTML = f ? `${ball(f)}<span>${esc(f.title)}</span>` : `<span>${esc(nd ? nd.label : mt.label)}</span>`;
+        $('#sheet-body').innerHTML = f ? fixBody(f, true) : nd ? nodeBody(nd) : metricBody(mt);
+        $('#sheet-body').scrollTop = 0;
+      }
+      $('#sheet-prev').hidden = $('#sheet-next').hidden = !f || fixes.length < 2;
+    } else { delete sheet.dataset.key; sheet.classList.remove('tall'); }
+    sheet.classList.toggle('open', open);
+    sheet.inert = !open;
+    document.body.style.setProperty('--sheet-h', open ? sheet.offsetHeight + 'px' : '0px');
+  }
+  new ResizeObserver(() => { if (sheet.classList.contains('open')) document.body.style.setProperty('--sheet-h', sheet.offsetHeight + 'px'); }).observe(sheet);
+
+  function revealSelection() {
+    const ids = (selFix()?.nodes ?? (selNode() ? [selNode().id] : [])).filter(id => info.get(id).col !== 'm' || present[state.side].has(id));
+    const rects = ids.map(id => graph.nodes.get(id)?.getBoundingClientRect()).filter(Boolean);
+    if (!rects.length) return;
+    const top = Math.min(...rects.map(r => r.top)), bottom = Math.max(...rects.map(r => r.bottom));
+    const vt = $('#bar').offsetHeight + 12;
+    // 详情面板让出高度，使选中的节点都落在它上方；最少留 200px 给详情
+    const fit = innerHeight - vt - (bottom - top) - 12;
+    sheet.style.setProperty('--fit', fit >= 200 ? fit + 'px' : '100dvh');
+    const vb = (sheet.classList.contains('open') ? innerHeight - sheet.offsetHeight : innerHeight) - 12;
+    if (top >= vt && bottom <= vb) return;
+    const d = bottom - top < vb - vt ? (top + bottom) / 2 - (vt + vb) / 2 : top - vt;
+    scrollBy({top: d, behavior: mq.still.matches ? 'auto' : 'smooth'});
+  }
+  // 宽屏的详情在右栏里：只滚右栏让它露出来，不动整页
+  function revealSide() {
+    const side = $('#side'), f = selFix(), el = f ? $(`#fxd-${f.n}`)?.parentNode : $('#card');
+    if (!el) return;
+    const r = el.getBoundingClientRect(), sr = side.getBoundingClientRect();
+    if (r.top < sr.top || r.bottom > sr.bottom) side.scrollTop += r.bottom - r.top > sr.height || r.top < sr.top ? r.top - sr.top - 8 : r.bottom - sr.bottom + 8;
+  }
+
+  const same = (a, b) => a.t === b.t && (a.t === 'fix' ? a.n === b.n : a.t === 'node' ? a.id === b.id : a.i === b.i);
+  function select(next, trigger, reveal) {
+    if (!next || state.sel && same(next, state.sel)) return clear();
+    state.sel = next;
+    lastTrigger = trigger;
+    render();
+    if (reveal) requestAnimationFrame(revealSelection);
+    if (mq.wide.matches) requestAnimationFrame(revealSide);
+  }
+  function clear() {
+    const inside = sheet.contains(document.activeElement) || $('#card').contains(document.activeElement);
+    state.sel = null;
+    render();
+    if (inside && lastTrigger?.isConnected) lastTrigger.focus({preventScroll: true});
+  }
+  function step(d) {
+    const f = selFix(); if (!f) return;
+    const i = fixes.indexOf(f), n = fixes[(i + d + fixes.length) % fixes.length];
+    select({t: 'fix', n: n.n}, lastTrigger, true);
+  }
+  function setSide(s, instant) {
+    // 改前改后藏显的文字在窄屏上位于地图之上；切换时按地图的位移补滚动，地图在屏幕上不动
+    const g = $('#graph'), t0 = g?.getBoundingClientRect().top;
+    state.side = s;
+    $('#sides').dataset.on = s;
+    for (const b of $$('#sides button')) b.setAttribute('aria-pressed', b.dataset.side === s);
+    $('#legend').dataset.on = s;
+    document.body.dataset.side = s;
+    renderFixes(s);
+    graph.show(s, instant);
+    render();
+    const d = g ? g.getBoundingClientRect().top - t0 : 0;
+    if (!instant && Math.abs(d) > .5) scrollBy(0, d);
+  }
+
+  // ---------- 输入 ----------
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-side],[data-fix],[data-node],[data-metric],[data-close],[data-step]');
+    if (!t) return;
+    const d = t.dataset;
+    if (d.side) { if (d.side !== state.side) setSide(d.side); }
+    else if (d.fix) select({t: 'fix', n: +d.fix}, t, !t.closest('.graph') || !mq.wide.matches);
+    else if (d.node) { graph.setRoving(d.node); select({t: 'node', id: d.node}, t, !mq.wide.matches); }
+    else if (d.metric) select({t: 'metric', i: +d.metric}, t, false);
+    else if ('close' in d) clear();
+    else if (d.step) step(+d.step);
+  });
+  const hoverTo = id => { if (state.hover !== id) { state.hover = id; graph.apply(); } };
+  // 只跟随真实移动：滚动会让节点滑到静止的指针下并触发 pointerover，那不是用户在指
+  const fine = matchMedia('(hover: hover) and (pointer: fine)');
+  document.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' && fine.matches) { const n = e.target.closest('.graph .node'); hoverTo(n ? n.dataset.node : null); } });
+  addEventListener('scroll', () => { if (state.hover && !document.activeElement?.matches('.graph .node:focus-visible')) hoverTo(null); }, {passive: true});
+  document.addEventListener('focusin', e => { const n = e.target.closest('.graph .node'); hoverTo(n && n.matches(':focus-visible') ? n.dataset.node : null); });
+  document.addEventListener('focusout', e => { if (!e.relatedTarget?.closest?.('.graph .node')) hoverTo(null); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && state.sel) { e.preventDefault(); clear(); return; }
+    if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    if (!e.repeat && /^[1-9]$/.test(e.key) && fixByN.has(+e.key)) select({t: 'fix', n: +e.key}, $(`.fx-btn[data-fix="${e.key}"]`), true);
+  });
+
+  // 下拉关闭手机详情
+  let drag = null;
+  $('#sheet-head').addEventListener('pointerdown', e => {
+    if (e.target.closest('button')) return;
+    drag = {y: e.clientY, id: e.pointerId};
+    sheet.classList.add('dragging');
+    e.currentTarget.setPointerCapture(e.pointerId);
+  });
+  $('#sheet-head').addEventListener('pointermove', e => { if (drag?.id === e.pointerId) sheet.style.setProperty('--drag', Math.max(-12, e.clientY - drag.y) + 'px'); });
+  // 轻点或上拉展开，下拉先收起再关闭
+  const endDrag = e => {
+    if (drag?.id !== e.pointerId) return;
+    const dy = e.clientY - drag.y, tall = sheet.classList.contains('tall');
+    drag = null;
+    sheet.classList.remove('dragging');
+    sheet.style.removeProperty('--drag');
+    if (dy > 64) tall ? sheet.classList.remove('tall') : clear();
+    else if (dy < -24 || (Math.abs(dy) < 6 && e.type === 'pointerup')) sheet.classList.toggle('tall', dy < -24 || !tall);
+  };
+  $('#sheet-head').addEventListener('pointerup', endDrag);
+  $('#sheet-head').addEventListener('pointercancel', endDrag);
+
+  const bar = $('#bar');
+  const syncBar = () => { document.body.style.setProperty('--bar-h', bar.offsetHeight + 'px'); bar.classList.toggle('stuck', scrollY > 0); };
+  addEventListener('scroll', syncBar, {passive: true});
+  new ResizeObserver(syncBar).observe(bar);
+  mq.wide.addEventListener('change', render);
+  mq.coarse.addEventListener('change', () => graph.build());
+
+  // 地址是视图的一种输入：打开时读一次，之后手改地址也照读；render 再把规范写法写回地址，地址与切换按钮始终一致
+  function fromHash(instant) {
+    const m = /^#(?:(after)(?:\/|$))?(?:(\d+)|@(.+)|m(\d+))?$/.exec(location.hash || '#'), id = m?.[3] && decodeURIComponent(m[3]);
+    state.sel = m?.[2] && fixByN.has(+m[2]) ? {t: 'fix', n: +m[2]} : id && info.has(id) ? {t: 'node', id} : m?.[4] && D.metrics[m[4] - 1] ? {t: 'metric', i: m[4] - 1} : null;
+    const side = m?.[1] && D.after ? 'after' : 'before';
+    if (instant || side !== state.side) setSide(side, instant); else render();
+    if (state.sel) requestAnimationFrame(() => { revealSelection(); if (mq.wide.matches) revealSide(); });
+  }
+  addEventListener('hashchange', () => fromHash(false));
+  graph.build();
+  fromHash(true);
+}
+window.addEventListener('error', e => {
+  if (!e.error) return;
+  const el = $('#err');
+  el.hidden = false;
+  el.innerHTML = `<h1>报告渲染出错</h1><p>${esc(e.message)}</p>`;
+});
+</script>
+</body>
+</html>
