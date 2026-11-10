@@ -32,15 +32,15 @@
 	"master": {
 		"roles": {
 			"工程师": {
-				"model": ["claude-opus-5-5/medium", "gpt-6.1-sol/medium"],
+				"model": ["claude-opus-5-5/medium", "gpt-6-astra/medium"],
 				"use": "难题：跨模块不变量、并发、持久化、安全、根因不明的调试、最终集成；也做需要深读代码找缺陷的审计（只读）"
 			},
 			"设计师": {
-				"model": ["claude-opus-5-5/medium", "gpt-6.1-sol/medium"],
+				"model": ["claude-opus-5-5/medium", "gpt-6-astra/medium"],
 				"use": "视觉、前端"
 			},
 			"初级工程师": {
-				"model": ["claude-sonnet-5-5/medium", "gpt-6.1-terra/medium"],
+				"model": ["claude-sonnet-5-5/medium", "gpt-6.1-terra/high"],
 				"use": "需求与验收明确的普通实现、局部修复与按既有模式的多文件改动；遇到产品或架构取舍上报；也做状态机审计（只读，每个怀疑在真实代码上复现）"
 			},
 			"杂务工": {
