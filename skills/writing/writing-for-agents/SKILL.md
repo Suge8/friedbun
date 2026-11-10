@@ -1,6 +1,6 @@
 ---
 name: writing-for-agents
-description: 写、改或审查给 agent 读的文档时使用：skill、AGENTS.md 及其指向的文档、术语表。
+description: 只要是写、改或审查 agent 读的文字时使用
 ---
 
 # 给 agent 写文档
