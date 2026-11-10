@@ -9,8 +9,8 @@
 
 ## 触发评测
 
-新增自动触发 Skill，或改了某个 Skill 的 `description` 里的适用场景、与邻近 Skill 的分工，或用户报告漏触发、误触发时，跑 `node evals/skill-trigger/run.mjs --only <技能> --near --repeat 3 && node evals/skill-trigger/analyze.mjs`。只改正文或润色措辞不跑：正文不进评测，小改的差别低于噪声。`~/.pi/agent/SYSTEM.md` 里加载 Skill 的规则改了才全量跑（去掉 `--only <技能> --near`）。花费与判定规则见 `evals/skill-trigger/README.md`。
+只在用户报告漏触发、误触发，或用户要求时跑：`node evals/skill-trigger/run.mjs --only <技能> --near --repeat 3 && node evals/skill-trigger/analyze.mjs`。新增、改 `description`、删 Skill 默认不跑：重复数小，差别多在噪声里。要全量时去掉 `--only <技能> --near`。花费与判定规则见 `evals/skill-trigger/README.md`。
 
 ## 系统提示评测
 
-改了 `config/pi/SYSTEM.md` 的规则含义（不含纯措辞润色）时，先把改动前的版本保存为基线（未提交改动用 `git show HEAD:config/pi/SYSTEM.md`），再在 `evals/system-prompt/` 跑 `uv run sp.py compare --system <基线文件> --cand <新 SYSTEM.md> --split val,test --n 3`，按 behavior 看有没有退步；不省略 `--system`，否则默认拿工作区新版与自身比较。新增规则要先补能考到它的用例。用例来自用户真实纠正，test 只放原样还原的真实样本，不对着 test 改规则。做法、花费与判定项见 `evals/system-prompt/README.md`。
+改 `config/pi/SYSTEM.md` 默认不跑：现有用例对强模型偏易，改动的差别多落在噪声里。只在用户要求时跑，跑法：先把改动前的版本保存为基线（未提交改动用 `git show HEAD:config/pi/SYSTEM.md`），再在 `evals/system-prompt/` 跑 `uv run sp.py compare --system <基线文件> --cand <新 SYSTEM.md> --split val,test --n 3`，按 behavior 看有没有退步；不省略 `--system`，否则默认拿工作区新版与自身比较。新增规则要先补能考到它的用例。用例来自用户真实纠正，test 只放原样还原的真实样本，不对着 test 改规则。做法、花费与判定项见 `evals/system-prompt/README.md`。
