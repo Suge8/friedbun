@@ -10,7 +10,8 @@ import { pathToFileURL } from "node:url";
 const SEARCH_TIMEOUT_MS = 90_000;
 setGlobalProxyFromEnv({ ...process.env, NO_PROXY: [process.env.NO_PROXY, "localhost", "127.0.0.1", "::1"].filter(Boolean).join(",") });
 const QUICK_COUNT = 8;
-const FETCH_CHARS = 40000;
+// 所有页合计：留在 pi bash 工具 50KB 的截断线内，否则它只留末尾，前面的页整页丢失。
+const FETCH_CHARS = 30000;
 const FETCH_MAX_URLS = 10;
 const MIN_QUOTE_CHARS = 12;
 const MIN_QUOTE_PART = 8;
@@ -51,7 +52,8 @@ search 选项
   -n N              --quick 每个查询的结果条数，默认 ${QUICK_COUNT}
 
 fetch 选项
-  --chars N         每页正文字符上限，默认 ${FETCH_CHARS}，0 为不截断
+  --chars N         所有页正文合计字符上限，默认 ${FETCH_CHARS}，各页均分，短页的余量让给长页；
+                    截断的页全文另存文件并给出路径；0 为不截断
   --links           一并输出页面内链接
 
 search 使用 pi 模型配置与登录。
@@ -336,10 +338,14 @@ function sourceList(done) {
 	return [...merged.values()].map((s, i) => `${i + 1}. ${clean(s.title) || s.url}${s.date ? ` · ${s.date}` : ""} · ${[...s.engines].join("+")}\n   ${s.url}`);
 }
 
-function writeRaw(queries, done, pages) {
+function tmpFile(tag = "") {
 	const dir = join(tmpdir(), "web-search");
 	mkdirSync(dir, { recursive: true });
-	const path = join(dir, `${Date.now()}-${process.pid}.md`);
+	return join(dir, `${Date.now()}-${process.pid}${tag}.md`);
+}
+
+function writeRaw(queries, done, pages) {
+	const path = tmpFile();
 	const sections = done.map(([name, r]) => `# ${ENGINES[name].label} 原料\n\n${r.raw}\n\n## ${ENGINES[name].label} 回复原文\n\n${r.text}`);
 	writeFileSync(path, [`# 搜索：${queries.join(" ｜ ")}`, ...sections, pages.raw && `# 回查原页\n\n${pages.raw}`].filter(Boolean).join("\n\n"));
 	return path;
@@ -407,16 +413,28 @@ async function runFetch(opts) {
 	if (!urls.length || !urls.every((arg) => /^https?:\/\//.test(arg))) fail(`fetch 只接受 http(s) URL\n\n${HELP}`);
 	if (urls.length > FETCH_MAX_URLS) fail(`fetch 一次最多 ${FETCH_MAX_URLS} 个 URL，收到 ${urls.length}`);
 	const data = await tinyfishFetch(urls, Boolean(opts.links));
-	for (const result of data.results ?? []) {
+	const results = data.results ?? [];
+	const limits = new Map();
+	let left = opts.chars > 0 ? opts.chars : Infinity;
+	for (const [n, result] of [...results].sort((a, b) => (a.text ?? "").length - (b.text ?? "").length).entries()) {
+		const limit = Math.min((result.text ?? "").length, Math.floor(left / (results.length - n)));
+		limits.set(result, limit);
+		left -= limit;
+	}
+	for (const [n, result] of results.entries()) {
 		const text = result.text ?? "";
-		const body = opts.chars > 0 && text.length > opts.chars
-			? `${text.slice(0, opts.chars)}\n\n[已截断 ${text.length - opts.chars} 字符，需要全文加 --chars 0]`
-			: text;
+		const limit = limits.get(result);
+		let body = text;
+		if (limit < text.length) {
+			const path = tmpFile(`-${n + 1}`);
+			writeFileSync(path, text);
+			body = `${text.slice(0, limit)}\n\n[已截断 ${text.length - limit} 字符，全文在 ${path}，用 grep 或按行读取要看的部分]`;
+		}
 		console.log(`# ${result.title ?? result.url}\n${result.final_url ?? result.url}\n\n${body}\n`);
 		if (opts.links && result.links?.length) console.log(`链接: ${result.links.slice(0, 40).join(" ")}\n`);
 	}
 	for (const error of data.errors ?? []) console.error(`取不到 ${error.url}: ${error.error ?? error.message ?? JSON.stringify(error)}`);
-	if (!(data.results ?? []).length) process.exit(1);
+	if (!results.length) process.exit(1);
 }
 
 async function runSearch(opts) {
