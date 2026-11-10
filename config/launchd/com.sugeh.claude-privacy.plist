@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.sugeh.claude-privacy</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/sh</string>
+		<string>-c</string>
+		<string>
+/bin/launchctl setenv DISABLE_TELEMETRY 1 DISABLE_ERROR_REPORTING 1 DISABLE_FEEDBACK_COMMAND 1 DISABLE_AUTOUPDATER 1 CLAUDE_CODE_TETHER_LIVE 1
+# 关了遥测，Claude Code 就读不到账号的线程开关；CLAUDE_CODE_TETHER_LIVE 强制打开消息线程，后续轮次不再重传历史图片。
+# magpie 也在登录时启动，先后不定：先起的拿不到这个变量。它刚起、还没有会话时重启一次，起了 3 分钟以上不碰。
+p=""
+for i in $(seq 1 60); do p=$(/usr/bin/pgrep -P 1 -x magpie | head -1); [ -n "$p" ] &amp;&amp; break; sleep 1; done
+[ -n "$p" ] || exit 0
+/bin/ps eww -o command= -p "$p" | tr ' ' '\n' | grep -qx 'CLAUDE_CODE_TETHER_LIVE=1' &amp;&amp; exit 0
+etime=$(/bin/ps -o etime= -p "$p" | tr -d ' ')
+case "$etime" in *-*|*:*:*) exit 0 ;; esac
+[ "$((10#${etime%%:*}))" -lt 3 ] || exit 0
+kill -TERM "$p"
+for i in $(seq 1 20); do kill -0 "$p" 2&gt;/dev/null || break; sleep 1; done
+/usr/bin/open -a magpie
+</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+</dict>
+</plist>

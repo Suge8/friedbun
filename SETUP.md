@@ -37,14 +37,16 @@ pi install npm:pi-firecode
 | `config/starship.toml` | `~/.config/starship.toml` | 整体写入 |
 | `config/fastfetch/` 两个文件 | `~/.config/fastfetch/` | 整体写入 |
 | `config/zsh/workstation.zsh` | `~/.config/friedbun/workstation.zsh` | 整体写入 |
+| `config/launchd/com.sugeh.claude-privacy.plist` | `~/Library/LaunchAgents/com.sugeh.claude-privacy.plist` | 整体写入后 `launchctl bootstrap gui/$(id -u) <落点>`，已加载过先 `bootout` |
 | `<repo>/skills` | `~/.agents/skills` | 软链 `ln -s`，已有目录先改名 `.bak` |
 | `~/.agents/skills/operations/browser/bin/bbu` | `~/.local/bin/bbu` | 软链 `ln -sf`，先 `mkdir -p ~/.local/bin`（workstation.zsh 把它加进 PATH） |
 
 - 合并：并入我们的键，冲突以我们的值为准，读者自己的键原样保留；`deviceId`、`lastChangelogVersion` 是作者本机状态，`httpProxy` 是作者本机的代理地址，`defaultProjectTrust` 会让任何目录自带的 pi 扩展不经询问就加载，这四个键不并入。
+- 登录项给图形应用（含 magpie 启动的 Claude Code）登记环境变量：关遥测、错误上报、反馈命令与自动升级，并强制打开消息线程，否则关了遥测后每轮都重传全部历史图片。magpie 也在登录时自启，先起时拿不到变量，登录项会在它启动不到 3 分钟时重启它一次。
 - skills 软链让本仓库的克隆成为 skills 的真身：装完不删，更新用 `git pull`。
 - `~/.zshrc` 末尾追加一行 `source ~/.config/friedbun/workstation.zsh`（须在 `compinit` 之后），并删掉其中已有的 autosuggestions、syntax-highlighting、starship、fastfetch 加载语句，避免重复加载。
 
-**完成标准**：表中每个落点都已就位；`herdr config check` 输出 `ok`；`ls ~/.agents/skills/search/research/SKILL.md` 存在；新开的 zsh 里 `echo $PI_CACHE_RETENTION` 输出 `long`；`bbu --stealth open about:blank` 与 `bbu --stealth close` 裸退出码都为 0。
+**完成标准**：表中每个落点都已就位；`herdr config check` 输出 `ok`；`ls ~/.agents/skills/search/research/SKILL.md` 存在；新开的 zsh 里 `echo $PI_CACHE_RETENTION` 输出 `long`；`bbu --stealth open about:blank` 与 `bbu --stealth close` 裸退出码都为 0；`launchctl print gui/$(id -u)` 的 environment 里有 `CLAUDE_CODE_TETHER_LIVE => 1`。
 
 ## 步骤 3：可选 key
 
