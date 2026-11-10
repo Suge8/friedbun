@@ -40,7 +40,7 @@ pi install npm:pi-firecode
 | `<repo>/skills` | `~/.agents/skills` | 软链 `ln -s`，已有目录先改名 `.bak` |
 | `~/.agents/skills/operations/browser/bin/bbu` | `~/.local/bin/bbu` | 软链 `ln -sf`，先 `mkdir -p ~/.local/bin`（workstation.zsh 把它加进 PATH） |
 
-- 合并：并入我们的键，冲突以我们的值为准，读者自己的键原样保留；`deviceId`、`lastChangelogVersion` 是作者本机状态，不并入。
+- 合并：并入我们的键，冲突以我们的值为准，读者自己的键原样保留；`deviceId`、`lastChangelogVersion` 是作者本机状态，`httpProxy` 是作者本机的代理地址，`defaultProjectTrust` 会让任何目录自带的 pi 扩展不经询问就加载，这四个键不并入。
 - skills 软链让本仓库的克隆成为 skills 的真身：装完不删，更新用 `git pull`。
 - `~/.zshrc` 末尾追加一行 `source ~/.config/friedbun/workstation.zsh`（须在 `compinit` 之后），并删掉其中已有的 autosuggestions、syntax-highlighting、starship、fastfetch 加载语句，避免重复加载。
 
@@ -68,9 +68,7 @@ pi install npm:pi-firecode
 
 `~/.pi/agent/models.json` 由 magpie 生成，上下文窗口、输出上限与价格都以它为准，不手改、不另覆盖。`settings.json` 的 `compaction.modelOverrides` 按 `magpie/<型号>` 写压缩点，换型号时同步改键。选定模型后发一条短请求确认账号可用，不以目录命中代替验证。已有会话不强切模型；切到新的 magpie 会话后再清 Pi 旧登录，保留 magpie 仍读取的官方客户端凭据。
 
-`watcher` 每回合结束后额外调用一次模型，作者关着，保持关闭。
-
-**完成标准**：重启 `pi` 后输入框上下边框出现 FireCode 状态，下边框右侧是模型与上下文占用；`alt+1` 切到对应模型；FireCode 启动时没有报配置错误。
+**完成标准**：重启 `pi` 后输入框上下边框出现 FireCode 状态，下边框右侧是模型与上下文占用；FireCode 启动时没有报配置错误。
 
 ## 步骤 6：交付
 
