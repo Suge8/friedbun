@@ -1,5 +1,5 @@
 {
-	"defaultModel": "claude/claude-opus-5-5",
+	"defaultModel": "claude/claude-fable-5-2",
 	"defaultProvider": "magpie",
 	"defaultThinkingLevel": "medium",
 	"quietStartup": true,
@@ -13,19 +13,19 @@
 		"reserveTokens": 50000,
 		"modelOverrides": {
 			"magpie/claude/claude-fable-5-2": {
-				"reserveTokens": 650000
+				"reserveTokens": 600000
 			},
 			"magpie/claude/claude-opus-5-5": {
-				"reserveTokens": 650000
+				"reserveTokens": 600000
 			},
 			"magpie/claude/claude-sonnet-5-5": {
-				"reserveTokens": 650000
+				"reserveTokens": 600000
 			},
 			"magpie/claude/claude-haiku-5-5": {
-				"reserveTokens": 650000
+				"reserveTokens": 600000
 			},
 			"magpie/deepseek/deepseek-flash": {
-				"reserveTokens": 498576
+				"reserveTokens": 600000
 			}
 		}
 	},
@@ -37,5 +37,5 @@
 	"codemode": {
 		"mode": "on"
 	},
-	"hideThinkingBlock": true
+	"hideThinkingBlock": false
 }

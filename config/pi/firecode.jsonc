@@ -17,10 +17,11 @@
 		}
 	},
 
-	// 后台小模型：子代理进展行、全部压缩摘要（主会话与子代理）、闲置压缩共用这条链；窗口放不下的候选自动跳过，整条链失败时回到 pi 默认压缩。
+	// 后台小模型：lineModel 写进展行（子代理与主会话）和会话名，compactionModel 写全部压缩摘要（主会话与子代理）与闲置压缩；窗口放不下的候选自动跳过，整条链失败时回到 pi 默认压缩。
 	// idleCompaction：闲置超过 1 小时缓存后，下一次请求从预先算好的摘要开始，不再整段重写 15 万以上的上下文。删掉整节三项都关。
 	"background": {
-		"model": ["claude-haiku-5-5/low", "gpt-6-luna/low"],
+		"lineModel": ["claude-haiku-5-5/low", "gpt-6-luna/low"],
+		"compactionModel": ["claude-haiku-5-5/medium", "gpt-6-luna/medium"],
 		"idleCompaction": true
 	},
 
@@ -33,15 +34,15 @@
 		"roles": {
 			"检索员": {
 				"model": ["gpt-6.1-terra/high", "claude-haiku-5-5/high"],
-				"use": "找事实：搜索、查文档、读日志、定位代码"
+				"use": "便宜，能做批量，不需要过强智力的工作。找事实：搜索、查文档、读日志、定位代码"
 			},
 			"副手": {
 				"model": ["claude-sonnet-5-5/high", "gpt-6.1-terra/high"],
-				"use": "标准明确的活：照既有模式实现、批量改动、按给定标准判断"
+				"use": "能做中等智力要求，标准明确的活：照既有模式实现、批量改动、按给定标准判断等"
 			},
-			"专家": {
+			"工程师": {
 				"model": ["claude-opus-5-5/medium", "gpt-6.1-sol/xhigh"],
-				"use": "要自己拿主意、判错代价大的活：方案设计、疑难排查、高风险改动与评审"
+				"use": "能做偏高智力要求的工作"
 			}
 		}
 	},
