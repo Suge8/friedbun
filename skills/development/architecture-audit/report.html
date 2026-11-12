@@ -28,7 +28,7 @@
     "status": "todo",                           todo 待做 / done 已解 / kept 保留 / reverted 撤销；第一条 todo 是先解的
     "nodes": ["store", "runner"],               涉及的功能或模块 id（改前或改后有即可）
     "problems": [{"kind": "hidden", "level": "repro", "loc": "src/ui/panel.ts:40", "text": "界面另存一份运行状态"}],
-                                                kind：hidden 隐藏联系 / needless 多余耦合 / surplus 冗余 / special 特殊情况
+                                                kind：surplus 不再需要 / hidden 隐藏联系 / needless 多余耦合 / special 特殊情况
                                                 level 证据：repro 探针带断言复现过 / code 读代码确认 / history 从提交历史看出 / guess 推测
     "fix": "修法", "verify": "验证与结果", "note": "保留或撤销的理由"
   }],
@@ -38,6 +38,19 @@
                                                 source：script 提取脚本从代码算出 / count 按具体场景逐处数出
                                                 evidence 可选：改前、改后各列计入的每一处 "文件:行"，可省一侧
                                                 fix 可选：这项是哪条修法的收益
+  "machines": [{                               可选：范围内的每个状态机，改前改后并排画成图
+    "name": "会话生命周期", "fix": 1,            fix 可选：哪条修法把它收成显式的
+    "before": {
+      "states": [{"id": "prep", "label": "准备中", "initial": true},
+                 {"id": "run", "label": "运行中", "problem": "中断在准备阶段被吞，停不下来（src/runner.ts:88）"},
+                 {"id": "done", "label": "结束", "terminal": true}],
+                                                initial 起点 / terminal 终态，都可选；problem 可选：这个状态的问题，写了就标红
+      "transitions": [{"from": "prep", "to": "run", "on": "会话就绪"},
+                      {"from": "run", "to": "done", "on": "完成", "problem": "失败时也走这条，结局分不清"}]
+                                                on 触发它的事件；problem 可选：这条转换的问题，写了就标红
+    },
+    "after": null                               改后，格式同 before；还没改时为 null
+  }],
   "outOfScope": ["导出的 Markdown 会漏掉分叉出去的消息，该由导出功能另修（src/export/markdown.ts:30）"]
 }
 -->
@@ -271,6 +284,37 @@ body[data-side=before] .b>.on-b{font-size:13px;font-weight:500;color:var(--mute)
 .icon-btn:active{background:var(--surface-2)}
 @media (hover:hover) and (pointer:fine){.icon-btn:hover{background:var(--surface-2);color:var(--ink)}}
 .empty{color:var(--mute);font-size:14px;padding:24px 0}
+.machines{margin-top:40px}
+.machines>h2{font-size:15px;margin:0 12px 12px}
+.machines>h2 small{margin-left:6px;color:var(--mute);font-size:13px;font-weight:500}
+.mach{padding:16px;border-radius:14px;background:var(--raised);box-shadow:var(--ring)}
+.mach+.mach{margin-top:12px}
+.mach h3{display:flex;align-items:center;gap:8px;font-size:15px}
+.mach h3 a{display:inline-flex;border-radius:50%}
+.mach h3 .yb{width:22px;height:22px}
+.mach-pair{display:grid;gap:16px 28px;margin-top:12px}
+.mach-side{min-width:0}
+.mach-side>span{display:block;margin-bottom:4px;color:var(--mute);font-size:13px}
+.mach-svg{overflow-x:auto;scrollbar-width:thin}
+.mach-svg svg{display:block}
+.ms rect{fill:var(--surface);stroke:var(--edge);stroke-width:1.2}
+.ms .in{fill:none;stroke-width:1}
+.ms text{fill:var(--ink);font:500 13px var(--sans);text-anchor:middle;dominant-baseline:central}
+.ms.bad rect{fill:color-mix(in oklch,var(--todo) 13%,var(--raised));stroke:var(--todo)}
+.ms.bad text{fill:var(--todo-ink)}
+.mt-e path{fill:none;stroke:var(--edge-hot);stroke-width:1.4}
+.mt-e text{fill:var(--mute);font:12px var(--sans);text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:var(--raised);stroke-width:5px;stroke-linejoin:round}
+.mt-e.bad path{stroke:var(--todo);stroke-width:1.8}
+.mt-e.bad text{fill:var(--todo-ink);font-weight:600}
+.mk-n path{fill:var(--edge-hot)}
+.mk-p path{fill:var(--todo)}
+.m-init{fill:var(--edge-hot)}
+.mp{margin:8px 0 0;padding:0;list-style:none;font-size:14px}
+.mp li{padding-left:14px;position:relative;overflow-wrap:anywhere}
+.mp li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--todo)}
+.mp li+li{margin-top:4px}
+.mp b{font-weight:600;color:var(--todo-ink);margin-right:6px}
+@media (min-width:1000px){.mach-pair.two{grid-template-columns:1fr 1fr}}
 .oos{margin-top:40px}
 .oos h2{font-size:14px;margin-bottom:8px}
 .oos ul{margin:0;padding-left:20px;font-size:14px}
@@ -394,7 +438,7 @@ body[data-side=before] :is(.st,.tally,.on-a,.ar,.a),body:not([data-side=before])
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="ybc"><circle cx="20" cy="20" r="16.6"/></clipPath></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="ybc"><circle cx="20" cy="20" r="16.6"/></clipPath><marker id="mk-n" class="mk-n" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 .8 7.2 4 0 7.2z"/></marker><marker id="mk-p" class="mk-p" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 .8 7.2 4 0 7.2z"/></marker></defs></svg>
 <header class="bar" id="bar"><div class="bar-in">
   <div class="who"><h1 id="project"></h1><p id="scope"></p></div>
   <div class="seg" role="group" aria-label="地图显示改前还是改后" id="sides" hidden>
@@ -417,6 +461,7 @@ body[data-side=before] :is(.st,.tally,.on-a,.ar,.a),body:not([data-side=before])
       <div class="graph" id="graph"></div>
     </div>
   </div>
+  <section class="machines" id="machines" aria-labelledby="mach-h" hidden></section>
   <section class="oos" id="oos" aria-labelledby="oos-h" hidden></section>
 </main>
 <aside class="sheet" id="sheet" aria-labelledby="sheet-title" inert>
@@ -435,7 +480,7 @@ body[data-side=before] :is(.st,.tally,.on-a,.ar,.a),body:not([data-side=before])
 // 数据校验：纯函数，不碰 DOM。页面用它，命令行 node check-report.mjs <report.html|data.json> 也从这里载入同一份
 'use strict';
 const STATUS = {todo: '待做', done: '已解', kept: '保留', reverted: '撤销'};
-const KIND = {hidden: '隐藏联系', needless: '多余耦合', surplus: '冗余', special: '特殊情况'};
+const KIND = {surplus: '不再需要', hidden: '隐藏联系', needless: '多余耦合', special: '特殊情况'};
 const EDGE = {call: '调用触及', import: '依赖'};
 const LEVEL = {repro: ['复现', '探针带断言复现过'], code: ['代码', '读代码确认'], history: ['历史', '从提交历史看出'], guess: ['推测', '推测，没有直接证据']};
 const SOURCE = {script: ['脚本', '提取脚本从代码算出'], count: ['清点', '按具体场景逐处数出']};
@@ -446,6 +491,7 @@ function validate(D) {
   if (!D.before || !arr(D.before.modules) || !arr(D.before.edges)) E.push('before 应包含 modules 与 edges 两个数组');
   if (D.after != null && (!arr(D.after.modules) || !arr(D.after.edges))) E.push('after 应为 null，或包含 modules 与 edges 两个数组');
   if (D.outOfScope != null && !arr(D.outOfScope)) E.push('outOfScope 应为数组');
+  if (D.machines != null && !arr(D.machines)) E.push('machines 应为数组');
   if (E.length) return E;
   if (typeof D.project !== 'string' || !D.project) E.push('缺 project：项目名，显示在顶栏左上');
   const feats = new Set(), all = new Set();
@@ -503,6 +549,26 @@ function validate(D) {
     if (ev != null && (typeof ev !== 'object' || arr(ev) || !list(ev.before) || !list(ev.after) || Object.keys(ev).some(k => k !== 'before' && k !== 'after')))
       E.push(`${at}：evidence 应为 {"before": [...], "after": [...]}，两侧各是 "文件:行" 字符串的数组，可省略一侧`);
     if (m?.fix != null && !ns.has(m.fix)) E.push(`${at}：fix ${m.fix} 不是任何修法的编号`);
+  });
+  (D.machines ?? []).forEach((m, i) => {
+    const at = `machines[${i}]${m?.name ? `（${m.name}）` : ''}`;
+    if (!has(m, 'name')) E.push(`${at} 缺 name`);
+    if (m?.fix != null && !ns.has(m.fix)) E.push(`${at}：fix ${m.fix} 不是任何修法的编号`);
+    if (!m?.before) E.push(`${at} 缺 before`);
+    for (const key of ['before', 'after']) {
+      const g = m?.[key]; if (g == null) continue;
+      if (!arr(g.states) || !g.states.length || !arr(g.transitions)) { E.push(`${at}.${key} 应包含 states（至少一个）与 transitions 两个数组`); continue; }
+      const ids = new Set();
+      g.states.forEach((s, j) => {
+        if (!has(s, 'id') || !has(s, 'label')) return E.push(`${at}.${key}.states[${j}] 缺 id 或 label`);
+        if (ids.has(s.id)) E.push(`${at}.${key}.states[${j}]：id "${s.id}" 重复`);
+        ids.add(s.id);
+      });
+      g.transitions.forEach((t, j) => {
+        for (const k of ['from', 'to']) if (!ids.has(t?.[k])) E.push(`${at}.${key}.transitions[${j}]：${k} "${t?.[k]}" 不是这一侧的状态`);
+        if (!has(t, 'on')) E.push(`${at}.${key}.transitions[${j}] 缺 on：触发这条转换的事件`);
+      });
+    }
   });
   return E;
 }
@@ -1046,6 +1112,64 @@ function start() {
   if (D.outOfScope?.length) {
     $('#oos').hidden = false;
     $('#oos').innerHTML = `<h2 id="oos-h">这次范围外，另行处理</h2><ul>${D.outOfScope.map(s => `<li>${esc(s)}</li>`).join('')}</ul>`;
+  }
+
+  // ---------- 状态机：按离起点的步数分列，往后的转换走列间，回头的转换从下方绕 ----------
+  const textW = (s, px) => [...String(s)].reduce((w, c) => w + (c.charCodeAt(0) > 255 ? px : px * .58), 0);
+  function machineSVG(g) {
+    const S = g.states, T = g.transitions, depth = new Map();
+    const q = S.filter(s => s.initial).map(s => s.id); if (!q.length) q.push(S[0].id);
+    q.forEach(id => depth.set(id, 0));
+    for (let i = 0; i < q.length; i++) for (const t of T) if (t.from === q[i] && !depth.has(t.to)) { depth.set(t.to, depth.get(q[i]) + 1); q.push(t.to); }
+    const last = Math.max(...depth.values());
+    S.forEach(s => depth.has(s.id) || depth.set(s.id, last + 1));
+    const cols = []; S.forEach(s => (cols[depth.get(s.id)] ??= []).push(s));
+    const H = 34, GY = 26, PAD = 14, LANE = 18, gap = Math.min(150, Math.max(64, ...T.map(t => textW(t.on, 12) + 28)));
+    const rows = Math.max(...cols.map(c => c.length)), bodyH = rows * H + (rows - 1) * GY;
+    // 不相邻或回头的转换走上方或下方的车道：两端都偏上走上方，否则走下方
+    const kind = t => { const d = depth.get(t.to) - depth.get(t.from); return t.from === t.to ? 'self' : d === 1 ? 'next' : d === 0 ? 'same' : 'far'; };
+    const rowOf = new Map(); cols.forEach(c => c.forEach((s, i) => rowOf.set(s.id, (i + .5) / c.length)));
+    const over = t => (rowOf.get(t.from) + rowOf.get(t.to)) / 2 < .5 || rows === 1 && depth.get(t.to) > depth.get(t.from);
+    const far = T.filter(t => kind(t) === 'far'), nTop = far.filter(over).length, nBot = far.length - nTop;
+    const top = PAD + Math.max(nTop ? 12 + LANE * nTop : 0, T.some(t => kind(t) === 'self') ? 30 : 0), floor = top + bodyH, pos = new Map();
+    let x = PAD + 16;
+    cols.forEach(c => {
+      const w = Math.max(...c.map(s => Math.max(60, textW(s.label, 13) + 28)));
+      const y0 = top + (bodyH - (c.length * H + (c.length - 1) * GY)) / 2;
+      c.forEach((s, i) => pos.set(s.id, {x, y: y0 + i * (H + GY), w, s}));
+      x += w + gap;
+    });
+    const width = x - gap + PAD + (T.some(t => kind(t) === 'same') ? 44 : 0);
+    let iTop = 0, iBot = 0;
+    const edges = T.map(t => {
+      const a = pos.get(t.from), b = pos.get(t.to), k = kind(t), fwd = depth.get(t.to) > depth.get(t.from);
+      let p;
+      if (k === 'self') { const cx = a.x + a.w / 2; p = [cx - 12, a.y, cx - 26, a.y - 34, cx + 26, a.y - 34, cx + 12, a.y]; }
+      else if (k === 'next') { const c = gap * .5; p = [a.x + a.w, a.y + H / 2, a.x + a.w + c, a.y + H / 2, b.x - c, b.y + H / 2, b.x, b.y + H / 2]; }
+      else if (k === 'same') { const r = Math.max(a.x + a.w, b.x + b.w) + 38; p = [a.x + a.w, a.y + H / 2, r, a.y + H / 2, r, b.y + H / 2, b.x + b.w, b.y + H / 2]; }
+      else {
+        const ax = a.x + a.w * (fwd ? .68 : .32), bx = b.x + b.w * (fwd ? .32 : .68), up = over(t);
+        const lane = up ? top - (12 + LANE * iTop++) * 4 / 3 : floor + (12 + LANE * iBot++) * 4 / 3;
+        p = up ? [ax, a.y, ax, lane, bx, lane, bx, b.y] : [ax, a.y + H, ax, lane, bx, lane, bx, b.y + H];
+      }
+      const mid = i => (p[i] + 3 * p[i + 2] + 3 * p[i + 4] + p[i + 6]) / 8;
+      return `<g class="mt-e${t.problem ? ' bad' : ''}"><path d="M${p[0]} ${p[1]}C${p.slice(2).join(' ')}" marker-end="url(#mk-${t.problem ? 'p' : 'n'})"/><text x="${mid(0)}" y="${mid(1)}">${esc(t.on)}</text></g>`;
+    }).join('');
+    const height = floor + (nBot ? 12 + LANE * nBot : 0) + PAD;
+    const nodes = [...pos.values()].map(({x, y, w, s}) => `<g class="ms${s.problem ? ' bad' : ''}">${s.initial ? `<circle class="m-init" cx="${x - 16}" cy="${y + H / 2}" r="4"/><path class="mt-e" d="M${x - 12} ${y + H / 2}H${x}" stroke="var(--edge-hot)" stroke-width="1.4" marker-end="url(#mk-n)"/>` : ''}<rect x="${x}" y="${y}" width="${w}" height="${H}" rx="${H / 2}"/>${s.terminal ? `<rect class="in" x="${x + 3}" y="${y + 3}" width="${w - 6}" height="${H - 6}" rx="${H / 2 - 3}"/>` : ''}<text x="${x + w / 2}" y="${y + H / 2}">${esc(s.label)}</text></g>`).join('');
+    return `<svg width="${Math.ceil(width)}" height="${Math.ceil(height)}" viewBox="0 0 ${Math.ceil(width)} ${Math.ceil(height)}" role="img" aria-label="${esc(S.map(s => s.label).join('、'))}">${edges}${nodes}</svg>`;
+  }
+  function machineSide(g, cap) {
+    const name = new Map(g.states.map(s => [s.id, s.label]));
+    const bad = [...g.states.filter(s => s.problem).map(s => [s.label, s.problem]), ...g.transitions.filter(t => t.problem).map(t => [`${name.get(t.from)} → ${name.get(t.to)}`, t.problem])];
+    return `<div class="mach-side"><span>${cap}</span><div class="mach-svg" tabindex="0">${machineSVG(g)}</div>${bad.length ? `<ul class="mp">${bad.map(([k, v]) => `<li><b>${esc(k)}</b>${esc(v)}</li>`).join('')}</ul>` : ''}</div>`;
+  }
+  if (D.machines?.length) {
+    $('#machines').hidden = false;
+    $('#machines').innerHTML = `<h2 id="mach-h">状态机<small>${D.machines.length} 个</small></h2>` + D.machines.map(m => {
+      const f = fixByN.get(m.fix);
+      return `<article class="mach"><h3>${esc(m.name)}${f ? `<a href="#${f.n}" aria-label="修法 ${f.n}：${esc(f.title)}">${ball(f)}</a>` : ''}</h3><div class="mach-pair${m.after ? ' two' : ''}">${machineSide(m.before, '改前')}${m.after ? machineSide(m.after, '改后') : ''}</div></article>`;
+    }).join('');
   }
 
   // ---------- 状态同步 ----------
