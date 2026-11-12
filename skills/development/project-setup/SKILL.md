@@ -17,7 +17,7 @@ description: 项目体检：新项目开工、半途补缺、开源前检查或�
 | 项 | 何时需要 | 内容与位置 |
 |---|---|---|
 | AGENTS.md | 所有项目 | 根目录；地图：命令入口、代码看不出的约束、条件指针 |
-| WORDS.md | 出现要禁用的近义词或易混概念时 | 根目录；格式见 writing-for-agents「术语表 WORDS.md」 |
+| WORDS.md | 出现要禁用的近义词或易混概念时 | 根目录，见下 |
 | 工单约定 | 团队或多个 agent 用 GitHub issue 分工时 | 写进根 AGENTS.md，见下 |
 | 验证链 | 所有项目 | 达到 [references/toolchains.md](references/toolchains.md) 的「合格验证链」；不达标时推荐动作按该文件「建链的最小形状」写到能直接交给 agent |
 | LICENSE、用户向 README | 要开源时 | 根目录 |
@@ -38,3 +38,14 @@ description: 项目体检：新项目开工、半途补缺、开源前检查或�
 ```md
 - 工单：动手前 `gh issue edit <n> --add-assignee @me` 认领，已有 assignee 的不抢，未合并就放弃时撤掉；PR 描述写 `Closes #<n>`，合并自动关闭；先后关系用 `gh issue create --blocked-by <n>` 或 `gh issue edit --add-blocked-by <n>`；`#N` 先 `gh issue view`，失败再 `gh pr view`（编号共享）。
 ```
+
+## WORDS.md
+
+只收代码看不出的约束，一条一行：
+
+```md
+- **桌仔**（Guide）→ `guide`；避免：主持
+```
+
+- 只收两种：带「避免」的（这个概念在本项目叫什么、不能叫什么，含改名后退役的旧名），和易混概念的一句区分（会话 vs 分段）。只有「词 → 模块」映射的不收：搜代码就能找到。
+- 业务规则写进所属模块的头注释，不进术语表。
