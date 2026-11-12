@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>架构报告</title>
 <!--
-报告数据：只改下方 <script id="data"> 的 JSON；features、modules、edges 的顺序随意，页面自己排。写完运行 node check-report.mjs <本文件或 data.json>，必须退出 0；有错会逐条列出。
+报告数据写成单独的 data.json，格式如下；features、modules、edges 的顺序随意，页面自己排。运行 node report.mjs <data.json> <报告.html>：校验通过才生成报告，有错逐条列出。本文件不手改。
 给人读的文字（title、scope、features.label、metrics.label、problems.text、verify、note、outOfScope）写给没读过代码的人：先说是什么问题、
 对用户有什么影响、该由谁处理；文件:行放在句末括号里；不写内部编号、代号和函数名。fix 给动手的人看，可以写技术细节。
 {
@@ -477,7 +477,7 @@ body[data-side=before] :is(.st,.tally,.on-a,.ar,.a),body:not([data-side=before])
 {"project": "", "title": "", "scope": "", "features": [], "before": {"modules": [], "edges": []}, "after": null, "fixes": [], "metrics": [], "outOfScope": []}
 </script>
 <script id="validate">
-// 数据校验：纯函数，不碰 DOM。页面用它，命令行 node check-report.mjs <report.html|data.json> 也从这里载入同一份
+// 数据校验：纯函数，不碰 DOM。页面用它，命令行 node report.mjs 也从这里载入同一份
 'use strict';
 const STATUS = {todo: '待做', done: '已解', kept: '保留', reverted: '撤销'};
 const KIND = {surplus: '不再需要', hidden: '隐藏联系', needless: '多余耦合', special: '特殊情况'};

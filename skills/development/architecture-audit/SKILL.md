@@ -102,4 +102,4 @@ disable-model-invocation: true
 
 ## 报告
 
-模板是 [report.html](report.html)，只读它顶部的字段注释。提取脚本把 JSON 写进模板副本的 `<script id="data">`，不改渲染代码；写完跑 `node <本技能目录>/check-report.mjs <报告>`，退出码 0 才算生成。
+字段说明在模板 [report.html](report.html) 顶部的注释里，只读那一段，不改模板。提取脚本产出 `data.json`，再跑 `node <本技能目录>/report.mjs <data.json> <报告.html>`：校验通过才生成报告，有错逐条列出。
