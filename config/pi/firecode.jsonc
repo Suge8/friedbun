@@ -21,7 +21,7 @@
 	// idleCompaction：闲置超过 1 小时缓存后，下一次请求从预先算好的摘要开始，不再整段重写 15 万以上的上下文。删掉整节三项都关。
 	"background": {
 		"lineModel": ["claude-haiku-5-5/low", "gpt-6-luna/low"],
-		"compactionModel": ["claude-haiku-5-5/medium", "gpt-6-luna/medium"],
+		"compactionModel": ["claude-haiku-5-5/high", "gpt-6-luna/high"],
 		"idleCompaction": true
 	},
 
