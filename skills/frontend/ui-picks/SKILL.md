@@ -1,6 +1,6 @@
 ---
 name: ui-picks
-description: 要找现成 UI 库或组件移植进项目时使用：装饰特效、卡片编排、状态转场、微交互小件、产品控件、营销/仪表盘块、技术图解、AI 聊天界面、界面音效。
+description: 要找现成 UI 库或组件移植进项目时使用：装饰特效、卡片编排、状态转场、微交互小件、产品控件、营销/仪表盘块、技术图解、文档图块、AI 聊天界面、界面音效。
 ---
 
 # UI Picks
@@ -38,6 +38,7 @@ description: 要找现成 UI 库或组件移植进项目时使用：装饰特效
 | 复杂交互控件（签名、快捷键录制、@提及、滑动操作、长按确认、主题切换转场） | Arc |
 | 营销页与仪表盘的动效块（hero、卡片块、定价块、图表） | Spectrum UI |
 | 把一个技术概念画成会动的机器（文档配图、落地页或官网主视觉） | Anatomy |
+| 文档站里字符画风的说明块与小图表（callout、steps、timeline、tree、kpi、gantt） | mdxcn |
 | AI 界面视觉件（思考态、流式、审批、工具调用） | Beautiful UI / Fluid Functionalism |
 | AI 聊天 runtime（线程、流式、工具调用） | assistant-ui |
 | 界面音效 | UI SFX |
@@ -104,6 +105,12 @@ description: 要找现成 UI 库或组件移植进项目时使用：装饰特效
 - 把概念做成一台由几十到上百个立体零件组成、会动的机器，零件运动和读数出自同一份模型；只有一种画风：线稿等轴测、四档明暗、一个强调色。站点 [skills.wheresryan.sh/anatomy](https://skills.wheresryan.sh/anatomy)，源码 [wheresryan22/anatomy](https://github.com/wheresryan22/anatomy)，MIT，零依赖，Node ≥ 20.10。
 - 现做一张：在目标项目里 `npx skills add wheresryan22/anatomy`（默认装进当前项目，`-g` 才装到全局），按它的流程做。用现成的 33 张图：`npm i anatomy-figures`，React 组件或 `<anatomy-*>` 自定义元素，颜色走 26 个 `--anatomy-*` 变量，映射到项目 token。
 - 红线：小图 30–90 分钟、主视觉级 2–4 小时，开工前跟用户说清；画风和项目视觉语言不搭时不用；原生 APP 只能 WebView 嵌入或导出静态 SVG。
+
+### mdxcn — 字符画风的文档图块（React / MDX / shadcn registry）
+
+- 47 个图块（内容块、流程/树/时间线、数据小图表），虚线框加等宽字符的终端画风；每个图块有 MDX、React、纯文本三种写法，纯文本版贴进 README、PR、Linear 照样成形。机读 <https://www.mdxcn.dev/llms.txt>，registry <https://www.mdxcn.dev/r/registry.json>，源码 [shadcn-labs/mdxcn](https://github.com/shadcn-labs/mdxcn)，MIT。
+- 获取：`pnpm dlx shadcn@latest add @mdxcn/<组件>`（`@mdxcn/all` 全装），落在 `@/registry`，唯一外部依赖 motion；MDX 站另按其 installation 页注册进 `mdx-components`。
+- 红线：画风固定，用在开发者文档、changelog、技术博客这类本就偏终端气质的页面，不进产品 UI；不装它的 agent skill。
 
 ### Beautiful UI — AI-native 界面原语（React / TypeScript）
 
