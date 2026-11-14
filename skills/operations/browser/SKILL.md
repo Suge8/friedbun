@@ -33,6 +33,7 @@ bbu --mine <账户> close
 
 - 账户名就是浏览器里的账户（profile）名，大小写不论；`bbu import --account` 用的也是它。离线时 bbu 自己开窗口连上。报「did not connect to browse」是该账户没装或没配对 browse 扩展，请用户装。
 - 会话由 bbu 按检出建好，带 `--session`/`-s`、`session new|use|delete|reset`、`execute --rm` 直接报错（退出码 2）。`close` 删会话、关它开的标签。
+- `execute` 默认 60 秒超时，批量截图、逐页滚动这类长流程加 `--timeout-ms <毫秒>`。
 - `close` 等上一条命令返回后再发：打断运行中的 `execute` 会让该账户的浏览器卡死。遇到 `The browser isn't responding (asleep or frozen?)` 或 `Page.enable`/`Target.setAutoAttach did not answer within 10000 ms` 就停下告诉用户，不重试：重试留下一堆 about:blank 标签，恢复要 `browse relay restart`，会打断别的 agent，由用户定。
 - 用户亲手做的步骤（验证码、通行密钥、付款确认）用 `handoff()`。
 - 页面里有别的扩展插入的 frame（如 1Password 内联菜单）时，当次 `execute` 报 page closed：请用户把该扩展的「网站访问权限」改成「点击时」再重跑。
@@ -76,6 +77,7 @@ rm -r "$d"
 
 - `errors` 文本模式不带内容，用 `errors --json`；`line`/`column` 从 0 计，行号以 `text` 里的堆栈为准。
 - `find` 命中多个元素时直接操作第一个；同名元素多时先 `snapshot -i` 用 ref。`find` 的动作只有 click、fill、check、hover、text。
+- `screenshot` 写绝对路径，相对路径会存进 agent-browser 自己的临时目录。
 - `snapshot -c` 丢掉非交互文字（确认码、正文），读文字用 `snapshot` 或 `get text`。
 
 ## 收尾与边界
