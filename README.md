@@ -2,7 +2,7 @@
 
 <p align="center"><b>中文</b> · <a href="README.en.md">English</a></p>
 
-28 个 skill、FireCode 多代理编排，Agent 接管你的整台 Mac。一句话装好。
+26 个 skill、FireCode 多代理编排，Agent 接管你的整台 Mac。一句话装好。
 
 只要 skills（用 skills CLI 可以装进 Claude Code、Codex、Cursor、Gemini CLI、GitHub Copilot 等七十多种 agent）：
 
@@ -20,7 +20,7 @@ npx skills add Suge8/friedbun
 
 ### Agent 照老手的做法干活
 
-28 个 skill 教它按成熟的路子来：先查一手资料再下结论，把代码写得极简、架构清爽，出宣传图，操作浏览器，等等。
+26 个 skill 教它按成熟的路子来：先查一手资料再下结论，把代码写得极简、架构清爽，出宣传图，操作浏览器，等等。
 
 <p align="center"><img alt="FriedBun 包子分发四个 skill：先查一手资料、代码极简架构清爽、出宣传图、操作浏览器" src="assets/skills-zh.jpg" width="100%"></p>
 

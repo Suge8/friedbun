@@ -38,7 +38,7 @@ pi install npm:pi-firecode
 | `config/starship.toml` | `~/.config/starship.toml` | 整体写入 |
 | `config/fastfetch/` 两个文件 | `~/.config/fastfetch/` | 整体写入 |
 | `config/zsh/workstation.zsh` | `~/.config/friedbun/workstation.zsh` | 整体写入 |
-| `config/launchd/com.sugeh.claude-privacy.plist` | `~/Library/LaunchAgents/com.sugeh.claude-privacy.plist` | 整体写入后 `launchctl bootstrap gui/$(id -u) <落点>`，已加载过先 `bootout` |
+| `config/launchd/com.friedbun.claude-privacy.plist` | `~/Library/LaunchAgents/com.friedbun.claude-privacy.plist` | 整体写入后 `launchctl bootstrap gui/$(id -u) <落点>`，已加载过先 `bootout`；旧名 `com.sugeh.claude-privacy` 已装的先 `bootout` 并删掉 |
 | `<repo>/skills` | `~/.agents/skills` | 软链 `ln -s`，已有目录先改名 `.bak` |
 | `~/.agents/skills/operations/browser/bin/bbu` | `~/.local/bin/bbu` | 软链 `ln -sf`，先 `mkdir -p ~/.local/bin`（workstation.zsh 把它加进 PATH） |
 
