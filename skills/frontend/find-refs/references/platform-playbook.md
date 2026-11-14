@@ -9,11 +9,13 @@
 ## Dribbble：视觉方向与字体
 
 - 搜索 `https://dribbble.com/search/<词>`，加 `?timeframe=year` 限近一年；标签 `/tags/<tag>`。不登录可浏览。
+- 搜索词用英文，写成形容词加界面（brutalist dashboard、editorial landing page、fintech mobile app dark）或技法（kinetic typography、bento grid）。
 - 多是做不出来、无视真实信息密度的概念稿：借字体搭配、配色氛围、构图，不信它的信息架构和数据密度。本身是 AI 生成的作品（假内容、融化的图标、乱码标签）淘汰。
 
 ## Pinterest：氛围与配色
 
 - 搜索 `https://www.pinterest.com/search/pins/?q=<词>`，要登录。
+- 只用来定氛围、字体和配色，不看交互流程。搜索词如 web design inspiration <调性>、typography pairing <氛围>、color palette <氛围>。
 - 点进原始出处再记录，转存的 pin 出处常已失效。
 
 ## 其他画廊
