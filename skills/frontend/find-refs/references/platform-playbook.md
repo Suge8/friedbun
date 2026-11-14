@@ -2,7 +2,7 @@
 
 ## Mobbin：上线产品的界面与流程
 
-- 搜索 `https://mobbin.com/search/{web|ios|android}?q=<词>`，按 App 浏览 `/apps`，按模式浏览 `/patterns`。大部分内容要登录。
+- 搜索 `https://mobbin.com/search/apps/{web|ios|android}?content_type=screens&q=<词>`，按 App 浏览 `/discover/apps/web/latest`。大部分内容要登录。
 - 按模式搜，不按形容词：onboarding、empty state、pricing、data table、settings，或与 brief 调性相近的 App 名（Linear、Notion、Arc）。
 - brief 关乎流程时截连续 2–4 屏，不截单帧。
 
@@ -23,7 +23,7 @@
 | 目标 | 画廊 |
 |---|---|
 | 沉浸动效、获奖级 | awwwards.com/websites/<tag>/、godly.website、60fps.design |
-| SaaS 落地页 | land-book.com、saaslandingpage.com、purelanding.page、saaspo.com |
+| SaaS 落地页 | land-book.com/search/websites?q=<词>、saaslandingpage.com、purelanding.page、saaspo.com/page-types/saas-<类型>-page-examples（如 pricing） |
 | 编辑风、排版驱动 | siteinspire.com |
 | 网页大范围扫 | curated.design |
 | 极简、安静 | minimal.gallery |

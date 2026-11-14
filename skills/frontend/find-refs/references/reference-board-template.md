@@ -23,7 +23,7 @@ platforms: <实际搜过的平台>
 - 截图: .agents/design/refs/<文件>.png
 - 调性: <产品感 | 美术指导> · <最多三个氛围词>
 - 字体: <标题字体 / 正文字体、字重、字阶感觉>
-- 配色: <从截图取的 3–6 个 hex 或 oklch 值，标出主色>
+- 配色: <对截图像素取样的 3–6 个 hex 或 oklch 值，标出主色；色块太小取不稳的标“未确认”>
 - 间距与布局: <栅格、密度、节奏，如“12 栏，区块间距 96px，稀疏”>
 - 动效: <scroll-driven narrative、magnetic cursor、reveal/masking、kinetic type、parallax depth、orchestrated load 中观察到的，或“静态”>
 - 借鉴: <2–4 个具体可拿的元素>
