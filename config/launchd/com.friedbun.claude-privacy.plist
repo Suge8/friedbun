@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.sugeh.claude-privacy</string>
+	<string>com.friedbun.claude-privacy</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>/bin/sh</string>
