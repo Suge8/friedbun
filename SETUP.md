@@ -9,7 +9,7 @@
 ```bash
 npm install --global --ignore-scripts @earendil-works/pi-coding-agent@latest
 npm install --global --allow-scripts=agent-browser agent-browser && agent-browser install
-npm install --global cloakbrowser && cloakbrowser install
+npm install --global cloakbrowser@0.5.12 && cloakbrowser install
 npm install --global @opencode/browse
 brew install herdr starship fastfetch zsh-autosuggestions zsh-syntax-highlighting
 herdr plugin install -y smarzban/herdr-file-viewer
@@ -19,7 +19,7 @@ pi install npm:pi-firecode
 
 - 按[官方说明](https://usemagpie.ai/docs/start)安装 magpie。
 - agent-browser 只用 npm 装：Homebrew 版不带 bbu 把页面交给读者时用的控制台网页；`--allow-scripts` 让安装脚本把命令直链到原生程序，省掉每次约 100ms 的 Node 包装。
-- 不运行 `cloakbrowser login`：Pro 许可证运行中要一直连 cloakbrowser.dev 校验，网络不稳时浏览器会被关掉。`cloakbrowser install` 下载有 10 分钟硬超时，中断时用 `curl -C -` 从 GitHub Releases 续传同名包，解压到 `~/.cloakbrowser/chromium-<版本>/`。
+- cloakbrowser 锁在 0.5.12、不运行 `cloakbrowser login`：0.6 起每次启动都要许可证，运行中要一直连 cloakbrowser.dev 校验，网络不稳时浏览器会被关掉；0.5.12 装的 Chromium 145 是 macOS 上最后一个免许可证的内核。`cloakbrowser install` 下载有 10 分钟硬超时，中断时用 `curl -C -` 从 GitHub Releases 续传同名包，解压到 `~/.cloakbrowser/chromium-<版本>/`。
 - 不装 herdr 官方的 pi 集成（`herdr integration install pi` 或设置面板里的 install）：侧边栏的 pi 状态由 FireCode 上报，两者并存时 FireCode 的上报会被丢弃。
 
 **完成标准**：`pi --version`、`herdr --version`、`bcu --version` 都打印版本号；`pi list` 列出 firecode；`readlink "$(command -v agent-browser)"` 不以 `.js` 结尾；`cloakbrowser info --quick` 显示 `Installed: true`。
