@@ -6,9 +6,9 @@ description: 查本机 pi 会话与 magpie 用量的数字（压缩、闲置后�
 # 会话数据
 
 ```
-bun ~/.agents/skills/search/session-data/sd.ts list                 # 命名查询、说明与默认参数
-bun ~/.agents/skills/search/session-data/sd.ts q <命名查询> [--since D] [--until D] [-p 参数=值]
-bun ~/.agents/skills/search/session-data/sd.ts sql "SELECT …"
+bun <本技能目录>/sd.ts list                 # 命名查询、说明与默认参数
+bun <本技能目录>/sd.ts q <命名查询> [--since D] [--until D] [-p 参数=值]
+bun <本技能目录>/sd.ts sql "SELECT …"
 ```
 
 - `D` 是 `YYYY-MM-DD`（UTC 日）或 `30d`。每次查询前自动增量同步；首次建库约 30 秒。

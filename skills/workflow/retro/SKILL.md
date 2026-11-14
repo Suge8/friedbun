@@ -8,9 +8,9 @@ disable-model-invocation: true
 
 ## 步骤
 
-1. 读 [writing-for-agents](../../writing/writing-for-agents/SKILL.md)；改动落点（AGENTS.md、skill、项目 docs）和写法都按它。
+1. 读 [writing-for-agents](../../development/writing-for-agents/SKILL.md)；改动落点（AGENTS.md、skill、项目 docs）和写法都按它。
 
-2. 读会话一手记录。Pi 会话按工作目录存于 `~/.pi/agent/sessions/<目录路径编码>/*.jsonl`，用户未指定则取当前会话。完成标准：每个工具调用与其结果都已过目，而不是只看对话摘要。查会话与用量的统计先用 [session-data](../../search/session-data/SKILL.md)，不现写脚本扫原始文件。
+2. 读会话一手记录。Pi 会话按工作目录存于 `~/.pi/agent/sessions/<目录路径编码>/*.jsonl`，用户未指定则取当前会话。完成标准：每个工具调用与其结果都已过目，而不是只看对话摘要。查会话与用量的统计先用 [session-data](../../operations/session-data/SKILL.md)，不现写脚本扫原始文件。
 
 3. 按下列类别逐类核对，找候选。每个候选附会话中的证据（发生了什么、耗了多少轮），并过一道筛：换一个 agent 认真重做，这个代价还会出现吗？不会就是这一轮的偶然失误，不列为候选；逐类核对后没有候选就直说。
 
