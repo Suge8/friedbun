@@ -1,0 +1,12 @@
+---
+name: reference-hunt
+description: 要为界面找真实设计参考时使用（moodboard、灵感、竞品界面，或点名 Mobbin、Dribbble 等平台）；只出参考板，不做界面。
+---
+
+# Reference Hunt
+
+1. 定 brief：界面类型（落地页、仪表盘、App、组件）、调性（能上线的产品感或强美术指导）、品牌约束（已有 token、受众）、动效程度（无、克制、沉浸）。由 ui-craft 转来时沿用它定的调性。完成标准：四项都有值。
+2. 按 brief 从[平台手册](references/platform-playbook.md)选平台，至少两个，单个平台只会给出一种审美。
+3. 用 browser 在用户已登录的 Chrome 里搜；没登录或中途被拦时告诉用户，先搜公开平台，参考板标 `coverage: partial`。候选截图存进项目的 `.agents/design/refs/`。
+4. 筛出 5–9 个：上线的优先于概念稿，两年内的优先于经典款（刻意复古除外）；整体观感靠渐变文字、奶油底色、默认玻璃拟态、深色底紫渐变撑起的淘汰。入选的要能分成两个互相冲突的候选方向。不足 5 个时按手册扩搜；扩完仍不足就如实交回，不凑数。完成标准：每个入选参考本次都打开过并截了图。
+5. 按[参考板模板](references/reference-board-template.md)逐条拆解，写到 `.agents/design/reference-board-<slug>.md`，回复里给出两个方向和推荐哪个。完成标准：每条都有截图路径、取自截图的色值和借鉴、避开两项。
