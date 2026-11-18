@@ -54,6 +54,7 @@ pi install npm:pi-firecode
 读者在对话里给了哪个 key 就配哪个，没给的跳过，对应功能不可用，其余照常。
 
 - TinyFish：web-search 的 `--quick` 和 `fetch` 走它。写进 `~/.config/friedbun/env.zsh` 并 `chmod 600`：`export TINYFISH_API_KEY='<tinyfish-key>'`。文件只用 Bash/Zsh 通用的 `export` 赋值；Pi Shell 工具会加载它，不依赖图形应用继承终端环境。
+- 1Password：browser 在读者自己的浏览器里代登录时从这里取账号密码，没配就改为请读者亲手登录。请读者在 1Password 建一个名为 `Agent` 的保险库，放进要交给 agent 的账号，再建一个只对它有 `read_items` 权限的服务账号（1Password.com → Developer → Directory → Other → Create a Service Account），把令牌给你：内置的 Personal、Private、Employee 保险库授不了权，权限建好后不能改，令牌只显示一次。`brew install 1password-cli`（服务账号要 2.18.0 以上），令牌存进钥匙串：`security add-generic-password -U -a "$USER" -s op-agent-token -w '<令牌>'`。完成标准：`OP_SERVICE_ACCOUNT_TOKEN="$(security find-generic-password -s op-agent-token -w)" op vault list` 列出 `Agent`。
 
 ## 步骤 4：请读者做三件事
 
@@ -79,4 +80,4 @@ pi install npm:pi-firecode
 
 ## 卸载
 
-按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、旧版 uilane 留下的 `~/.config/uilane.json`；browse 先运行 `browse uninstall` 再卸 npm 包。
+按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、钥匙串里的 `op-agent-token`（`security delete-generic-password -s op-agent-token`）、旧版 uilane 留下的 `~/.config/uilane.json`；browse 先运行 `browse uninstall` 再卸 npm 包。

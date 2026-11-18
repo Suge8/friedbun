@@ -43,7 +43,7 @@ bbu --mine <账户> close
 
 先打开目标页，有用户菜单或头像就是已登录。
 
-**你的浏览器**未登录时，账号密码从 Agent 保险库（1Password）取。密码不进代码，因为 execute 的代码会写进 browse 日志：写进私有临时文件，代码里只出现路径，用完删掉。
+**你的浏览器**未登录时，账号密码从 Agent 保险库（1Password）取；这台机器没配（钥匙串里取不到 `op-agent-token`）时请用户亲手登录。密码不进代码，因为 execute 的代码会写进 browse 日志：写进私有临时文件，代码里只出现路径，用完删掉。
 
 ```bash
 export OP_SERVICE_ACCOUNT_TOKEN="$(security find-generic-password -s op-agent-token -w)"  # 每次 bash 调用都要
