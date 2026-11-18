@@ -10,7 +10,7 @@
 | 点击时闪一块灰/蓝 | 基线里的 `-webkit-tap-highlight-color: transparent`，之后每个可点元素都要有自己的 `:active` |
 | 高度不对、底部按钮被地址栏挡住 | 应用壳、抽屉用 `100dvh`；Hero 和首屏用 `min-height: 100svh`（不随滚动跳布局）；不用 `100vh`/`lvh` |
 | 聚焦输入框页面放大且不缩回 | 输入字号至少 16px（`text-base sm:text-sm`，或 `@media (pointer: coarse)` 下设 16px）；不用 `maximum-scale=1`/`user-scalable=no`，其他浏览器会因此禁止缩放，违反 WCAG 1.4.4 |
-| 点击有延迟感 | 可点元素 `touch-action: manipulation` 去掉双击缩放等待；反馈放在 `:active` 或 `pointerdown`，不等 `click`；按下反馈 100–160ms 缓出 |
+| 点击有延迟感 | 可点元素 `touch-action: manipulation` 去掉双击缩放等待；反馈放在 `:active` 或 `pointerdown`，不等 `click`；时长见 `motion.md`「按下反馈」 |
 | 下拉刷新或整页回弹劫持滚动 | `html, body { overscroll-behavior: none; }`，内部滚动区 `overscroll-behavior: contain`；不用 `touchmove` + `preventDefault()`，它会让监听变成非 passive 并整段禁滚。允许下拉刷新的文档型页面去掉根上的 `none` |
 | 内容停在刘海外、边缘留色块 | viewport 加 `viewport-fit=cover`，固定页头、底部栏、toast、sheet 用 `env(safe-area-inset-*)` 补内距（`calc(1rem + env(safe-area-inset-bottom, 0px))`）；没有该 meta 时 `env()` 全为 0 |
 | 长按选中按钮文字或弹出系统菜单 | 控件（button、tab、chip、拖拽把手）加 `user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;`；正文、地址、错误信息、订单号保持可选，不加在 `body` 上 |
@@ -44,7 +44,7 @@ button, a, [role="button"] {
 
 ## 输入键盘
 
-`inputmode="numeric"` 给验证码，`inputmode="decimal"` 给金额，`type="email"`/`type="tel"` 给对应字段；用户名和验证码加 `autocapitalize="none" autocorrect="off"`；`enterkeyhint="send"`/`"search"`/`"done"` 让回车键说明它做什么。
+`inputmode` 取值见 `forms-and-feedback.md`；`type="email"`/`type="tel"` 给对应字段；用户名和验证码加 `autocapitalize="none" autocorrect="off"`；`enterkeyhint="send"`/`"search"`/`"done"` 让回车键说明它做什么。
 
 ## 命中区
 

@@ -63,7 +63,7 @@
 - `transform-origin` 对齐物理锚点：Popover 指向 trigger，Card fan 用扇轴，Modal 保持中心。进出方向、z-order 和阴影符合同一空间关系。
 - Blur 只在视觉语言明确需要且实测流畅时加入。Cross-fade 两层重叠感调不掉时，过渡期加 ≤2px blur 融合新旧状态；任何 blur 都小于 20px，Safari 上很贵。
 - Stagger 默认间隔 30–50ms，最多 6 个语义块；长列表只动画新增或可见项。首屏、成功页、Onboarding 等低频分段入场可放宽到 80–100ms，最后一块的开始时间不超过 400ms。Stagger 播放期间不阻塞交互。
-- 切 tab、hover 列表行、筛选重排、打开菜单等高频交互即时呈现；同一区域只在本会话首次进入时错峰。
+- 切 tab、hover 列表行、筛选重排、打开菜单等高频交互不做错峰，内容一次到位；同一区域只在本会话首次进入时错峰。
 - Tooltip 首次 hover 保留延时防误触；已有 Tooltip 打开时，相邻 Tooltip 立即显示并跳过入场（Base UI 的 `[data-instant]` 设 `transition-duration: 0ms`）。
 - 首屏默认可见。条件区块收起时同步处理 `inert` 和焦点。
 - 展开收起：外层 `display: grid` 过渡 `grid-template-rows: 0fr → 1fr`（≈200ms），内层 `min-height: 0; overflow: hidden`；不动画 `height: auto`。`interpolate-size: allow-keywords` 只有 Chromium 129+ 支持（Firefox、Safari 未支持，2026-10 核实），只能当增强。headless 原语已给出内容高度变量时用原语。
@@ -154,15 +154,8 @@
 - One-shot 动画结束后回到静态样式；用 `fill-mode: both` 时终态与组件状态一致。
 - Hover 动效的媒体查询守卫见 `mobile.md`；语义和关键反馈同时支持 focus、键盘与 touch。
 
-## 原生应用（SwiftUI / AppKit / UIKit）
-
-- 点一下当场建整页是最常见的卡顿：去过的页面留在树上只切可见性，不按身份重建；首次打开先出第一帧必需的内容，其余下一帧再挂；首次才付的成本（面板、菜单、编辑器）在启动后空闲时预热。响应按"输入到画面第一次变化"之间主线程的全部工作计，把活挪到下一帧不算变快。
-- macOS 上逐帧改几何的过渡（滑入的面板、分栏开合动画）每帧都让 AppKit 重算整窗的鼠标跟踪区并重设光标：面板原地淡入淡出，侧栏开合一步到位。NSWindow 的 sheet 与 alert 开、关都把主线程关在约 300ms 的嵌套动画循环里，浮层与确认框放在窗口内。
-- 内容滚到透明的顶栏或底栏后面时，滚动视图本身铺到栏后、用内容边距让出初始位置：懒加载容器只保留自身框内的行，关掉裁剪画到框外的行会被回收，在栏后突然消失。沉浸式的栏只在状态栏那一条淡出，玻璃控件浮在清楚可见的内容上，不加渐变色带。
-
 ## 检查动效
 
 - 截图只验证静态对齐。Web 动效用 `bbu record` 录屏，必要时把时长放大 2–5 倍，逐帧看起点、终点、反向、各属性是否同步、`transform-origin` 是否对；reduced-motion 与暗色用 `bbu set media` 切换后再看。
 - 在数据加载、滚动和连续操作同时发生时复测，用 `bbu trace` 录性能追踪，确认没有每帧全页 layout/paint、图层爆增或主线程长任务；交互响应看 INP（≤ 200ms 为好）与 Long Task。
-- Apple 平台用 Instruments：Animation Hitches 把每个掉帧拆成 App 提交、渲染服务、GPU 三段，先看卡在哪段再改（hitch 时长比 < 5ms/s 为好）；卡在 App 段时用 Time Profiler 看主线程栈。命令行是 `xcrun xctrace record --template 'Animation Hitches'`。第一次与第二次分开测，首次构建视图的成本只在第一次出现。掉帧在前台、真机上测：AppKit 动画只在前台跑，后台与模拟器的数字偏乐观。
 - 覆盖快速重复操作、中途反向、低性能设备和 reduced-motion；手势在真机上测。
