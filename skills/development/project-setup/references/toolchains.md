@@ -32,6 +32,7 @@
 - Vue / Svelte / Astro 保留 `vue-tsc`、`svelte-check`、`astro check`：Biome 对它们的支持仍是实验性的，Oxlint 只 lint script 区域。
 - Formatter 只保证规范化输出；lint、typecheck、compile 和行为测试覆盖不同失败模式，互不冒充。
 - 注释相关只开项目已用工具里机器能判定的规则：屏蔽 lint 须指名规则并写理由，多余的屏蔽要报，注释掉的代码要报。Oxlint 用 `typescript/ban-ts-comment` 与 `--report-unused-disable-directives`；ESLint 用 `@eslint-community/eslint-comments` 与 `@typescript-eslint/ban-ts-comment`；Ruff 用 `PGH004`、`RUF100`、`ERA001`；Clippy 用 `allow_attributes_without_reason`；SwiftLint 用 `blanket_disable_command`、`superfluous_disable_command`。注释该不该写靠判断，不开全面禁注释的规则。
+- 测试里的替身、固定 sleep、重试与调大超时在 Vitest + Oxlint（1.81 起）的项目可交给 lint：推荐 `@interfere/landmines` 的 `landmines-testing` 插件，按插件单独注册，不 extends 它的 recommended（含全面禁注释与禁显式返回类型）。存量违规用它的按文件 `allow` 计数豁免，计数只减不增。它是 0.x，装之前核对当前版本。
 
 ## 建链的最小形状
 
