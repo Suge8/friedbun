@@ -50,7 +50,7 @@ Agent 能自己操作你电脑上的任何应用，全程在后台，不抢你�
 - 操作 Mac 应用的 bcu；操作网页的 [agent-browser](https://github.com/vercel-labs/agent-browser) 和 [CloakBrowser](https://cloakbrowser.dev)，用的是单独的浏览器，不碰你平时用的那个。
 - skills，链接到 `~/.agents/skills`。
 
-agent 全程自己装，最后只请你做两件事：在 Pi 里登录模型账号，给 bcu 勾两个系统权限（辅助功能、屏幕录制）。你已有的文件都会先留一份 `.bak`。[SETUP.md](SETUP.md) 列出了它改动的每个文件。
+agent 全程自己装，最后只请你做三件事：在 magpie 里授权模型账号，给 bcu 勾两个系统权限（辅助功能、屏幕录制），给要交给 agent 用的浏览器账户装上 browse 扩展并配对。你已有的文件都会先留一份 `.bak`。[SETUP.md](SETUP.md) 列出了它改动的每个文件。
 
 </details>
 

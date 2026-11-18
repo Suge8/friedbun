@@ -50,7 +50,7 @@ Your agent operates any app on your Mac by itself — in the background, without
 - bcu for Mac apps; [agent-browser](https://github.com/vercel-labs/agent-browser) and [CloakBrowser](https://cloakbrowser.dev) for the web, in a separate browser from the one you use.
 - The skills, linked to `~/.agents/skills`.
 
-The agent installs everything by itself. At the end it asks you for just two things: log in to your model account in Pi, and give bcu two macOS permissions (Accessibility and Screen Recording). Files you already have get a `.bak` copy first. [SETUP.md](SETUP.md) lists every file it touches.
+The agent installs everything by itself. At the end it asks you for just three things: authorize your model accounts in magpie, give bcu two macOS permissions (Accessibility and Screen Recording), and add the browse extension to each browser profile you want the agent to use. Files you already have get a `.bak` copy first. [SETUP.md](SETUP.md) lists every file it touches.
 
 </details>
 
