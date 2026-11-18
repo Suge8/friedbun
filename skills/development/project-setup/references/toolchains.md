@@ -21,7 +21,7 @@
 | CLI 工具 | 直接调用 + 输出断言；golden file diff；bats | 固定 seed/时间，输出与 known-good 快照 diff |
 | API / 服务 | curl/httpie + 响应断言；supertest/内存启动 | 断言状态码 + 响应体关键字段，不是"200 就算过" |
 | npm/crate 库 | 单测 + `pack` 后在临时目录真实 install 冒烟 | 防止 exports/files 字段错误这种测试测不到的发布事故 |
-| macOS 原生 app | XCUITest；accessibility API 驱动 | 无测试链时用 desktop 做取证兜底：accessibility 结构化读控件 + 操作 + 截图，比 AppleScript 盲坐标可靠；但它操作真实桌面，只算兜底不算达标链 |
+| macOS 原生 app | XCUITest；accessibility API 驱动 | 无测试链时用 desktop 做取证兜底：accessibility 结构化读控件 + 操作 + 截图，比 AppleScript 盲坐标可靠，默认在后台、不抢输入；但它操作的是用户会话里的真实应用（状态不隔离，部分界面要前台），只算兜底不算达标链 |
 
 ## 已配置静态门的接入
 

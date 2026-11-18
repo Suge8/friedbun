@@ -5,7 +5,7 @@ description: 写、审查或迁移 Swift 时读：Swift 6.2 起的并发规则�
 
 # Write Swift
 
-以项目工具链为准：下文到 Swift 6.3 都可用；标 ⚠ 的属于未发布的 6.4，确认工具链后才用。
+以项目工具链为准：下文到 Swift 6.3 都可用；标 6.4 的要项目工具链到 6.4 才用。
 
 ## 默认
 
@@ -39,4 +39,4 @@ description: 写、审查或迁移 Swift 时读：Swift 6.2 起的并发规则�
 | 手算字符串下标 | Swift Regex；日期、数字组合 Foundation 的解析器 |
 | `XCTestCase` + `XCTAssert*` | Swift Testing：`@Test`、`#expect`、`try #require`、`@Test(arguments:)` |
 | `print` | `Logger`；非数字插值默认脱敏，确定不涉隐私才 `privacy: .public` |
-| ⚠ `@available(anyAppleOS:)`、`mapKeyedValues`、`weak let`、`@diagnose`、Task 取消屏蔽 | 工具链确认 6.4 后才用 |
+| 6.4：`@available(anyAppleOS:)`、`mapKeyedValues`、`weak let`、`@diagnose`、Task 取消屏蔽 | 项目工具链到 6.4 才用 |

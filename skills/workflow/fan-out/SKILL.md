@@ -1,6 +1,6 @@
 ---
 name: fan-out
-description: 调研、审计、设计探索拆给子代理并行的低中高三档；research、grilling、architecture-audit、better-test 按档引用，用户也可直接点档位。
+description: 调研、审计、设计探索拆给子代理并行的低中高三档；其他 skill 按档引用，用户也可直接点档位。
 disable-model-invocation: true
 ---
 
@@ -20,7 +20,7 @@ disable-model-invocation: true
 
 - 按互不依赖的子问题或模块切；依赖前一波结果的放下一波。
 - 工作说明只给范围（路径、问题）、要交回什么、是否只读；不附你已有的结论，免得带偏。
-- 搜索、读日志、找线索派检索员；要判断力的（代码设计、测试判决）派实现角色。
+- 搜索、读日志、找线索派角色表里最便宜的角色；要判断力的（代码设计、测试判决）派最强的角色。
 
 ## 收口
 

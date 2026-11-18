@@ -1,6 +1,6 @@
 ---
 name: grilling
-description: 以毫不留情的方式就计划、决策或想法不断追问用户。当用户想对自己的思路进行压力测试
+description: 用户要给自己的计划、决策或想法做压力测试时使用：逐轮追问，直到每个决策都由用户定下。
 disable-model-invocation: true
 ---
 
