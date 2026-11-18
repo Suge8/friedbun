@@ -1,1 +1,0 @@
-{ "name": "exec-roundtable", "version": "0.0.0", "type": "module", "scripts": { "test": "node --test --test-timeout=5000" } }

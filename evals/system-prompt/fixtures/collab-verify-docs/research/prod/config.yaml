@@ -1,3 +1,0 @@
-chat_model: deepseek-v4.1
-embedding: bge-m3-v2
-search: tavily
