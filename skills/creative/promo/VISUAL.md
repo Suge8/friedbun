@@ -9,7 +9,7 @@
 1. **用途与位置**："background for a website hero section, wide crop safe, generous empty area on the left for headline text"——留白位置跟着最终排版走
 2. **构图**：单焦点、不对称构图、大面积留白（active negative space）
 3. **气质**：优先沿用现有界面和品牌资产；`DESIGN.md` 存在时可取其色板和情绪词，否则根据项目选择明确方向
-4. **比例**：按目标平台横竖版写进 prompt（gpt-image 没有尺寸参数）
+4. **比例**：按目标平台横竖版写进 prompt
 
 **反 AI 味清单（每个提示词末尾附加；链 A 的 Logo 字标提案去掉 no text；IP 吉祥物模板自带约束，不附加）**：no text, no letters, no watermark, no busy details, no oversaturated neon, no glossy plastic 3D render look, no fake lens flare, no cluttered composition。
 
@@ -64,7 +64,7 @@
 ### IP 吉祥物模板
 
 1. **提三个方向**，每个一行：`主体 — 与产品的关联 — 标志性轮廓`。用户没指定主体时，三个方向是三个不同主体，默认用常见动物，非动物主体要有直接的产品理由；项目已有吉祥物时其中一个方向用它。某个主体放到三类不相干的产品上也说得通，就换成和产品职责更贴的主体。用户指定了主体时，三个方向是同一主体的三种处理（轮廓、第二色的位置、标志特征、性格）。
-2. **出 6 张**：用户同意后，每个方向 2 张，标 A1 A2 B1 B2 C1 C2；用户只选一个方向就出这个方向的 6 张，标 A1–A6。每张单独生成方图，不拼成网格；同时最多跑 3 张。完成标准：每张都已出图并标号。
+2. **出 6 张**：用户同意后，每个方向 2 张，标 A1 A2 B1 B2 C1 C2；用户只选一个方向就出这个方向的 6 张，标 A1–A6。每张单独生成方图，不拼成网格。完成标准：每张都已出图并标号。
 3. **原样交付**：每张只生成一次，全部交给用户，附标号、方向和所用颜色；不自行筛掉、重生成或后期修。用户要换再出。
 
 填 `<subject>`、`<defining feature>`、两个角色色和背景色：
