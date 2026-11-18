@@ -13,7 +13,7 @@
 
 	"openai": {
 		"providers": {
-			"magpie": { "textVerbosity": "low" }
+			"magpie": { "textVerbosity": "low", "serviceTier": "ultrafast" }
 		}
 	},
 
@@ -21,11 +21,11 @@
 	// idleCompaction：闲置超过 1 小时缓存后，下一次请求从预先算好的摘要开始，不再整段重写 15 万以上的上下文。删掉整节三项都关。
 	"background": {
 		"lineModel": ["claude-haiku-5-5/low", "gpt-6.1-terra/low"],
-		"compactionModel": ["claude-haiku-5-5/high", "gpt-6.1-terra/high"],
+		"compactionModel": ["claude-haiku-5-5/high", "gpt-6.1-terra/high/fast"],
 		"idleCompaction": true
 	},
 
-	// 凡是指定模型的位置都写模型原子 "<模型>/<强度>"（强度：off minimal low medium high xhigh max）；审查与角色的模型可再接加速档 "/fast" 或 "/ultrafast"，后台模型不能带；
+	// 凡是指定模型的位置都写模型原子 "<模型>/<强度>"（强度：off minimal low medium high xhigh max），可再接加速档 "/fast" 或 "/ultrafast"，只作用于那一个模型；
 	// 供应商可省略："claude-opus-5-5/high" 会匹配 magpie/claude/claude-opus-5-5 或 anthropic/claude-opus-5-5。
 	// 写成数组就是有序候选链：前面的优先，最终报错或额度用完时同一回合换下一个并让出错的模型冷却，下一次派活再从第一个选。
 	// /fire-master 角色表：角色名自定；每个角色写 model（原子或数组）+ use 适用场景。Master 只按 use 选角色，
