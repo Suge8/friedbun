@@ -20,12 +20,12 @@
 	// 后台小模型：lineModel 写进展行（子代理与主会话）和会话名，compactionModel 写全部压缩摘要（主会话与子代理）与闲置压缩；窗口放不下的候选自动跳过，整条链失败时回到 pi 默认压缩。
 	// idleCompaction：闲置超过 1 小时缓存后，下一次请求从预先算好的摘要开始，不再整段重写 15 万以上的上下文。删掉整节三项都关。
 	"background": {
-		"lineModel": ["claude-haiku-5-5/low", "gpt-6-luna/low"],
-		"compactionModel": ["claude-haiku-5-5/high", "gpt-6-luna/high"],
+		"lineModel": ["claude-haiku-5-5/low", "gpt-6.1-terra/low"],
+		"compactionModel": ["claude-haiku-5-5/high", "gpt-6.1-terra/high"],
 		"idleCompaction": true
 	},
 
-	// 凡是指定模型的位置都写模型原子 "<模型>/<强度>"（强度取最后一段：off minimal low medium high xhigh max）；
+	// 凡是指定模型的位置都写模型原子 "<模型>/<强度>"（强度：off minimal low medium high xhigh max）；审查与角色的模型可再接加速档 "/fast" 或 "/ultrafast"，后台模型不能带；
 	// 供应商可省略："claude-opus-5-5/high" 会匹配 magpie/claude/claude-opus-5-5 或 anthropic/claude-opus-5-5。
 	// 写成数组就是有序候选链：前面的优先，最终报错或额度用完时同一回合换下一个并让出错的模型冷却，下一次派活再从第一个选。
 	// /fire-master 角色表：角色名自定；每个角色写 model（原子或数组）+ use 适用场景。Master 只按 use 选角色，
@@ -33,11 +33,11 @@
 	"master": {
 		"roles": {
 			"检索员": {
-				"model": ["gpt-6.1-terra/high", "claude-haiku-5-5/high"],
+				"model": ["gpt-6.1-terra/high/fast", "claude-haiku-5-5/high"],
 				"use": "便宜，能做批量，不需要过强智力的工作。找事实：搜索、查文档、读日志、定位代码"
 			},
 			"副手": {
-				"model": ["claude-sonnet-5-5/high", "gpt-6.1-terra/high"],
+				"model": ["claude-sonnet-5-5/high", "gpt-6.1-terra/high/fast"],
 				"use": "能做中等智力要求，标准明确的活：照既有模式实现、批量改动、按给定标准判断等"
 			},
 			"工程师": {
@@ -56,7 +56,7 @@
 	// 本节字段必须齐全；拼错字段名会直接报配置错误而不是静默忽略。
 	"review": {
 		"advisor": ["claude-opus-5-5/high", "gpt-6.1-sol/high"],
-		"reviewers": [["gpt-6.1-terra/low", "claude-opus-5-5/low"]],
+		"reviewers": [["gpt-6.2-sol/low/ultrafast", "claude-opus-5-5/low"]],
 		"maxRounds": 1,
 		"advisorAfterFailures": 2,
 		"timeoutMinutes": 60,
