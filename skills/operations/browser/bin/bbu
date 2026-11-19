@@ -2,8 +2,8 @@
 # bbu = agent-browser + 登录态。bbu 独占 session 命名，浏览器的启动、复用、回收归 agent-browser。
 # 默认（测试浏览器）：每个检出一个 Chrome for Testing，登录态按检出存取（agent-browser restore）。
 # --stealth：全机一个 CloakBrowser + agent 专用 profile，每个检出一个窗口，登录实时共享。
-# --mine <账户>：换成 browse（经扩展操作用户自己的浏览器），每个检出每个账户一个 browse 会话。
-# --as <名字>：同一检出里再开一个会话；测试浏览器是另一份登录态，--stealth 是另一个窗口，--mine 是另一个会话。
+# --mine <账户>：换成 browse（经扩展操作用户自己的浏览器），每个检出每个账户一个标签。
+# --as <名字>：同一检出里再开一个会话；测试浏览器是另一份登录态，--stealth 是另一个窗口，--mine 是另一个标签。
 # import <域名>...：从用户日常浏览器复制这些站点的 cookie 进共享浏览器。
 # 文中 #编号 均为 vercel-labs/agent-browser 的 issue 或 PR，修复或合并后删掉对应绕行。
 set -euo pipefail
@@ -29,11 +29,9 @@ done
 # restore 按 "<key>-" 前缀找登录态文件：身份名带 '-' 会读到别的身份的登录态。
 [[ "$as" =~ ^[[:alnum:]_]*$ ]] || die "--as name may contain only letters, digits and '_'"
 if [ "$lane" = mine ]; then
-  managed="sessions are managed by bbu per checkout and --as; close with: bbu --mine <account> close"
   for arg; do
-    case "$arg" in --session|--session=*|-s) die "$managed" ;; --rm) [ "${1:-}" = execute ] && die "$managed" ;; esac
+    case "$arg" in --tab|--tab=*) die "the tab is opened by bbu per checkout and --as; close with: bbu --mine <account> close" ;; esac
   done
-  [ "${1:-}" = session ] && case "${2:-}" in new|use|delete|reset) die "$managed" ;; esac
 fi
 for arg; do
   case "$arg" in --session|--session=*) die "session is named by bbu; use --as <name> for another session" ;; esac
@@ -70,10 +68,13 @@ fi
 
 if [ "$lane" = mine ]; then
   # 锁内做：同一账户离线时并发的命令只开一个窗口。
-  session="$(node "$DIR/helper.mjs" mine "$account" "$(ab_ session id --scope worktree --prefix bbu-mine)" "$as" 9>&-)"
+  tab="$(node "$DIR/helper.mjs" mine "$account" "$(ab_ session id --scope worktree --prefix bbu-mine)" "$as" 9>&-)"
   exec 9>&-
-  [ "${1:-}" = close ] && exec browse session delete --session "$session"
-  OPENCODE_BROWSER_SESSION="$session" exec browse "$@"
+  case "${1:-}" in
+    close) exec browse tabs --json "{\"action\":\"close\",\"group\":\"$tab\"}" ;;
+    status|tabs|settings|tools) exec browse "$@" ;;
+  esac
+  exec browse "$@" --tab "$tab"
 fi
 
 if [ "$lane" = dev ]; then

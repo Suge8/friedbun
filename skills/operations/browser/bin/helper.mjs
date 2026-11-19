@@ -2,9 +2,9 @@
 // bbu 直接做的事，agent-browser 与 browse 没有对应命令：
 //   window <ws> [targetId]   --stealth：targetId 的标签还在就打印它，否则在默认存储空间后台开一个新窗口、
 //                            打印其 targetId（为什么要新窗口见 bbu）。
-//   mine <账户> <会话前缀> [身份]
+//   mine <账户> <前缀> [身份]
 //                            --mine：确保默认浏览器的这个账户连着 browse（离线就开它的一个窗口、
-//                            前台还给原应用），建或复用它的 browse 会话，打印会话 id。不带账户时列出账户，
+//                            前台还给原应用），在这个账户里开或复用以 <前缀> 命名的标签，打印标签 id。不带账户时列出账户，
 //                            账户名后附 ~/.config/bbu.json 的 {"accounts": {账户: 用途}} 里写的用途。
 //   import <ws> [--from <浏览器>] [--account <账户>] <域名>...
 //                            从用户日常浏览器复制这些站点的 cookie。只复制 cookie：轮换制续期
@@ -160,7 +160,7 @@ async function guard(bundle) {
 const ONLINE_TIMEOUT_MS = 30000;
 const RECONNECT_MS = 12000;
 const browse = async (...args) => (await run('browse', args)).stdout;
-// 中继没在跑时 status 照样打印 JSON（relay.running 为 false），只是退出码非 0。
+// 中继没在跑时 status 照样打印 JSON（relay.running 为 false，在跑时没有这个字段），只是退出码非 0。
 const status = async () => JSON.parse(await browse('status', '--json').catch((e) => e.stdout || Promise.reject(e)));
 const online = (state, account) => state.extension?.browsers?.find((b) => b.connected && b.name.toLowerCase() === account.toLowerCase());
 async function waitOnline(account, ms) {
@@ -170,8 +170,8 @@ async function waitOnline(account, ms) {
   }
 }
 
-// browse CLI 不能选账户（session new 没有 browser 参数），中继的 /cli/session/new 能；会话 id 只许小写字母、
-// 数字和 '-'，所以账户名取哈希。会话建在哪个账户就一直在那，账户名进 id 才不会把两个账户混进同一会话。
+// browse 0.1 起没有会话，标签是句柄：每个检出每个账户一个自己命名的标签，同名再开就是复用。标签 id 只许
+// 小写字母、数字和 '-'，所以账户名取哈希；账户名进 id 才不会把两个账户的页面混成同一个标签。
 async function mine(account, prefix, as) {
   const name = defaultBrowser();
   const { browser, named } = profiles(name);
@@ -188,9 +188,9 @@ async function mine(account, prefix, as) {
     return 'online: ' + (up.map(label).join(', ') || 'none') + '; offline ' + name + ' accounts: ' + (down.map(label).join(', ') || 'none');
   };
   if (!account) fail('usage: bbu --mine <account> <browse command>...; ' + list());
-  if (!state.relay.running) {
+  if (state.relay.running === false) {
     // 任一操作类命令都会拉起中继；中继进程会继承管道，所以不接它的输出。
-    await new Promise((resolve) => spawn('browse', ['session', 'list'], { stdio: 'ignore' }).once('exit', resolve));
+    await new Promise((resolve) => spawn('browse', ['tabs'], { stdio: 'ignore' }).once('exit', resolve));
     // 已开着窗口的账户在中继就绪后 2–7 s 内自己重连（实测）；等短了会误判离线，往它已有的窗口里塞一个 about:blank。
     state = (await waitOnline(account, RECONNECT_MS)) ?? await status();
   }
@@ -205,14 +205,8 @@ async function mine(account, prefix, as) {
     stop();
   }
   const id = [prefix, createHash('sha256').update(account.toLowerCase()).digest('hex').slice(0, 8), ...(as ? [as.toLowerCase().replaceAll('_', '-')] : [])].join('-');
-  const token = readFileSync(join(process.env.XDG_DATA_HOME || join(homedir(), '.local/share'), 'browse/relay-token'), 'utf8').trim();
-  const response = await fetch(state.endpoint + '/cli/session/new', {
-    method: 'POST',
-    headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' },
-    body: JSON.stringify({ id, browser: online(state, account).name }),
-  });
-  const body = await response.json();
-  if (!response.ok && body.code !== 'session-already-exists') fail(body.error);
+  // 组名与 id 相同，close 按组关掉它和它弹出的标签。
+  await browse('tabs', '--json', JSON.stringify({ action: 'new', id, group: id, browser: online(state, account).name }));
   return id;
 }
 
