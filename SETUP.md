@@ -11,6 +11,7 @@ npm install --global --ignore-scripts @earendil-works/pi-coding-agent@latest
 npm install --global --allow-scripts=agent-browser agent-browser && agent-browser install
 npm install --global cloakbrowser@0.5.12 && cloakbrowser install
 npm install --global @opencode/browse
+npm install --global --ignore-scripts @jackwener/opencli
 brew install herdr starship fastfetch zsh-autosuggestions zsh-syntax-highlighting
 herdr plugin install -y smarzban/herdr-file-viewer
 brew install --cask ghostty font-maple-mono-nf-cn suge8/tap/bcu
@@ -22,7 +23,7 @@ pi install npm:pi-firecode
 - cloakbrowser 锁在 0.5.12、不运行 `cloakbrowser login`：0.7 起每次启动都要许可证，运行中要一直连 cloakbrowser.dev 校验，网络不稳时浏览器会被关掉；0.5.12 装的 Chromium 145 是 macOS 上最后一个免许可证的内核。`cloakbrowser install` 下载有 10 分钟硬超时，中断时用 `curl -C -` 从 GitHub Releases 续传同名包，解压到 `~/.cloakbrowser/chromium-<版本>/`。
 - 不装 herdr 官方的 pi 集成（`herdr integration install pi` 或设置面板里的 install）：侧边栏的 pi 状态由 FireCode 上报，两者并存时 FireCode 的上报会被丢弃。
 
-**完成标准**：`pi --version`、`herdr --version`、`bcu --version` 都打印版本号；`pi list` 列出 firecode；`readlink "$(command -v agent-browser)"` 不以 `.js` 结尾；`cloakbrowser info --quick` 显示 `Installed: true`。
+**完成标准**：`pi --version`、`herdr --version`、`bcu --version`、`opencli --version` 都打印版本号；`pi list` 列出 firecode；`readlink "$(command -v agent-browser)"` 不以 `.js` 结尾；`cloakbrowser info --quick` 显示 `Installed: true`。
 
 ## 步骤 2：落配置
 
@@ -80,4 +81,4 @@ pi install npm:pi-firecode
 
 ## 卸载
 
-按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、`~/.config/friedbun/env.zsh`、钥匙串里的 `op-agent-token`（`security delete-generic-password -s op-agent-token`）、旧版 uilane 留下的 `~/.config/uilane.json`；browse 先运行 `browse uninstall` 再卸 npm 包。
+按步骤 1 的安装命令与步骤 2 的落点表逐项删除，有 `.bak` 的还原；另有 `~/.config/herdr/` 下的插件与会话状态、`~/.bbu/`（bbu 的 agent 专用浏览器 profile）、cloakbrowser 的 `~/.cloakbrowser/`、OpenCLI 的 `~/.opencli/`、`~/.config/friedbun/env.zsh`、钥匙串里的 `op-agent-token`（`security delete-generic-password -s op-agent-token`）、旧版 uilane 留下的 `~/.config/uilane.json`；browse 先运行 `browse uninstall` 再卸 npm 包。

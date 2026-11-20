@@ -5,6 +5,7 @@
 # --mine <账户>：换成 browse（经扩展操作用户自己的浏览器），每个检出每个账户一个标签。
 # --as <名字>：同一检出里再开一个会话；测试浏览器是另一份登录态，--stealth 是另一个窗口，--mine 是另一个标签。
 # import <域名>...：从用户日常浏览器复制这些站点的 cookie 进共享浏览器。
+# --stealth opencli <站> <命令>：让 OpenCLI 在本会话的共享浏览器窗口里跑。
 # 文中 #编号 均为 vercel-labs/agent-browser 的 issue 或 PR，修复或合并后删掉对应绕行。
 set -euo pipefail
 
@@ -60,6 +61,8 @@ shared() {
 # 浏览器没在跑时 get cdp-url 只报错、不启动它（0.41 起），先用 get url 启动。
 shared_url() { shared get cdp-url 2>/dev/null || { shared get url >/dev/null && shared get cdp-url; }; }
 
+[ "${1:-}" = opencli ] && [ "$lane" != stealth ] && die "opencli runs only in the stealth browser: bbu --stealth opencli ..."
+
 if [ "${1:-}" = import ]; then
   url="$(shared_url)"
   exec 9>&-
@@ -107,6 +110,12 @@ else
   fi
   # 关掉窗口里唯一的标签即关窗口；挂接会话的 close 只断开，不碰浏览器。
   [ "${1:-}" = close ] && ab_ --cdp "$url" --pin-tab tab close >/dev/null
+  # 给 OpenCLI 浏览器级地址时它按打分挑标签，会挑到别的 agent 的窗口；直接给本会话这个标签的地址。
+  if [ "${1:-}" = opencli ]; then
+    command -v opencli >/dev/null || die "opencli not found; run: npm install --global --ignore-scripts @jackwener/opencli"
+    exec 9>&-
+    OPENCLI_CDP_ENDPOINT="${url%/devtools/browser/*}/devtools/page/$target" exec opencli "${@:2}"
+  fi
 fi
 exec 9>&-
 ab "$@"
